@@ -345,7 +345,7 @@ export default {
         }
 
         function searchPort() {
-            router.post('/dnSnReport/', searchForm, { preserveState: true })
+            router.post('/dnSnReport', searchForm, { preserveState: true });
         }
         const fetchPOP = async () => {
             if (!searchForm.partner) {
