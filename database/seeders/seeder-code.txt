@@ -1,0 +1,8 @@
+ php artisan db:seed RoleSeeder
+ php artisan db:seed UserSeeder
+
+ php artisan db:seed CustomerStatusSeeder
+ php artisan db:seed TownshipSeeder 
+ php artisan db:seed CustomerSeeder 
+ php artisan db:seeder CustomerSeeder 
+ php artisan db:seed CustomerSeeder 
