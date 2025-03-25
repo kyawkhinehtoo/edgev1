@@ -61,13 +61,24 @@
 
               <p v-if="errors.due_date" class="mt-2 text-sm text-red-500">{{ errors.due_date }}</p>
             </div>
-            <!-- <div class="px-4 py-2">
-              <label for="bill" class="block text-sm font-medium text-gray-700">Additional to Existing Bill ? </label>
+            <div class="px-4 py-2">
+              <label for="isp" class="block text-sm font-medium text-gray-700">ISP <span class="text-xs italic text-gray-400">Leave blank for all ISP</span> </label>
               <div class="flex rounded-md shadow-sm">
-                <multiselect deselect-label="Selected already" :options="bill" track-by="id" label="name" v-model="form.bill_id" :allow-empty="true"></multiselect>
+                <multiselect deselect-label="Selected already" :options="isps" track-by="id" label="name" v-model="form.isp_id" :allow-empty="true"></multiselect>
               </div>
-              <p v-if="$page.props.errors.bill_id" class="mt-2 text-sm text-red-500">{{ $page.props.errors.bill_id }}</p>
-            </div> -->
+              <p v-if="$page.props.errors.isp_id" class="mt-2 text-sm text-red-500">{{ $page.props.errors.isp_id }}</p>
+            </div>
+            <div class="px-4 py-2">
+              <label for="usd_exchange_rate" class="block text-gray-700 text-sm font-bold ">
+                USD to MMK Exchange Rate: <span class="text-xs italic text-gray-400">Optional</span> </label>
+
+              <div class=" flex rounded-md shadow-sm">
+                <input type="number" v-model="form.usd_exchange_rate" name="usd_exchange_rate" id="usd_exchange_rate"
+                  class=" form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
+              </div>
+
+              <p v-if="errors.usd_exchange_rate" class="mt-2 text-sm text-red-500">{{ errors.usd_exchange_rate }}</p>
+            </div>
           </div>
 
           <!-- ... -->
@@ -98,6 +109,14 @@
                 <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt class="text-sm font-medium text-gray-500">Due Date</dt>
                   <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ form.due_date }}</dd>
+                </div>
+                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt class="text-sm font-medium text-gray-500">ISP</dt>
+                  <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ form.isp_id?form.isp_id?.name:"All" }}</dd>
+                </div>
+                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                  <dt class="text-sm font-medium text-gray-500">USD Exchange Reate</dt>
+                  <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ form.usd_exchange_rate }}</dd>
                 </div>
 
               </dl>
@@ -140,10 +159,8 @@ export default {
     VueDatePicker
   },
   props: {
-    packages: Object,
-    townships: Object,
+    isps: Object,
     bill: Object,
-    projects: Object,
     errors: Object,
   },
   setup(props) {
@@ -163,25 +180,12 @@ export default {
       month_name: null,
       bill_month: null,
       bill_year: null,
+      isp_id: null,
+      usd_exchange_rate: 1,
     });
 
     function resetForm() {
-      form.month = null;
-      form.bill_id = null;
-      form.period_covered = null;
-      form.period_covered_name = null;
-      form.bill_number = null;
-      form.usd_exchange_rate = null;
-      form.baht_exchange_rate = null;
-      form.issue_date = null;
-      form.due_date = null;
-      form.expire_date = null;
-      form.package = null;
-      form.township = null;
-      form.month_name = null;
-      form.bill_month = null;
-      form.bill_year = null;
-      form.is_mmk = null;
+      form.reset();
     }
     function selectMonth() {
 
@@ -243,11 +247,20 @@ export default {
 
       form.post("/doGenerate", {
         onSuccess: (page) => {
-          Toast.fire({
+          if(page.props.flash.error){
+            Toast.fire({
+            icon: "error",
+            title: page.props.flash.error,
+          });
+          }else{
+            Toast.fire({
             icon: "success",
             title: page.props.flash.message,
           });
           resetForm();
+          }
+         
+         
 
         },
         onError: (errors) => {
@@ -256,11 +269,7 @@ export default {
       });
     }
 
-    onMounted(() => {
-      props.packages.map(function (x) {
-        return (x.item_data = `${x.speed} Mbps ${x.name} - ${x.contract_period} Months`);
-      });
-    });
+  
     return { form, step, formatter, selectMonth, next, back, submit };
   },
 };

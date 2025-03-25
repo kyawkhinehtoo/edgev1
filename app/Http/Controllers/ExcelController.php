@@ -12,9 +12,11 @@ use App\Imports\PaymentImport;
 use App\Exports\AnnouncementLogExport;
 use App\Exports\ReceiptExport;
 use App\Exports\BillingExport;
+use App\Exports\BillingItemExport;
 use App\Exports\IncidentExport;
 use App\Exports\RadiusExport;
 use App\Exports\TempBillingExport;
+use App\Exports\TempBillingItemExport;
 use App\Exports\RevenueExport;
 use App\Exports\PublicIpExport;
 use App\Imports\CustomersUpdate;
@@ -82,7 +84,15 @@ class ExcelController extends Controller
     }
     public function exportTempBillingExcel(Request $request)
     {
-        return (new TempBillingExport($request))->download('temp_billings.csv');
+        return FacadesExcel::download(new TempBillingExport($request), 'temp_billings.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+    }
+    public function exportTempBillingItemExcel(Request $request)
+    {
+        return FacadesExcel::download(new TempBillingItemExport($request), 'temp_billings.xlsx', \Maatwebsite\Excel\Excel::XLSX);
+    }
+    public function exportBillingItemExcel(Request $request)
+    {
+        return FacadesExcel::download(new BillingItemExport($request), 'billings.xlsx', \Maatwebsite\Excel\Excel::XLSX);
     }
     public function exportRevenue(Request $request)
     {

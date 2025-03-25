@@ -36,6 +36,12 @@ use App\Models\SmsGateway;
 use App\Jobs\PDFCreateJob;
 use App\Jobs\BillingSMSJob;
 use App\Jobs\ReminderSMSJob;
+use App\Models\InvoiceItem;
+use App\Models\Isp;
+use App\Models\SystemSetting;
+use App\Models\TempBill;
+use App\Models\TempInvoice;
+use App\Models\TempInvoiceItem;
 
 class BillingController extends Controller
 {
@@ -43,134 +49,197 @@ class BillingController extends Controller
     public function BillGenerator()
     {
 
-        $packages = Package::select('packages.*')
-            ->orderBy('name', 'ASC')->get();
-        $townships = Township::get();
+        $isps = Isp::all();
         $bill = Bills::get();
         return Inertia::render('Client/BillGenerator', [
-            'packages' => $packages,
-            'townships' => $townships,
+            'isps' => $isps,
             'bill' => $bill,
         ]);
     }
     public function doGenerate(Request $request)
     {
-
-        return redirect()->back()->with('message', 'Billing Cannot Generate In Demo Mode');
-        
-
-        $bill_year = $request->bill_year;
-        $bill_month = $request->bill_month;
-        $bill_number = $request->bill_number;
-
-        BillingTemp::truncate();
-        $expiredList = RadiusController::getExpiredAll($bill_month, $bill_year);
-        $expiredList = json_decode($expiredList);
-        $expiredUsers = array_column($expiredList, "username");
+        $validated = $request->validate([
+            'bill_year' => 'required|integer',
+            'bill_month' => 'required|integer|between:1,12',
+            'bill_number' => 'required',
+            'issue_date' => 'required',
+            'due_date' => 'required',
+            'usd_exchange_rate' => 'required|numeric'
+        ]);
+        $bill_year = $validated['bill_year'];
+        $bill_month = str_pad($validated['bill_month'], 2, '0', STR_PAD_LEFT);
+        $billingPeriod = $bill_year . '-' . $bill_month;
+        $bill_number = $validated['bill_number'];
+        // Get first and last day of the month
+        $firstDayOfMonth = date('Y-m-d', strtotime("$bill_year-$bill_month-01"));
+        $lastDayOfMonth = date('Y-m-t', strtotime("$bill_year-$bill_month-01"));
+       
+        TempInvoiceItem::query()->delete();
+        TempInvoice::query()->delete();
+        TempBill::query()->delete();
+       
         $cal_days = cal_days_in_month(CAL_GREGORIAN, $bill_month, $bill_year);
         $temp_date = Date('Y-m-d', strtotime($cal_days . '-' . $bill_month . '-' . $bill_year));
-        $customers =  DB::table('customers')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
-            ->join('townships', 'customers.township_id', '=', 'townships.id')
+        $customers = Customer::with(['package', 'isp'])  // Include isp relationship
+            ->select('customers.*', 'isps.id as isp_id', 'isps.name as isp_name', 'status.type as status_type')
+            ->join('isps', 'customers.isp_id', '=', 'isps.id')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->when($request->bill_id, function ($query, $bill) {
-                $bill_id = $bill['id'];
-
-                $query_result  = DB::select('select customer_id from invoices where bill_id =' . $bill_id);
-                $result = collect($query_result)->pluck('customer_id')->toArray();
-
-                $query->whereNotIn('customers.id', $result);
+            ->when($request->bill_id, function ($query) use ($request) {
+                return $query->whereNotIn('customers.id', function($subquery) use ($request) {
+                    $subquery->select('customer_id')
+                            ->from('invoices')
+                            ->where('bill_id', $request->bill_id['id']);
+                });
             })
             ->whereDate('customers.installation_date', '<', $temp_date)
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
-                    ->orwherenull('customers.deleted');
+                    ->orWhereNull('customers.deleted');
             })
             ->whereNotIn('status.type', ['new', 'pending', 'cancel'])
-            // ->whereNotIn('customers.pppoe_account', $expiredUsers)
-            //->where('customers.ftth_id','=','TCL00009-FTTH')//just for debugging
-            ->select(
-                'customers.id as id',
-                'customers.ftth_id as ftth_id',
-                'customers.name as name',
-                'customers.order_date as order_date',
-                'customers.phone_1 as phone_1',
-                'customers.phone_2 as phone_2',
-                'customers.email',
-                'customers.address as address',
-                'customers.installation_date as installation_date',
-                'customers.advance_payment as advance_payment',
-                'customers.advance_payment_day as advance_payment_day',
-                'customers.status_id as status_id',
-                'townships.name as township',
-                'packages.name as package',
-                'packages.type as type',
-                'packages.speed as speed',
-                'packages.price as price',
-                'packages.currency as currency',
-                'status.name as status'
-            )
             ->get();
-        if ($customers) {
 
-            foreach ($customers as $value) {
-
-                $billing_cost = $value->price;
-                $total_cost = round($billing_cost, 2);
-
-                // $max_invoice_no =  DB::table('invoices')
-                //     ->where('invoices.bill_id', '=', $bill->id)
-                //     ->select(DB::raw('max(invoices.invoice_number) as max_invoice_number'))
-                //     ->pluck('max_invoice_number')
-                //     ->first();
-
-                // Create the range
-
-
-                if ($billing_cost <> 0) {
-                    $inWords = new NumberFormatter('en', NumberFormatter::SPELLOUT);
-
-                    $billing = new BillingTemp();
-                    $billing->bill_number = $bill_number;
-                    $billing->customer_id = $value->id;
-                    $billing->ftth_id = $value->ftth_id;
-                    $billing->date_issued = $request->issue_date;
-                    $billing->bill_to =  $value->name;
-                    $billing->attn =  $value->address;
-                    $billing->previous_balance = 0; // always zero 
-                    $billing->current_charge = $total_cost;
-                    $billing->compensation = 0;
-                    $billing->otc = 0;
-                    $billing->sub_total = $total_cost;
-                    $billing->payment_duedate = $request->due_date;
-                    $billing->service_description = $value->package;
-                    $billing->type = "Prepaid";
-                    $billing->qty = $value->speed . " Mbps";
-                    $billing->usage_day = 0;
-                    $billing->usage_month = 1;
-                    $billing->bonus_day = 0;
-                    $billing->bonus_month = 0;
-
-                    $billing->customer_status = $value->status;
-                    $billing->normal_cost = $value->price;
-                    $billing->total_payable = $total_cost;
-                    $billing->discount = 0;
-                    $billing->amount_in_word = 'Amount in words: ' . ucwords($inWords->format($total_cost));
-                    $billing->commercial_tax = "The Prices are inclusive of Commerial Tax (15%)";
-                    $billing->phone = trim($value->phone_1);
-                    $billing->email = $value->email;
-                    $billing->bill_month =  $bill_month;
-                    $billing->bill_year =  $bill_year;
-                    $billing->save();
-                }
+            if ($customers->isEmpty()) {
+                return redirect()->back()->with('message', 'No customers found for billing generation');
             }
-            //return redirect()->route('tempBilling');
-            return redirect()->back()->with('message', 'Billing Created Successfully.');
-        }
+
+            try {
+                $tempBill = TempBill::create([
+                    'name' => "Billing for $billingPeriod",
+                    'bill_number' => $validated['bill_number'],
+                    'billing_period' => $billingPeriod . '-01',
+                    'exchange_rate' => $validated['usd_exchange_rate'],
+                    'status' => 'Draft',
+                ]);
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Failed to create temporary bill');
+            }
+
+         
+            foreach ($customers->groupBy('isp_id') as $ispId => $customerList) {
+       
+                $totalMRC = 0;
+                $totalInstallation = 0;
+                $totalMRCCustomer = 0;
+                $totalNewCustomer = 0;
+                $tempInvoice = TempInvoice::create([
+                    'temp_bill_id' => $tempBill->id,
+                    'isp_id' => $ispId,
+                    'total_mrc_amount' => 0,
+                    'total_installation_amount' => 0,
+                    'total_mrc_customer' => 0,
+                    'total_new_customer' => 0,
+                    'discount_amount' => 0,
+                    'total_amount' => 0,
+                ]);
+        
+                foreach ($customerList as $customer) {
+                 
+                    $package = Package::find($customer->package_id);
+                    if (!$package) continue;
+                    $mrc = $package->price;
+                    $installationFee = $package->otc;
+            
+                    // **New Installations** (Prorated MRC)
+                    if ($customer->installation_date && $customer->installation_date->format('Y-m') == $billingPeriod) {
+                        $totalNewCustomer++;
+
+
+                        if ($customer->service_activation_date && $customer->service_activation_date->format('Y-m') == $billingPeriod) {
+                            $totalMRCCustomer++;
+                            $daysUsed = round($customer->service_activation_date->diffInDays($lastDayOfMonth) + 1);
+                            $proratedMRC = ($mrc / $cal_days) * $daysUsed;
+                            $proratedMRC = $proratedMRC?round($proratedMRC):0;
+                            TempInvoiceItem::create([
+                                'temp_invoice_id' => $tempInvoice->id,
+                                'customer_id' => $customer->id,
+                                'type' => 'ProRatedRecurring',
+                                'start_date' => $customer->service_activation_date,
+                                'end_date' => $lastDayOfMonth,
+                                'quantity' => 1,
+                                'unit_price' => $mrc / $cal_days,
+                                'total_amount' => $proratedMRC,
+                                'description' => "Prorated MRC for {$customer->name} ({$daysUsed} days)",
+                            ]);
+                            $totalMRC += $proratedMRC;
+                        }
+                     
+            
+                        // Installation Fee
+                        TempInvoiceItem::create([
+                            'temp_invoice_id' => $tempInvoice->id,
+                            'customer_id' => $customer->id,
+                            'type' => 'NewInstallation',
+                            'quantity' => 1,
+                            'unit_price' => $installationFee,
+                            'total_amount' => $installationFee,
+                            'description' => "Installation Fee for {$customer->name}",
+                        ]);
+            
+                     
+                        $totalInstallation += $installationFee;
+                    }
+                    // **Normal Monthly Recurring Charge (MRC)**
+                    elseif ($customer->installation_date->format('Y-m') < $billingPeriod) {
+                        $totalMRCCustomer++;
+                        $isTerminated = $customer->service_termination_date && $customer->service_termination_date->format('Y-m') == $billingPeriod;
+                        
+                        // Prorated if terminated
+                        if ($isTerminated) {
+                            $daysUsed = round($customer->service_termination_date->diffInDays($firstDayOfMonth) + 1);
+                            $proratedMRC = ($mrc / $cal_days) * $daysUsed;
+                            $proratedMRC = $proratedMRC?round($proratedMRC):0;
+                            TempInvoiceItem::create([
+                                'temp_invoice_id' => $tempInvoice->id,
+                                'customer_id' => $customer->id,
+                                'type' => 'ProRatedRecurring',
+                                'start_date' => $firstDayOfMonth,
+                                'end_date' => $customer->service_termination_date,
+                                'quantity' => 1,
+                                'unit_price' => $mrc / $cal_days,
+                                'total_amount' => $proratedMRC,
+                                'description' => "Prorated MRC for {$customer->name} ({$daysUsed} days)",
+                            ]);
+            
+                            $totalMRC += $proratedMRC;
+                        } else {
+                            // Full month charge
+                            TempInvoiceItem::create([
+                                'temp_invoice_id' => $tempInvoice->id,
+                                'customer_id' => $customer->id,
+                                'type' => 'FullRecurring',
+                                'start_date' => now()->startOfMonth(),
+                                'end_date' => now()->endOfMonth(),
+                                'quantity' => 1,
+                                'unit_price' => $mrc,
+                                'total_amount' => $mrc,
+                                'description' => "MRC for {$customer->name}",
+                            ]);
+            
+                            $totalMRC += $mrc;
+                        }
+                    }
+                }
+                 // Update total amounts in invoice
+                 $tempInvoice->update([
+                    'issue_date' => $validated['issue_date'],
+                    'due_date' => $validated['due_date'],
+                    'total_mrc_amount' => $totalMRC,
+                    'total_installation_amount' => $totalInstallation,
+                    'total_mrc_customer' => $totalMRCCustomer,
+                    'total_new_customer' => $totalNewCustomer,
+                    'sub_total' => $totalMRC + $totalInstallation,
+                    'total_amount' => $totalMRC + $totalInstallation,
+                ]);
+            }
+           
+        return redirect()->route('tempBilling')->with('message', 'Billing Created Successfully.');
+         //   return redirect()->back()->with('message', 'Billing Created Successfully.');
+        
 
 
 
-        return redirect()->back()->with('message', 'Billing Cannot Generate');
+      
     }
 
     public function goTemp(Request $request)
@@ -181,493 +250,210 @@ class BillingController extends Controller
         $townships = Township::get();
         $status = Status::get();
         $bill = Bills::where('status', 'active')->get();
-        $billings =  DB::table('temp_billings')
-            ->join('customers', 'customers.id', '=', 'temp_billings.customer_id')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
-            ->join('townships', 'customers.township_id', '=', 'townships.id')
-            ->join('status', 'customers.status_id', '=', 'status.id')
-            ->where(function ($query) {
-                return $query->where('customers.deleted', '=', 0)
-                    ->orwherenull('customers.deleted');
-            })
-            ->when($request->keyword, function ($query, $search = null) {
-                $query->where('customers.name', 'LIKE', '%' . $search . '%')
-                    ->orWhere('customers.ftth_id', 'LIKE', '%' . $search . '%')
-                    ->orWhere('packages.name', 'LIKE', '%' . $search . '%')
-                    ->orWhere('townships.name', 'LIKE', '%' . $search . '%');
-            })
-            ->when($request->general, function ($query, $general) {
-                $query->where(function ($query) use ($general) {
-                    $query->where('customers.name', 'LIKE', '%' . $general . '%')
-                        ->orWhere('customers.ftth_id', 'LIKE', '%' . $general . '%')
-                        ->orWhere('customers.phone_1', 'LIKE', '%' . $general . '%')
-                        ->orWhere('customers.phone_2', 'LIKE', '%' . $general . '%');
-                });
-            })
-            ->when($request->installation, function ($query, $installation) {
-                $startDate = Carbon::parse($installation[0])->format('Y-m-d');
-                $endDate = Carbon::parse($installation[1])->format('Y-m-d');
-                $query->whereBetween('customers.installation_date', [$startDate, $endDate]);
-            })
-            ->when($request->package, function ($query, $package) {
-                $query->where('customers.package_id', '=', $package);
-            })
-            ->when($request->total_payable_min, function ($query, $total_payable_min) {
-                $query->where('temp_billings.total_payable', '>=', $total_payable_min);
-            })
-            ->when($request->total_payable_max, function ($query, $total_payable_max) {
-                $query->where('temp_billings.total_payable', '<=', $total_payable_max);
-            })
-            ->when($request->township, function ($query, $township) {
-                $query->where('customers.township_id', '=', $township);
-            })
-            ->when($request->status, function ($query, $status) {
-                $query->where('customers.status_id', '=', $status);
-            })
-            ->when($request->order, function ($query, $order) {
-                $query->whereBetween('customers.order_date', $order);
-            })
-            ->when($request->installation, function ($query, $installation) {
-                $query->whereBetween('customers.installation_date', $installation);
-            })
-            ->when($request->sort, function ($query, $sort = null) {
-                $sort_by = 'temp_billings.id';
-                if ($sort == 'cid') {
-                    $sort_by = 'temp_billings.id';
-                }
-
-                $query->orderBy($sort_by, 'asc');
-            }, function ($query) {
-                $query->orderBy('temp_billings.id', 'asc');
-            })
-            ->select('temp_billings.*')
-            ->paginate(20);
-        $billings->appends($request->all())->links();
+        $tempInvoices = TempInvoice::with('tempInvoiceItems','isp','tempBill')->paginate(20);
+        $tempInvoices->appends($request->all())->links();
         return Inertia::render('Client/TempBilling', [
             'packages' => $packages,
             'townships' => $townships,
             'status' => $status,
-            'billings' => $billings,
             'bill' => $bill,
+            'tempInvoices' => $tempInvoices,
+        ]);
+   
+    }
+    public function updateTempInvoice(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'issue_date' => 'required|date',
+            'due_date' => 'required|date',
+            'discount_amount' => 'required|numeric|min:0',
+            'tax_percent' => 'numeric|min:0',
+            'additional_description' => 'nullable|string',
+            'additional_fees' => 'numeric|min:0',
+        ]);
+
+        $invoice = TempInvoice::findOrFail($id);
+        
+        // Calculate sub total (MRC + Installation + Additional Fees)
+        $subTotal = $invoice->total_mrc_amount + 
+                   $invoice->total_installation_amount + 
+                   $validated['additional_fees'] - 
+                   $validated['discount_amount'];
+
+        // Calculate tax amount based on percentage
+        $taxAmount = ($subTotal * $validated['tax_percent']) / 100;
+
+        // Calculate final total amount
+        $totalAmount = $subTotal + $taxAmount;
+
+        // Merge calculated values with validated data
+        $updateData = array_merge($validated, [
+            'sub_total' => $subTotal,
+            'tax_amount' => $taxAmount,
+            'total_amount' => $totalAmount
+        ]);
+
+        $invoice->update($updateData);
+
+        return redirect()->back()->with('message', 'Invoice updated successfully');
+    }
+    public function viewTempInvoiceDetails($id, Request $request)
+    {   
+        $tempInvoiceItems = TempInvoiceItem::with(['customer', 'tempInvoice.isp', 'tempInvoice.tempBill'])
+            ->where('temp_invoice_id', $id)
+            ->paginate(10);
+        $tempInvoices  = DB::table('temp_invoice_items AS tii')
+            ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
+            ->join('packages AS p', 'c.package_id', '=', 'p.id')
+            ->selectRaw("
+                CASE 
+                    WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
+                    WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
+                    WHEN tii.type LIKE '%Installation%' THEN 
+                        CONCAT('New Installation for ', p.installation_timeline, ' hour')
+                    ELSE 'Other'
+                END AS category,
+                MIN(
+                    CASE 
+                     WHEN tii.type LIKE '%ProRated%' THEN 0
+                        WHEN tii.type LIKE '%Recurring%' THEN p.price
+                        WHEN tii.type LIKE '%Installation%' THEN p.otc 
+                        ELSE p.price 
+                    END
+                ) AS unit_price,
+                COUNT(*) AS total_customers,
+                SUM(tii.total_amount) AS total_amount
+            ")
+            ->where('tii.temp_invoice_id', $id)
+            ->groupBy('category')
+            ->get();
+        $tempInvoiceItems->appends($request->all())->links();
+        return Inertia::render('Client/TempInvoiceDetails', [
+            'tempInvoiceItems' => $tempInvoiceItems,
+            'tempInvoices'=> $tempInvoices
         ]);
     }
-    public function checkStartDate($month, $year, $customer_id, $price)
+    public function updateTempInvoiceItem(Request $request, $id)
     {
-        //check suspense/terminate by suspense terminate date with bill issue month (plan changed user must adjust manually)
+        $validated = $request->validate([
+            'unit_price' => 'required|numeric',
+            'total_amount' => 'required|numeric',
+        ]);
 
-        //check bill start date fallback to installation date 
-        // get total days of months and substract from the total days of bill start date to current day 
-        // if under dayofmonth 
-        // calculate bill start date/installation date to the end of the month by 
-        // total bill - actual bill = compensation 
-        // bill month/ bill day ? 
-        //Customer Status 
-        //4 = Suspense
-        //5 = Terminate
+        $invoiceItem = TempInvoiceItem::findOrFail($id);
+        $invoiceItem->update($validated);
 
-        $billing_day = "0";
-        $total_cost = $price;
-        $customer = Customer::find($customer_id);
-        $installation_date = $customer->installation_date;
-        $bill_date = $installation_date;
+        // Update invoice totals
+        $invoice = $invoiceItem->tempInvoice;
+        $totalMRC = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->sum('total_amount');
+        $totalMRCCustomer = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->count();
+        $totalInstallation = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->sum('total_amount');
+        $totalInstallationCustomer = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->count();
 
-        $customer_history = CustomerHistory::where('customer_id', '=', $customer_id)
-            ->where('active', '=', 1)
-            ->first();
-        if ($customer_history) {
-            $bill_date = ($bill_date >= $customer_history->start_date) ? $bill_date : $customer_history->start_date;
+       
 
-            if ($customer_history->status_id == 4 || $customer_history->status_id == 5) {
-                //customer has history
-                return $this->endDateCompare($customer_history->start_date, $year, $month, $price);
-            } else {
-                //need to check active date
-                if ($customer_history->start_date) {
+        // Calculate sub total (MRC + Installation + Additional Fees)
+        $subTotal = $totalMRC + $totalInstallation + ($invoice->additional_fees ?? 0);
 
-                    return $this->startDateCompare($bill_date, $year, $month, $price);
-                }
-                return $this->startDateCompare($bill_date, $year, $month, $price);
-                // $billing_day = "1 Month";
-                // $total_cost = $price;
-                // return array('total_cost' => $total_cost, 'billing_day' => $billing_day);
-            }
-        } else {
-            if ($customer->status_id == 2) {
-                return $this->startDateCompare($bill_date, $year, $month, $price);
-            } else {
-                $billing_day = "";
-                $total_cost = 0;
-                return array('total_cost' => $total_cost, 'billing_day' => $billing_day);
-            }
-        }
+        // Calculate discount amount from sub total
+        $discountAmount = $invoice->discount_amount;
+
+        // Calculate gross total after discount
+        $grossTotal = $subTotal - $discountAmount;
+
+        // Calculate tax amount based on discounted total
+        $taxAmount = ($grossTotal * ($invoice->tax_percent ?? 0)) / 100;
+
+        // Calculate final total (gross + tax)
+        $finalTotal = $grossTotal + $taxAmount;
+
+        $invoice->update([
+            'total_mrc_amount' => $totalMRC,
+            'total_installation_amount' => $totalInstallation,
+            'total_mrc_customer' => $totalMRCCustomer,
+            'total_new_customer' => $totalInstallationCustomer,
+            'sub_total' => $subTotal,
+            'tax_amount' => $taxAmount,
+            'total_amount' => $finalTotal
+        ]);
+
+        return redirect()->back()->with('message', 'Invoice Updated successfully');
     }
-    public function endDateCompare($bill_date, $year, $month, $price)
+    public function destroyTempInvoiceItem($id)
     {
-        $billing_day = "0";
-        $total_cost = $price;
-        $stop_month = (int)date("n", strtotime($bill_date));
-        $stop_year = (int)date("Y", strtotime($bill_date));
+        $invoiceItem = TempInvoiceItem::findOrFail($id);
+        $invoice = $invoiceItem->tempInvoice;
+        
+        $invoiceItem->delete();
+       
+        // Recalculate invoice totals
+        $totalMRC = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->sum('total_amount');
+        $totalMRCCustomer = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->count();
+        $totalInstallation = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->sum('total_amount');
+        $totalInstallationCustomer = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->count();
 
-        if ($stop_year <= $year) {
-            if ($bill_date != null) {
-                if ($stop_month == $month) {
+        // Calculate sub total (MRC + Installation + Additional Fees)
+        $subTotal = $totalMRC + $totalInstallation + ($invoice->additional_fees ?? 0);
 
-                    //sus or ter month is the same with billing month
-                    $billing_day_temp = date("j", strtotime($bill_date)) - 1;
+        // Calculate discount amount from sub total
+        $discountAmount = $invoice->discount_amount;
 
-                    $billing_day = $billing_day_temp . " Days";
-                    $cal_days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-                    $cost_per_day = $price / $cal_days;
-                    $total_cost = $cost_per_day * $billing_day_temp;
-                } elseif ($stop_month > $month) {
-                    $billing_day = "1 Month";
-                    $total_cost = $price;
-                } else {
-                    $billing_day = "0";
-                    $total_cost = 0;
-                }
-            } else {
-                $billing_day = "";
-                $total_cost = 0;
-            }
-        } else {
-            $billing_day = "1 Month";
-            $total_cost = $price;
-        }
-        return array('total_cost' => $total_cost, 'billing_day' => $billing_day);
+        // Calculate gross total after discount
+        $grossTotal = $subTotal - $discountAmount;
+
+        // Calculate tax amount based on discounted total
+        $taxAmount = ($grossTotal * ($invoice->tax_percent ?? 0)) / 100;
+
+        // Calculate final total (gross + tax)
+        $finalTotal = $grossTotal + $taxAmount;
+
+        $invoice->update([
+            'total_mrc_amount' => $totalMRC,
+            'total_installation_amount' => $totalInstallation,
+            'total_mrc_customer' => $totalMRCCustomer,
+            'total_new_customer' => $totalInstallationCustomer,
+            'sub_total' => $subTotal,
+            'tax_amount' => $taxAmount,
+            'total_amount' => $finalTotal
+        ]);
+
+        return redirect()->back()->with('message', 'Invoice item deleted successfully');
     }
-    public function startDateCompare($bill_date, $year, $month, $price)
+   
+  
+  
+    public function preview_1($id)
     {
-        $billing_day = "0";
-        $total_cost = $price;
-        $start_month = (int)date("n", strtotime($bill_date));
-        $start_year = (int)date("Y", strtotime($bill_date));
+        $isp = TempInvoice::with('isp','tempBill')->find($id);
+        $tempInvoices  = DB::table('temp_invoice_items AS tii')
+        ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
+        ->join('packages AS p', 'c.package_id', '=', 'p.id')
+        ->selectRaw("
+            CASE 
+                WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
+                WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
+                WHEN tii.type LIKE '%Installation%' THEN 
+                    CONCAT('New Installation for ', p.installation_timeline, ' hour')
+                ELSE 'Other'
+            END AS category,
+            MIN(
+                CASE 
+                    WHEN tii.type LIKE '%ProRated%' THEN 0
+                    WHEN tii.type LIKE '%Installation%' THEN p.otc 
+                    ELSE p.price 
+                END
+            ) AS unit_price,
+            COUNT(*) AS total_customers,
+            SUM(tii.total_amount) AS total_amount
+        ")
+        ->where('tii.temp_invoice_id', $id)
+        ->groupBy('category')
+        ->get();
 
-        if ($start_year == $year) {
-            if ($bill_date != null) {
-                if ($start_month == $month) {
-                    $billing_day_temp = date("j", strtotime($bill_date));
-                    if ($billing_day_temp == 0) {
-                        $billing_day = "1 Month";
-                        $total_cost = $price;
-                    } else {
-                        //active or reactive date is the same with billing month
-                        $cal_days = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-                        $billing_day_temp = $cal_days - $billing_day_temp;
-                        $billing_day = $billing_day_temp . " Days";
-                        $cost_per_day = $price / $cal_days;
-                        $total_cost = $cost_per_day * $billing_day_temp;
-                    }
-                } elseif ($start_month < $month) {
-                    $billing_day = "1 Month";
-                    $total_cost = $price;
-                } else {
-                    $billing_day = "0";
-                    $total_cost = 0;
-                }
-            } else {
-                $billing_day = "";
-                $total_cost = 0;
-            }
-        } else {
-            $billing_day = "1 Month";
-            $total_cost = $price;
-        }
-        return array('total_cost' => $total_cost, 'billing_day' => $billing_day);
-    }
-    public function updateTemp(Request $request)
-    {
-
-        if ($request->id) {
-            $temp_billing = BillingTemp::find($request->id);
-            $temp_billing->customer_id = $request->customer_id;
-            $temp_billing->start_date = $request->start_date;
-            $temp_billing->end_date = $request->end_date;
-            $temp_billing->bill_number = $request->bill_number;
-            $temp_billing->ftth_id = $request->ftth_id;
-            $temp_billing->date_issued = $request->date_issued;
-            $temp_billing->bill_to = $request->bill_to;
-            $temp_billing->attn = $request->attn;
-
-            $temp_billing->current_charge = $request->current_charge;
-            $temp_billing->compensation = $request->compensation;
-            $temp_billing->public_ip = $request->public_ip;
-            $temp_billing->otc = $request->otc;
-            $temp_billing->sub_total = $request->sub_total;
-            $temp_billing->payment_duedate = $request->payment_duedate;
-            $temp_billing->service_description = $request->service_description;
-            $temp_billing->qty = $request->qty;
-            $temp_billing->usage_day = $request->usage_day;
-            $temp_billing->usage_month = $request->usage_month;
-            $temp_billing->bonus_day = $request->bonus_day;
-            $temp_billing->bonus_month = $request->bonus_month;
-            $temp_billing->normal_cost = $request->normal_cost;
-            $temp_billing->type = $request->type;
-            $temp_billing->tax = $request->tax;
-            $temp_billing->total_payable = $request->total_payable;
-            $temp_billing->discount = $request->discount;
-            $temp_billing->phone = $request->phone;
-            $temp_billing->update();
-            return redirect()->back()->with('message', 'Invoice Updated Successfully.');
-        }
-        return redirect()->back()->with('message', 'Invoice Cannot be Updated.');
-    }
-    public function updateInvoice(Request $request)
-    {
-
-
-        if ($request->id) {
-            $invoice = Invoice::find($request->id);
-            $invoice->customer_id = $request->customer_id;
-            $invoice->start_date = $request->start_date;
-            $invoice->end_date = $request->end_date;
-            $invoice->bill_number = $request->bill_number;
-            $invoice->ftth_id = $request->ftth_id;
-            $invoice->date_issued = $request->date_issued;
-            $invoice->bill_to = $request->bill_to;
-            $invoice->attn = $request->attn;
-            $invoice->previous_balance = $request->previous_balance;
-            $invoice->current_charge = $request->current_charge;
-            $invoice->compensation = $request->compensation;
-            $invoice->otc = $request->otc;
-            $invoice->sub_total = $request->sub_total;
-            $invoice->payment_duedate = $request->payment_duedate;
-
-            $invoice->service_description = $request->service_description;
-            //  $invoice->popsite_id = $request->package['pop_id'];
-
-            $invoice->qty = $request->qty;
-            $invoice->usage_day = $request->usage_day;
-            $invoice->usage_month = $request->usage_month;
-            $invoice->bonus_day = $request->bonus_day;
-            $invoice->bonus_month = $request->bonus_month;
-            $invoice->normal_cost = $request->normal_cost;
-            $invoice->type = $request->type;
-            $invoice->tax = $request->tax;
-            $invoice->public_ip = $request->public_ip;
-            $invoice->total_payable = $request->total_payable;
-            $invoice->discount = $request->discount;
-            $invoice->phone = $request->phone;
-
-            if ($request->reset_email) {
-                $invoice->sent_date = null;
-                $invoice->mail_sent_status = null;
-            }
-            if ($request->reset_sms) {
-                $invoice->sent_date = null;
-                $invoice->sms_sent_status = null;
-            }
-
-            $invoice->invoice_file = null;
-            $invoice->invoice_url = null;
-
-            //if ($request->reset_receipt) {
-            
-            $invoice_no = "INV" . substr($invoice->bill_number, 0, 4) . str_pad($invoice->invoice_number, 5, "0", STR_PAD_LEFT);
-            $receipt = ReceiptRecord::where('invoice_id', '=', $invoice->id)->first();
-            if ($receipt) {
-                $receipt_id = $receipt->id;
-                ReceiptRecord::find($receipt_id)->delete();
-                $months = 12;
-                while ($months > 0) {
-                    $status =  ReceiptSummery::where($months, '=', $receipt_id)
-                        ->where('customer_id', '=', $invoice->customer_id)
-                        ->first();
-                    if ($status) {
-                        $status->$months = null;
-                        $status->update();
-                    }
-                    $months--;
-                }
-                $receipt->delete();
-                activity()
-                ->causedBy(User::find(Auth::id()))
-                ->performedOn($invoice)
-                ->log('Receipt Reset. Customer ID: ' . $invoice->ftth_id . ', Invoice No. : ' . $invoice_no);
-            }
-            $old_c = Customer::find($request->customer_id);
-
-            if ($request->package['id'] != $old_c->package_id || $request->attn != $old_c->address) {
-                $new_history = new CustomerHistory();
-                $new_history->customer_id = $request->customer_id;
-                $new_history->actor_id = Auth::user()->id;
-                if ($request->package) {
-                    if ($request->package['id'] != $old_c->package_id) {
-                        $new_history->type = 'plan_change';
-                        $new_history->new_package = $request->package['id'];
-                        $new_history->old_package = $old_c->package_id;
-                        $myDateTime = new DateTime;
-                        if ($request->start_date) {
-                            $myDateTime = new DateTime($request->start_date);
-                        }
-                        $newtime = clone $myDateTime;
-                        $new_history->start_date = $newtime->format('Y-m-j h:m:s');
-                    }
-                }
-                if ($request->attn != $old_c->address) {
-                    $new_history->type = 'relocation';
-                    //new
-                    if ($request->attn)
-                        $new_history->new_address = $request->attn;
-                    $new_history->old_address = $old_c->address;
-                }
-                $new_history->active = 1;
-                $new_history->date = date("Y-m-j h:m:s");
-                $new_history->save();
-            }
-            $customer = Customer::find($request->customer_id);
-            $customer->name = $request->bill_to;
-            $customer->address = $request->attn;
-            $customer->package_id = $request->package['id'];
-
-
-            if ($request->phone) {
-
-                $phones = $billing_phone = preg_replace('/\s+/', '', $request->phone);
-                if (strpos($billing_phone, ',') !== false) {
-                    $phones = explode(",", $billing_phone);
-                }
-                if (strpos($billing_phone, ';') !== false) {
-                    $phones = explode(';', $billing_phone);
-                }
-                if (strpos($billing_phone, ':') !== false) {
-                    $phones = explode(':', $billing_phone);
-                }
-                if (strpos($billing_phone, ' ') !== false) {
-                    $phones = explode(' ', $billing_phone);
-                }
-                if (strpos($billing_phone, '/') !== false) {
-                    $phones = explode('/', $billing_phone);
-                }
-                //possible phone number style  
-                // 09420043911
-                // 9420043911
-                // 959420043911
-                // +959420043911
-                $pattern = "/^(09|\+959)+[0-9]+$/";
-
-                if (is_array($phones)) {
-                    $phones = array_map('trim', $phones); //first remove white space from array value
-                    $phones = array_filter($phones); //get rid of empty value from array then
-                    $phones = array_values($phones); // reindexing the array
-                    $phone_1 = trim($phones[0]);
-                    $phone_2 = trim($phones[1]);
-
-                    $customer->phone_1 = $this->sanitisePhone($phone_1);
-                    $customer->phone_2 = $this->sanitisePhone($phone_2);
-                } else {
-                    $customer->phone_1 =  $this->sanitisePhone($phones);
-                }
-            }
-
-
-
-            $customer->update();
-            if (RadiusController::checkRadiusEnable()) {
-                RadiusController::updateRadius($customer->id);
-            }
-
-
-            $original = $invoice->getOriginal();  // Get the original values before update
-            $invoice->update();                   // Perform the update
-            $changes = $invoice->getChanges();    // Get the updated values after the update
-
-            $logData = [];
-            foreach ($changes as $key => $newValue) {
-                $logData[$key] = [
-                    'from' => $original[$key] ?? null,  // Original value
-                    'to' => $newValue                   // New value
-                ];
-            }
-            activity()
-                ->causedBy(User::find(Auth::id()))
-                ->performedOn($invoice)
-                ->withProperties(['changes' => $logData])  // Log the changes with from-to values
-                ->log('Invoice updated. Customer ID: ' . $invoice->ftth_id . ', Invoice No. : ' . $invoice_no);
-            return redirect()->back()->with('message', 'Invoice Updated Successfully.');
-        }
-        return redirect()->back()->with('message', 'Invoice Cannot be Updated.');
-    }
-    public function createInvoice(Request $request)
-    {
-        Validator::make($request->all(), [
-            'customer_id' => 'required|max:255',
-            'bill_id' => 'required|max:255',
-            'start_date' => 'required|max:255',
-            'end_date' => 'required|max:255',
-            'ftth_id' => 'required',
-            'date_issued' => 'required',
-            'bill_to' => 'required|max:255',
-            'attn' => 'required|max:255',
-            'current_charge' => 'required|max:255',
-            'sub_total' => 'required|max:255',
-            'payment_duedate' => 'required|max:255',
-            'service_description' => 'required|max:255',
-            'qty' => 'required|max:255',
-            'usage_month' => 'required|max:255',
-            'normal_cost' => 'required|max:255',
-            'type' => 'required|max:255',
-            'total_payable' => 'required|max:255',
-            'phone' => 'required|max:255',
-
-
-        ])->validate();
-        //   dd($request);
-        $bill = Bills::find($request->bill_id);
-        $max_invoice_id =  DB::table('invoices')
-            ->where('invoices.bill_id', '=', $request->bill_id)
-            ->select(DB::raw('max(invoices.invoice_number) as max_invoice_number'))
-            ->first();
-        $customer_status = Customer::join('status', 'status.id', '=', 'customers.status_id')
-            ->join('packages', 'packages.id', '=', 'customers.package_id')
-            ->where('customers.id', '=', $request->customer_id)
-            ->select('status.name as status_name', 'packages.type as package_type')
-            ->first();
-        $inWords = new NumberFormatter('en', NumberFormatter::SPELLOUT);
-        $invoice = new Invoice();
-        $invoice->customer_id = $request->customer_id;
-        $invoice->bill_id = $request->bill_id;
-        $invoice->invoice_number = ($max_invoice_id) ? ($max_invoice_id->max_invoice_number + 1) : 1;
-        $invoice->start_date = $request->start_date;
-        $invoice->end_date = $request->end_date;
-        $invoice->bill_number = $bill->bill_number;
-        $invoice->ftth_id = $request->ftth_id['ftth_id'];
-        $invoice->date_issued = $request->date_issued;
-        $invoice->bill_to = $request->bill_to;
-        $invoice->attn = $request->attn;
-        $invoice->previous_balance = $request->previous_balance;
-        $invoice->current_charge = $request->current_charge;
-        $invoice->compensation = $request->compensation;
-        $invoice->otc = $request->otc;
-        $invoice->sub_total = $request->sub_total;
-        $invoice->payment_duedate = $request->payment_duedate;
-        $invoice->service_description = $request->service_description;
-        $invoice->qty = $request->qty;
-        $invoice->usage_day = $request->usage_day;
-        $invoice->usage_month = $request->usage_month;
-        $invoice->bonus_day = $request->bonus_day;
-        $invoice->bonus_month = $request->bonus_month;
-        $invoice->normal_cost = $request->normal_cost;
-        $invoice->type = $request->type;
-        $invoice->tax = $request->tax;
-        $invoice->public_ip = $request->public_ip;
-        $invoice->total_payable = $request->total_payable;
-        $invoice->discount = $request->discount;
-        $invoice->email = $request->email;
-        $invoice->phone = $request->phone;
-        $invoice->customer_status = $customer_status->status_name;
-        $invoice->bill_month = $bill->bill_month;
-        $invoice->bill_year = $bill->bill_year;
-        //    $invoice->popsite_id = $request->package['pop_id'];
-        $invoice->amount_in_word = 'Amount in words: ' . ucwords($inWords->format($request->total_payable));
-        $invoice->commercial_tax = "The Prices are inclusive of Commerial Tax (5%)";
-        $invoice->save();
-        return redirect()->back()->with('message', 'Invoice Created Successfully.');
-    }
-    public function preview_1(Request $request)
-    {
-        $billings = BillingTemp::find($request->id);
-        return view('preview', $billings);
+        return view('preview', [
+            'tempInvoices' => $tempInvoices,
+            'isp' => $isp
+        ]);
     }
     public function preview_2(Request $request)
     {
@@ -743,83 +529,85 @@ class BillingController extends Controller
     }
     public function saveFinal(Request $request)
     {
+        // Validate bill name
+ 
+        if (!$request->has('bill_name')) {
+            return redirect()->back()->with('error', 'Bill name is required');
+        }
 
-        if ($request->has('bill_name') || $request->has('bill_id')) {
+        // Check for duplicate bill name
+        if (Bills::where('name', $request->bill_name)->exists()) {
+            return redirect()->back()->with('error', 'Bill name already exists');
+        }
 
-            $existingBill = isset($request->bill_id['id']) ? $request->bill_id['id'] : null;
-            $bill = ($request->additonal && $existingBill) ? Bills::find($existingBill) : new Bills();
-            $bill_data = BillingTemp::first();
-            if (!$request->additonal) {
-                $bill->name = $request->bill_name;
-                $bill->bill_number = substr($bill_data->bill_number, 0, 4);
-                $bill->bill_month = $bill_data->bill_month;
-                $bill->bill_year = $bill_data->bill_year;
-                $bill->status = "active";
-                $bill->save();
+        try {
+            DB::beginTransaction();
+
+            // Get temp bill data
+            $tempBill = TempBill::with(['tempInvoices.tempInvoiceItems'])->first();
+            if (!$tempBill) {
+                throw new \Exception('No temporary bill found');
             }
 
-            $invoices = Invoice::where('bill_id', $bill->id)->select('customer_id')->pluck('customer_id')->toArray();
+            // Create new bill
+            $bill = Bills::create([
+                'name' => $request->bill_name,
+                'bill_number' => $tempBill->bill_number,
+                'billing_period' => $tempBill->billing_period,
+                'exchange_rate' => $tempBill->exchange_rate,
+                'status' => 'Active'
+            ]);
 
-            $temp = null;
-            if ($request->additonal && $existingBill && $invoices) {
-                $temp = BillingTemp::whereNotIn('customer_id', $invoices)->get();
-            } else {
-                $temp = BillingTemp::all();
-            }
+            // Copy temp invoices and their items
+            foreach ($tempBill->tempInvoices as $tempInvoice) {
+                $invoiceNumber = 'INV_'.$bill->bill_number.'_'.Invoice::generateInvoiceNumber($bill->id);
+                $invoice = Invoice::create([
+                    'bill_id' => $bill->id,
+                    'invoice_number' => $invoiceNumber,
+                    'isp_id' => $tempInvoice->isp_id,
+                    'issue_date' => $tempInvoice->issue_date,
+                    'due_date' => $tempInvoice->due_date,
+                    'total_mrc_amount' => $tempInvoice->total_mrc_amount,
+                    'total_installation_amount' => $tempInvoice->total_installation_amount,
+                    'total_mrc_customer' => $tempInvoice->total_mrc_customer,
+                    'total_new_customer' => $tempInvoice->total_new_customer,
+                    'sub_total' => $tempInvoice->sub_total,
+                    'tax_percent' => $tempInvoice->tax_percent,
+                    'tax_amount' => $tempInvoice->tax_amount,
+                    'discount_amount' => $tempInvoice->discount_amount,
+                    'total_amount' => $tempInvoice->total_amount,
+                    'additional_description' => $tempInvoice->additional_description,
+                    'additional_fees' => $tempInvoice->additional_fees
+                ]);
 
-            foreach ($temp as $value) {
-                $max_invoice_id =  DB::table('invoices')
-                    ->where('invoices.bill_id', '=', $bill->id)
-                    ->select(DB::raw('max(invoices.invoice_number) as max_invoice_number'))
-                    ->pluck('max_invoice_number')
-                    ->first();
-                if ($value->total_payable > 0) {
-                    $billing = new Invoice();
-                    $billing->start_date = $value->start_date;
-                    $billing->end_date = $value->end_date;
-                    $billing->bill_number = $value->bill_number;
-                    $billing->bill_id = $bill->id;
-                    $billing->invoice_number = ($max_invoice_id) ? ($max_invoice_id + 1) : 1;
-                    $billing->customer_id = $value->customer_id;
-                    $billing->ftth_id = $value->ftth_id;
-                    $billing->date_issued = $value->date_issued;
-                    $billing->bill_to = $value->bill_to;
-                    $billing->attn = $value->attn;
-                    $billing->public_ip = $value->public_ip;
-                    $billing->current_charge = $value->current_charge;
-                    $billing->compensation = $value->compensation;
-                    $billing->otc = $value->otc;
-                    $billing->sub_total = $value->sub_total;
-                    $billing->payment_duedate = $value->payment_duedate;
-                    $billing->service_description = $value->service_description;
-                    // $billing->popsite_id = $value->popsite_id;
-                    $billing->qty = $value->qty;
-                    $billing->usage_day = $value->usage_day;
-                    $billing->usage_month = $value->usage_month;
-                    $billing->bonus_day = $value->bonus_day;
-                    $billing->bonus_month = $value->bonus_month;
-                    $billing->customer_status = $value->customer_status;
-                    $billing->normal_cost = $value->normal_cost;
-                    $billing->type = $value->type;
-                    $billing->total_payable = $value->total_payable;
-                    $billing->discount = $value->discount;
-                    $billing->amount_in_word = $value->amount_in_word;
-                    $billing->commercial_tax = $value->commercial_tax;
-                    $billing->tax = $value->tax;
-                    $billing->phone = $value->phone;
-                    $billing->email = $value->email;
-                    $billing->bill_month = $value->bill_month;
-                    $billing->bill_year = $value->bill_year;
-                    $billing->save();
+                // Copy invoice items
+                foreach ($tempInvoice->tempInvoiceItems as $tempItem) {
+                    InvoiceItem::create([
+                        'invoice_id' => $invoice->id,
+                        'customer_id' => $tempItem->customer_id,
+                        'type' => $tempItem->type,
+                        'start_date' => $tempItem->start_date,
+                        'end_date' => $tempItem->end_date,
+                        'quantity' => $tempItem->quantity,
+                        'unit_price' => $tempItem->unit_price,
+                        'total_amount' => $tempItem->total_amount,
+                        'description' => $tempItem->description
+                    ]);
                 }
             }
-            // activity()
-            //     ->causedBy(User::find(Auth::id()))
-            //     ->performedOn($invoices)
-            //     ->log('Bill Save Final. Bill No. :' .   $bill->name);
-            return redirect()->back()->with('message', 'Billing Generated Successfully');
+
+            // Clean up temp data
+            $tempBill->delete(); // This will cascade delete temp invoices and items
+
+            DB::commit();
+            return redirect()->route('showbill')->with('message', 'Billing finalized successfully');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('message', 'Failed to finalize billing: ' . $e->getMessage());
         }
     }
+
     public function showList()
     {
         $lists = Bills::all();
@@ -829,281 +617,259 @@ class BillingController extends Controller
     }
     public function showBill(Request $request)
     {
-        $roles = Role::get();
-        $user = User::join('roles', 'users.role', 'roles.id')
-            ->select('users.*', 'roles.delete_invoice')
-            ->where('users.id', '=', Auth::user()->id)
-            ->first();
+        $bills  = Bills::orderBy('id','desc')->get();
+        $billingTeam = User::join('roles','roles.id','users.role')
+                    ->where('roles.name','like','%bill%')
+                    ->where('users.user_type','internal')
+                    ->select('users.*')
+                    ->get();
+        $selectedBill = null;
+
         if ($request->bill_id) {
-            $lists = Bills::all();
-            $packages =  Package::select('packages.*')
-                ->orderBy('price', 'ASC')->get();
-          
-            $package_type = Package::select('type')
-                ->groupBy('type')
-                ->orderBy('type', 'ASC')->get();
-            $townships = Township::get();
-            $status = Status::get();
-            $users = User::join('roles', 'users.role', 'roles.id')
-                ->where('roles.name', 'LIKE', '%Sale%')
-                ->select('users.*')
-                ->orderBy('users.name', 'ASC')->get();
-
-            $orderform = null;
-            if ($request->orderform)
-                $orderform['status'] = ($request->orderform == 'signed') ? 1 : 0;
-
-            $max_receipt =  DB::table('invoices')
-                ->leftJoin('receipt_records', 'invoices.id', '=', 'receipt_records.invoice_id')
-                ->where('invoices.bill_id', '=', $request->bill_id)
-                ->select(DB::raw('max(receipt_records.receipt_number) as max_receipt_number'))
-                ->first();
-            $total_receivable = DB::table('invoices')
-                ->where('invoices.bill_id', '=', $request->bill_id)
-                ->select(DB::raw('sum(invoices.total_payable) as total_payable'))
-                ->first();
-            $receivable = $total_receivable->total_payable;
-
-            $total_paid = DB::table('invoices')
-                ->leftJoin('receipt_records', 'invoices.id', '=', 'receipt_records.invoice_id')
-                ->where('invoices.bill_id', '=', $request->bill_id)
-                ->select(DB::raw('sum(receipt_records.collected_amount) as paid'))
-                ->first();
-            $paid = $total_paid->paid;
-
-            $receipts = ReceiptRecord::where('bill_id', '=', $request->bill_id)
-                ->select('invoice_id')
-                ->get()
-                ->toArray();
-            $last_receipt = ReceiptRecord::join('invoices', 'receipt_records.invoice_id', '=', 'invoices.id')
-                ->groupBy('invoices.customer_id')
-                ->select(DB::raw('max(receipt_records.id) as id'))
-                ->get()
-                ->toArray();
-            $last_invoices = Invoice::join('receipt_records', 'receipt_records.invoice_id', '=', 'invoices.id')
-                ->whereIn('receipt_records.id', $last_receipt)
-                ->select('invoices.id', 'invoices.customer_id', 'invoices.period_covered')
-                ->get();
-            //select i.period_covered, i.ftth_id from invoices i join receipt_records rr on i.id = rr.invoice_id where rr.id in (select max(rr.id) as received_id from invoices i left join receipt_records rr on i.id = rr.invoice_id group by i.customer_id) and i.ftth_id = 'ggh0102';
-
-            $billings =  DB::table('invoices')->join('customers', 'customers.id', '=', 'invoices.customer_id')
-                ->join('packages', 'customers.package_id', '=', 'packages.id')
-                ->join('townships', 'customers.township_id', '=', 'townships.id')
-                ->join('status', 'customers.status_id', '=', 'status.id')
-                ->leftJoin('receipt_records', 'invoices.id', '=', 'receipt_records.invoice_id')
-                ->where(function ($query) {
-                    return $query->where('customers.deleted', '=', 0)
-                        ->orWhereNull('customers.deleted');
-                })
-                ->where('invoices.bill_id', '=', $request->bill_id)
-                ->when($request->keyword, function ($query, $search = null) {
-                    $query->where('customers.name', 'LIKE', '%' . $search . '%')
-                        ->orWhere('customers.ftth_id', 'LIKE', '%' . $search . '%')
-                        ->orWhere('packages.name', 'LIKE', '%' . $search . '%')
-                        ->orWhere('townships.name', 'LIKE', '%' . $search . '%');
-                })->when($request->general, function ($query, $general) {
-                    $query->where(function ($query) use ($general) {
-                        $query->where('customers.name', 'LIKE', '%' . $general . '%')
-                            ->orWhere('customers.ftth_id', 'LIKE', '%' . $general . '%')
-                            ->orWhere('customers.phone_1', 'LIKE', '%' . $general . '%')
-                            ->orWhere('customers.phone_2', 'LIKE', '%' . $general . '%');
-                    });
-                })
-                ->when($request->total_payable_min, function ($query, $total_payable_min) {
-                    $query->where('invoices.total_payable', '>=', $total_payable_min);
-                })
-                ->when($request->payment_type, function ($query, $payment_type) use ($receipts) {
-                    if ($payment_type == 'unpaid') {
-                        $query->whereNotIn('invoices.id', $receipts);
-                    } else {
-                        $query->whereIn('invoices.id', $receipts);
-                    }
-                })
-                ->when($request->total_payable_max, function ($query, $total_payable_max) {
-                    $query->where('invoices.total_payable', '<=', $total_payable_max);
-                })
-                ->when($request->installation, function ($query, $installation) {
-                    $startDate = Carbon::parse($installation[0])->format('Y-m-d');
-                    $endDate = Carbon::parse($installation[1])->format('Y-m-d');
-                    $query->whereBetween('customers.installation_date', [$startDate, $endDate]);
-                })
-                ->when($request->package, function ($query, $package) {
-                    $query->where('customers.package_id', '=', $package);
-                })
-                ->when($request->package_speed, function ($query, $package_speed) {
-                    $speed_type =  explode("|", $package_speed);
-                    $speed = $speed_type[0];
-                    $type = $speed_type[1];
-                    $query->where('packages.speed', '=', $speed);
-                    $query->where('packages.type', '=', $type);
-                })
-                ->when($request->package_type, function ($query, $package_type) {
-                    $query->where('packages.type', '=', $package_type);
-                })
-                ->when($request->township, function ($query, $township) {
-                    $query->where('customers.township_id', '=', $township);
-                })
-                ->when($request->status, function ($query, $status) {
-                    $query->where('customers.status_id', '=', $status);
-                })
-                ->when($orderform, function ($query, $orderform) {
-                    $query->where('customers.order_form_sign_status', '=', $orderform['status']);
-                })
-                ->when($request->order, function ($query, $order) {
-                    $query->whereBetween('customers.order_date', $order);
-                })
-                ->when($request->installation, function ($query, $installation) {
-                    $query->whereBetween('customers.installation_date', $installation);
-                })
-
-                ->select(
-                    'invoices.id as id',
-                    'invoices.bill_id as bill_id',
-                    'invoices.start_date as start_date',
-                    'invoices.end_date as end_date',
-                    'invoices.customer_id as customer_id',
-                    'invoices.period_covered as period_covered',
-                    'invoices.bill_to as bill_to',
-                    'invoices.bill_number as bill_number',
-                    'invoices.ftth_id as ftth_id',
-                    'invoices.date_issued as date_issued',
-                    'invoices.attn as attn',
-                    'invoices.service_description as service_description',
-                    'invoices.total_payable as total_payable',
-                    'invoices.bill_year as bill_year',
-                    'invoices.bill_month as bill_month',
-                    'invoices.amount_in_word as amount_in_word',
-                    'invoices.qty as qty',
-                    'invoices.usage_day as usage_day',
-                    'invoices.usage_month as usage_month',
-                    'invoices.bonus_day as bonus_day',
-                    'invoices.bonus_month as bonus_month',
-                    'invoices.invoice_file as invoice_file',
-                    'invoices.invoice_url as invoice_url',
-                    'invoices.sent_date as sent_date',
-                    'invoices.payment_duedate as payment_duedate',
-                    'invoices.previous_balance as previous_balance',
-                    'invoices.current_charge as current_charge',
-                    'invoices.sub_total as sub_total',
-                    'invoices.normal_cost as normal_cost',
-                    'invoices.otc as otc',
-                    'invoices.type as type',
-                    'invoices.compensation as compensation',
-                    'invoices.discount as discount',
-                    'invoices.tax as tax',
-                    'invoices.public_ip as public_ip',
-                    'invoices.phone as phone',
-                    'invoices.sms_sent_status as sms_sent_status',
-                    'receipt_records.collected_currency as currency',
-                    'receipt_records.id as receipt_id',
-                    'receipt_records.receipt_number as receipt_number',
-                    'receipt_records.receipt_file as receipt_file',
-                    'receipt_records.receipt_url',
-                    'receipt_records.status as receipt_status',
-                    DB::raw('DATE_FORMAT(receipt_records.receipt_date,"%Y-%m-%d") as receipt_date'),
-                    'receipt_records.collected_person as collected_person',
-                    'receipt_records.collected_amount as collected_amount',
-                    'receipt_records.transition as transition',
-                    'receipt_records.remark as remark',
-                    'receipt_records.payment_channel as payment_channel',
-
-
-                )
-                ->orderBy('invoices.id')
-                ->paginate(10);
-            //DATE_FORMAT(date_and_time, '%Y-%m-%dT%H:%i') AS 
-            $invoices_customers = DB::table('customers')->join('invoices', 'invoices.customer_id', '=', 'customers.id')
-                ->where('invoices.bill_id', '=', $request->bill_id)
-                ->pluck('customers.id');
-            $prepaid_customers = DB::table('customers')
-                ->join('packages', 'packages.id', '=', 'customers.package_id')
-                ->join('status', 'status.id', '=', 'customers.status_id')
-                ->leftjoin('receipt_records as rr', 'customers.id', '=', 'rr.customer_id')
-                ->whereNotIn('customers.id', $invoices_customers)
-                ->where(function ($query) {
-                    return $query->where('customers.deleted', '=', 0)
-                        ->orwherenull('customers.deleted');
-                })
-                ->select('customers.*', 'customers.id as customer_id', 'packages.name as package_name', 'packages.speed as package_speed', 'packages.type as package_type', 'packages.price as package_price', 'status.name as customer_status', DB::raw('DATE_FORMAT(MAX(rr.receipt_date),"%Y-%m-%d") as rr_date'))
-                ->groupBy('customers.id')
-                ->get();
-            $current_bill = DB::table('bills')->where('id', '=', $request->bill_id)->first();
-
-            $smsgateway = SmsGateway::first();
-            $billings->appends($request->all())->links();
-            return Inertia::render('Client/BillList', [
-                'lists' => $lists,
-                'packages' => $packages,
-                'townships' => $townships,
-                'status' => $status,
-                'billings' => $billings,
-                'users' => $users,
-                'user' => $user,
-                'roles' => $roles,
-                'max_receipt' => $max_receipt,
-                'prepaid_customers' => $prepaid_customers,
-                'receivable' => $receivable,
-                'paid' => $paid,
-                'current_bill' => $current_bill,
-                'last_invoices' => $last_invoices,
-          
-                'package_type' => $package_type,
-                'smsgateway' => $smsgateway,
-            ]);
-        } else {
-
-            $lists = Bills::all();
-            $packages =  Package::orderBy('price', 'ASC')->get();
-         
-            $package_type =  Package::select('type')
-                ->groupBy('type')
-                ->orderBy('type', 'ASC')->get();
-            $townships = Township::get();
-            $status = Status::get();
-            $users = User::orderBy('name', 'ASC')->get();
-            return Inertia::render('Client/BillList', [
-                'lists' => $lists,
-                'packages' => $packages,
-                'townships' => $townships,
-                'status' => $status,
-                'users' => $users,
-                'user' => $user,
-                'roles' => $roles,
-          
-                'package_type' => $package_type,
-            ]);
+            $selectedBill = Bills::find($request->bill_id);
         }
+        $invoices = null;
+        $smsgateway = SmsGateway::first();  
+        
+        if ($request->bill_id) {
+            $invoices = Invoice::with('invoiceItem','isp','bill','receiptRecord')->where('bill_id',$request->bill_id)->paginate(20);
+            $invoices->appends($request->all())->links();
+           
+        } 
+        return Inertia::render('Client/BillList', [
+            'bills' => $bills,
+            'selectedBill' => $selectedBill,
+            'invoices' => $invoices,
+            'smsgateway'=> $smsgateway,
+            'billingTeam'=>$billingTeam
+        ]);
+    }
+    public function updateInvoice(Request $request, $id)
+    {
+    
+        $validated = $request->validate([
+            'issue_date' => 'required|date',
+            'due_date' => 'required|date',
+            'discount_amount' => 'required|numeric|min:0',
+            'tax_percent' => 'numeric|min:0',
+            'additional_description' => 'nullable|string',
+            'additional_fees' => 'numeric|min:0',
+        ]);
+
+        $invoice = Invoice::findOrFail($id);
+        
+        // Calculate sub total (MRC + Installation + Additional Fees)
+        $subTotal = $invoice->total_mrc_amount + 
+                   $invoice->total_installation_amount + 
+                   $validated['additional_fees'] - 
+                   $validated['discount_amount'];
+
+        // Calculate tax amount based on percentage
+        $taxAmount = ($subTotal * $validated['tax_percent']) / 100;
+
+        // Calculate final total amount
+        $totalAmount = $subTotal + $taxAmount;
+
+        // Merge calculated values with validated data
+        $updateData = array_merge($validated, [
+            'sub_total' => $subTotal,
+            'tax_amount' => $taxAmount,
+            'total_amount' => $totalAmount
+        ]);
+
+        $invoice->update($updateData);
+        if($invoice->receipt_id){
+           // ReceiptRecord::find($invoice->receipt_id)->delete();
+            $invoice->receipt_id = null;
+            $invoice->payment_status = "Pending";
+            $invoice->save();
+        }
+     
+        return redirect()->back()->with('message', 'Invoice updated successfully');
+    }
+    public function viewInvoiceDetails($id, Request $request)
+    {   
+        $invoiceItems = InvoiceItem::with(['customer', 'invoice.isp', 'invoice.bill'])
+            ->where('invoice_id', $id)
+            ->paginate(10);
+        $invoices  = DB::table('invoice_items AS tii')
+            ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
+            ->join('packages AS p', 'c.package_id', '=', 'p.id')
+            ->selectRaw("
+                CASE 
+                    WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
+                    WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
+                    WHEN tii.type LIKE '%Installation%' THEN 
+                        CONCAT('New Installation for ', p.installation_timeline, ' hour')
+                    ELSE 'Other'
+                END AS category,
+                MIN(
+                    CASE 
+                     WHEN tii.type LIKE '%ProRated%' THEN 0
+                        WHEN tii.type LIKE '%Recurring%' THEN p.price
+                        WHEN tii.type LIKE '%Installation%' THEN p.otc 
+                        ELSE p.price 
+                    END
+                ) AS unit_price,
+                COUNT(*) AS total_customers,
+                SUM(tii.total_amount) AS total_amount
+            ")
+            ->where('tii.invoice_id', $id)
+            ->groupBy('category')
+            ->get();
+        $invoiceItems->appends($request->all())->links();
+        return Inertia::render('Client/InvoiceDetails', [
+            'invoiceItems' => $invoiceItems,
+            'invoices'=> $invoices
+        ]);
+    }
+    public function updateInvoiceItem(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'unit_price' => 'required|numeric',
+            'total_amount' => 'required|numeric',
+        ]);
+
+        $invoiceItem = TempInvoiceItem::findOrFail($id);
+        $invoiceItem->update($validated);
+
+        // Update invoice totals
+        $invoice = $invoiceItem->tempInvoice;
+        $totalMRC = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->sum('total_amount');
+        $totalMRCCustomer = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->count();
+        $totalInstallation = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->sum('total_amount');
+        $totalInstallationCustomer = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->count();
+
+       
+
+        // Calculate sub total (MRC + Installation + Additional Fees)
+        $subTotal = $totalMRC + $totalInstallation + ($invoice->additional_fees ?? 0);
+
+        // Calculate discount amount from sub total
+        $discountAmount = $invoice->discount_amount;
+
+        // Calculate gross total after discount
+        $grossTotal = $subTotal - $discountAmount;
+
+        // Calculate tax amount based on discounted total
+        $taxAmount = ($grossTotal * ($invoice->tax_percent ?? 0)) / 100;
+
+        // Calculate final total (gross + tax)
+        $finalTotal = $grossTotal + $taxAmount;
+
+        $invoice->update([
+            'total_mrc_amount' => $totalMRC,
+            'total_installation_amount' => $totalInstallation,
+            'total_mrc_customer' => $totalMRCCustomer,
+            'total_new_customer' => $totalInstallationCustomer,
+            'sub_total' => $subTotal,
+            'tax_amount' => $taxAmount,
+            'total_amount' => $finalTotal
+        ]);
+
+        return redirect()->back()->with('message', 'Invoice Updated successfully');
+    }
+    public function destroyInvoiceItem($id)
+    {
+        $invoiceItem = TempInvoiceItem::findOrFail($id);
+        $invoice = $invoiceItem->tempInvoice;
+        
+        $invoiceItem->delete();
+       
+        // Recalculate invoice totals
+        $totalMRC = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->sum('total_amount');
+        $totalMRCCustomer = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->count();
+        $totalInstallation = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->sum('total_amount');
+        $totalInstallationCustomer = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->count();
+
+        // Calculate sub total (MRC + Installation + Additional Fees)
+        $subTotal = $totalMRC + $totalInstallation + ($invoice->additional_fees ?? 0);
+
+        // Calculate discount amount from sub total
+        $discountAmount = $invoice->discount_amount;
+
+        // Calculate gross total after discount
+        $grossTotal = $subTotal - $discountAmount;
+
+        // Calculate tax amount based on discounted total
+        $taxAmount = ($grossTotal * ($invoice->tax_percent ?? 0)) / 100;
+
+        // Calculate final total (gross + tax)
+        $finalTotal = $grossTotal + $taxAmount;
+
+        $invoice->update([
+            'total_mrc_amount' => $totalMRC,
+            'total_installation_amount' => $totalInstallation,
+            'total_mrc_customer' => $totalMRCCustomer,
+            'total_new_customer' => $totalInstallationCustomer,
+            'sub_total' => $subTotal,
+            'tax_amount' => $taxAmount,
+            'total_amount' => $finalTotal
+        ]);
+
+        return redirect()->back()->with('message', 'Invoice item deleted successfully');
     }
     public function makeSinglePDF(Request $request)
     {
-
-        $invoice = Invoice::join('customers', 'invoices.customer_id', 'customers.id')
-            ->join('packages', 'customers.package_id', 'packages.id')
-            ->where('invoices.id', '=', $request->id)
-            ->select('invoices.*', 'packages.type as service_type')
-            ->first();
+       
+        $invoice = Invoice::with('isp','bill','receiptRecord')->find($request->id);
+        $invoiceItems  = DB::table('invoice_items AS tii')
+        ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
+        ->join('packages AS p', 'c.package_id', '=', 'p.id')
+        ->selectRaw("
+            CASE 
+                WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
+                WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
+                WHEN tii.type LIKE '%Installation%' THEN 
+                    CONCAT('New Installation for ', p.installation_timeline, ' hour')
+                ELSE 'Other'
+            END AS category,
+            MIN(
+                CASE 
+                    WHEN tii.type LIKE '%ProRated%' THEN 0
+                    WHEN tii.type LIKE '%Installation%' THEN p.otc 
+                    ELSE p.price 
+                END
+            ) AS unit_price,
+            COUNT(*) AS total_customers,
+            SUM(tii.total_amount) AS total_amount
+        ")
+        ->where('tii.invoice_id', $request->id)
+        ->orderBy('category')
+        ->groupBy('category')
+        ->get();
+      
+        
         $options = [
             'format' => 'A4',
             'default_font_size' => '11',
-            'orientation'   => 'P',
-            'encoding'      => 'UTF-8',
-            'margin_top'  => 45,
-            'title' => $invoice->ftth_id,
+            'orientation' => 'P',
+            'encoding' => 'UTF-8',
+            'margin_top' => 0,
+            'margin_bottom' => 45,  // Ensure bottom margin is enough
+            'margin_footer' => 0,
+            'title' => $invoice->isp->name,
+            'setAutoBottomMargin' => 'stretch', 
         ];
-        $name = date("ymdHis") . '-' . $invoice->bill_number . ".pdf";
-        $path = $invoice->ftth_id . '/' . $name;
-        $pdf = $this->createPDF($options, 'invoice', $invoice, $name, $path);
-        $invoice_no = "INV" . substr($invoice->bill_number, 0, 4) . str_pad($invoice->invoice_number, 5, "0", STR_PAD_LEFT);
+
+        $name = date("ymdHis") . '-' . $invoice->bill->bill_number . ".pdf";
+        $path = $invoice->isp->name . '/' . $name;
+        $pdf = $this->createPDF($options, 'pdf.invoice', [
+            'invoiceItems' => $invoiceItems,
+            'invoice' => $invoice
+        ], $name, $path);
+        $invoice_no = $invoice->invoice_number;
         if ($pdf['status'] == 'success') {
 
             // Successfully stored. Return the full path.
             $invoice->invoice_file =  $pdf['disk_path'];
             $invoice->invoice_url = $pdf['shortURL'];
+ 
             $invoice->update();
             activity()
                 ->causedBy(User::find(Auth::id()))
                 ->performedOn($invoice)
-                ->log('Create Single PDF for' . $invoice->ftth_id . ', Invoice ID : ' .  $invoice_no);
+                ->log('Create Single PDF for' . $invoice->isp->name . ', Invoice ID : ' .  $invoice_no);
             return redirect()->back()->with('message', 'PDF Generated Successfully.');
         }
 

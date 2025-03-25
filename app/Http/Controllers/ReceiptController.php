@@ -93,59 +93,59 @@ class ReceiptController extends Controller
             'id' => 'required|max:255', //invoice_id
             'bill_id' => 'required|max:255', //bill_id
             'bill_number' => 'required|max:255',
-            'customer_id' => 'required|max:255',
+            'isp_id' => 'required|max:255',
             'type' => 'required', //cash or kbz pay etc..
             'currency' => 'required|max:255',
             'extra_amount' => 'required|max:255',
-            'bill_month' => 'required', // month
-            'bill_year' => 'required', // year
+            'billing_period' => 'required', // month
             'receipt_date' => 'required', // year
             'collected_amount' => 'required', // year
+            'user' =>'required',
 
         ])->validate();
+        $invoice = Invoice::query()
+        ->with('isp')
+        ->find($request->id);
+        if(!$invoice){
+            return redirect()->back()->with('error', 'Invoice not found.'); 
+        }
         if ($request) {
-            $max_receipt_id =  DB::table('receipt_records')
-                ->where('receipt_records.bill_id', '=', $request->bill_id)
-                ->select(DB::raw('max(CONVERT(receipt_records.receipt_number,UNSIGNED INTEGER)) as max_receipt_number'))
-                ->first();
-
+       
+            $receiptNumber = 'RCP_'.$request->bill_number.'_'.ReceiptRecord::generateReceiptNumber($request->bill_id);
+            $invoice = Invoice::query()
+                        ->with('isp')
+                        ->find($request->id);
             $receipt = new ReceiptRecord();
-            $receipt->customer_id = $request->customer_id;
-            $receipt->receipt_number = ($max_receipt_id) ? ($max_receipt_id->max_receipt_number + 1) : 1;
+            $receipt->isp_id = $request->isp_id;
+            $receipt->receipt_number = $receiptNumber;
             $receipt->bill_id = $request->bill_id;
-            $receipt->bill_no = $request->bill_number;
-            $receipt->invoice_id = $request->id;
-            $receipt->month = $request->bill_month;
-            $receipt->year = $request->bill_year;
             $receipt->transition = $request->transition;
             $receipt->receipt_person = Auth::user()->id;
-            $receipt->payment_channel = ($request->type) ? implode(', ', $request->type) : null;
+            $receipt->payment_channel = $request->type;
             $receipt->collected_currency = $request->currency;
-
             $receipt->collected_amount = $request->collected_amount;
             if ($request->user)
-                $receipt->collected_person = $request->user['id'];
+            $receipt->collected_person = $request->user['id'];
             $receipt->receipt_date = $request->receipt_date;
-
-            $receipt->issue_amount = $request->total_payable;
+            $receipt->issue_amount = $invoice->total_amount;
             $receipt->remark = $request->remark;
 
             if ($request->collected_amount == 0) {
                 $receipt->status = "outstanding";
             } else {
                 //'outstanding','full_paid','over_paid','under_paid','no_invoice'
-                if ($request->total_payable == $request->collected_amount)
+                if ($invoice->total_amount == $request->collected_amount)
                     $receipt->status = "full_paid";
-                if ($request->total_payable < $request->collected_amount)
+                if ($invoice->total_amount < $request->collected_amount)
                     $receipt->status = "over_paid";
-                if ($request->total_payable > $request->collected_amount)
+                if ($invoice->total_amount > $request->collected_amount)
                     $receipt->status = "under_paid";
             }
             $receipt->save();
-            $this->ReceiptPaid($receipt->id, $request->customer_id);
-            //$this->updateRRS($request->id, $request->customer_id, $request->bill_month, $request->bill_year);
-            //$this->runReceiptSummery();
-
+            $invoice->receipt_id = $receipt->id;
+            $invoice->payment_status = ( $invoice->total_amount == $request->collected_amount)?'Paid':'Partially Paid';
+            $invoice->update();
+           
             $changes = $receipt->getChanges();    // Get the updated values after the update
 
             $logData = [];
@@ -154,14 +154,14 @@ class ReceiptController extends Controller
                     'to' => $newValue                   // New value
                 ];
             }
-            $invoice = Invoice::find($receipt->invoice_id);
-            $invoice_no = "INV" . substr($invoice->bill_number, 0, 4) . str_pad($invoice->invoice_number, 5, "0", STR_PAD_LEFT);
+            
+         
 
             activity()
             ->causedBy(User::find(Auth::id()))
             ->performedOn($receipt)
             ->withProperties(['changes' => $logData])  // Log the changes with from-to values
-            ->log('Bill Receipt. Customer ID: ' . $invoice->ftth_id . ', Invoice No. : ' . $invoice_no);
+            ->log('Bill Receipt. ISP: ' . $invoice->isp->name . ', Invoice No. : ' . $invoice->invoice_number);
         }
 
         // {"id":2,"customer_id":5,"period_covered":"2021-10-01 to 2021-10-31","bill_number":"2110-A0006-FTTH","ftth_id":"A0006-190425-TCL-FTTH","date_issued":"2021-11-09","bill_to":"Sar Pay Law Ka","attn":"Shop 4, The Central Boulevard, Kabar Aye Pagoda Road, Yangon","previous_balance":"0","current_charge":"46900","compensation":"0","otc":"0","sub_total":"46900","payment_duedate":"2021-11-16","service_description":"Business Fiber","qty":"10 Mbps","usage_days":"1 Month","normal_cost":"46900","total_payable":"46900","discount":"0","email":null,"phone":"959515313","bill_year":"2021","bill_month":"10","device_rental_amount":null,"device_rental_price":null,"device_rental_qty":0,"product_id_amount":null,"product_id_price":null,"product_id_qty":0,"foc_amount":null,"foc_price":null,"foc_qty":0,"setup_fees_amount":null,"setup_fees_price":null,"setup_fees_qty":0,"lan_amount":null,"lan_price":null,"lan_qty":0,"device_amount":null,"device_price":null,"device_name_qty":0,"commercial_tax":5,"final_payment":null,"amount_in_word":"Amount in words: Forty-six Thousand Nine Hundred Kyats Only","user":null,"type":"cash","currency":"mmk","collected_amount":"46900","extra_amount":0,"customer_status":"Suspend"}
@@ -251,42 +251,77 @@ class ReceiptController extends Controller
     // }
     public function makeReceiptPDF(Request $request)
     {
+        $receipt = ReceiptRecord::query()
+        ->find($request->id);
+        if(!$receipt){
+            return redirect()->back()->with('error', 'Receipt not found.'); 
+        }
+        $invoice = Invoice::query()->with('isp','bill','receiptRecord','receiptRecord.collectedPerson')->where('invoices.receipt_id',$request->id)->first();
 
-        // $receipt =  ReceiptRecord::join('invoices', 'receipt_records.invoice_id', '=', 'invoices.id')
-        // ->leftjoin('users', 'users.id', '=', 'receipt_records.receipt_person')
-        // ->join('customers', 'receipt_records.customer_id', 'customers.id')
-        // ->join('packages', 'customers.package_id', 'packages.id')
-        // ->where('receipt_records.id', '=', $request->id)
-        // ->select('invoices.*', 'packages.type as service_type','receipt_records.id', 'receipt_records.remark as remark', 'receipt_records.collected_amount as collected_amount', 'receipt_records.receipt_date as receipt_date', 'receipt_records.receipt_number as receipt_number','receipt_records.receipt_file','receipt_records.receipt_url' ,'users.name as collector')
-        // ->first();
-        $receipt = ReceiptRecord::where('receipt_records.id', '=', $request->id)
-            ->join('invoices', 'invoices.id', '=', 'receipt_records.invoice_id')
-            ->select('invoices.*', 'receipt_records.*', DB::raw('DATE_FORMAT(receipt_records.receipt_date,"%Y-%m-%d") as receipt_date_2'))
-            ->first();
+        $invoiceItems  = DB::table('invoice_items AS tii')
+        ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
+        ->join('packages AS p', 'c.package_id', '=', 'p.id')
+        ->selectRaw("
+            CASE 
+                WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
+                WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
+                WHEN tii.type LIKE '%Installation%' THEN 
+                    CONCAT('New Installation for ', p.installation_timeline, ' hour')
+                ELSE 'Other'
+            END AS category,
+            MIN(
+                CASE 
+                    WHEN tii.type LIKE '%ProRated%' THEN 0
+                    WHEN tii.type LIKE '%Installation%' THEN p.otc 
+                    ELSE p.price 
+                END
+            ) AS unit_price,
+            COUNT(*) AS total_customers,
+            SUM(tii.total_amount) AS total_amount
+        ")
+        ->where('tii.invoice_id', $invoice->id)
+        ->orderBy('category')
+        ->groupBy('category')
+        ->get();
         $options = [
+            'format' => 'A4',
             'default_font_size' => '11',
-            'orientation'   => 'P',
-            'encoding'      => 'UTF-8',
-            'margin_top'  => 45,
-            'margin_bottom'  => 1,
-            'title' => $receipt->ftth_id,
+            'orientation' => 'P',
+            'encoding' => 'UTF-8',
+            'margin_top' => 0,
+            'margin_bottom' => 45,  // Ensure bottom margin is enough
+            'margin_footer' => 0,
+            'title' => $invoice->isp->name,
+            'setAutoBottomMargin' => 'stretch', 
         ];
 
-        // dd($invoice);
-
-        $name = date("ymdHis") . '-R' . $receipt->bill_number . ".pdf";
-        $path = $receipt->ftth_id . '/' . $name;
-        $pdf = $this->createPDF($options, 'receipt', $receipt, $name, $path);
+        $name = date("ymdHis") . '-' . $invoice->receiptRecord->receipt_number . ".pdf";
+        $path = $invoice->isp->name . '/' . $name;
+        $pdf = $this->createPDF($options, 'pdf.receipt', [
+            'invoiceItems' => $invoiceItems,
+            'receipt' => $invoice
+        ], $name, $path);
+      
         if ($pdf['status'] == 'success') {
+          
             // Successfully stored. Return the full path.
             $receipt->receipt_file =  $pdf['disk_path'];
             $receipt->receipt_url = $pdf['shortURL'];
+ 
             $receipt->update();
+            activity()
+                ->causedBy(User::find(Auth::id()))
+                ->performedOn($receipt)
+                ->log('Create Single PDF for' . $invoice->isp->name . ', Receipt ID : ' .  $receipt->receipt_number);
+            return redirect()->back()->with('message', 'Receipt PDF Generated Successfully.');
         }
 
-
+        activity()
+            ->causedBy(User::find(Auth::id()))
+            ->performedOn($receipt)
+            ->log('Single PDF Creation Failed for ' . $invoice->isp->name . ', Receipt ID : ' .  $receipt->receipt_number);
         // download PDF file with download method
-        return redirect()->back()->with('message', 'Receipt PDF Generated Successfully.');
+        return redirect()->back()->with('message', 'Receipt PDF Generation Fails.');
     }
     public function ReceiptPaid($receipt_id, $customer_id)
     {

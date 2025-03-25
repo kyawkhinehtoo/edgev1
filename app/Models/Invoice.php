@@ -15,52 +15,71 @@ class Invoice extends Model
      * @var array
      */
     protected $fillable = [
-        'period_covered',
-        'bill_number',
-        'customer_id',
+        'bill_id',
+        'receipt_id',
         'invoice_number',
-        'ftth_id',
-        'date_issued',
-        'bill_to',
-        'attn',
-        'previous_balance',
-        'current_charge',
-        'compensation',
-        'otc',
+        'isp_id',
+        'issue_date',
+        'due_date',
+        'total_mrc_amount',
+        'total_installation_amount',
+        'total_mrc_customer',
+        'total_new_customer',
+        'additional_description',
+        'additional_fees',
+        'discount_amount',
         'sub_total',
-        'payment_duedate',
-        'service_description',
-        'qty',
-        'usage_days',
-        'customer_status',
-        'normal_cost',
-        'type',
-        'total_payable',
-        'discount',
-        'amount_in_word',
-        'commercial_tax',
-        'tax',
-        'public_ip',
-        'email',
-        'phone',
-        'sent_date',
-        'mail_sent_status',
-        'sms_sent_status',
+        'tax_amount',
+        'tax_percent',
+        'total_amount',
+        'payment_status',
+        'sms_status',
+        'email_status',
+        'sms_date',
+        'email_date',
         'invoice_file',
         'invoice_url',
-        'bill_month',
-        'bill_year',
-        'reminder_sms_sent_status',
-        'reminder_sms_sent_date',
-        'popsite_id',
-        'start_date',
-        'end_date',
-        'usage_day',
-        'usage_month',
-        'bonus_day',
-        'bonus_month',
         'created_at',
         'updated_at'
-
     ];
+
+    protected $casts = [
+        'sms_date' => 'datetime',
+        'email_date' => 'datetime',
+        
+    ];
+
+    public static function generateInvoiceNumber($bill_id)
+    {
+        // Get the last invoice for the given billing month
+        $latestInvoice = self::where('bill_id', $bill_id)
+                             ->orderBy('id', 'desc')
+                             ->first();
+    
+        // Extract last sequence number and increment
+        $lastNumber = $latestInvoice ? intval(substr($latestInvoice->invoice_number, -3)) : 0;
+        $newSequence = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+    
+        // Generate invoice number format
+        return $newSequence;
+    }
+    
+    public function bill()
+    {
+        return $this->belongsTo(Bills::class, 'bill_id');
+    }
+
+    public function isp()
+    {
+        return $this->belongsTo(Isp::class, 'isp_id');
+    }
+
+    public function invoiceItem()
+    {
+        return $this->hasMany(invoiceItem::class, 'invoice_id');
+    }
+    public function receiptRecord()
+    {
+        return $this->belongsTo(ReceiptRecord::class, 'receipt_id');
+    }
 }

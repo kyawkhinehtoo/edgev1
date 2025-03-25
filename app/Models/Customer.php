@@ -27,7 +27,6 @@ class Customer extends Model
      */
     protected $fillable = [
         'ftth_id',
-        'installation_timeline',
         'name',
         'phone_1',
         'address',
@@ -86,14 +85,16 @@ class Customer extends Model
         'prefer_install_date' => 'datetime:Y-m-d',
         'installation_date' => 'datetime:Y-m-d',
         'installation_reappointment_date' => 'datetime:Y-m-d',
-        'subcom_assign_date' => 'datetime:Y-m-d',
+        'subcom_assign_date' => 'datetime:Y-m-d H:i:s',
         'way_list_date' => 'datetime:Y-m-d',
+        'service_termination_date' => 'datetime:Y-m-d',
     ];
 
     protected $dates = [
         'order_date',
         'installation_date',
         'prefer_install_date',
+        'service_termination_date',
         'created_at',
         'updated_at'
     ];
@@ -225,7 +226,8 @@ class Customer extends Model
         'start_meter_image',
         'end_meter_image',
         'subcom_assign_date',
-        'installation_reappointment_date'
+        'installation_reappointment_date',
+        'service_termination_date',
     ];
         
         foreach ($columns as $key => $value) {

@@ -116,22 +116,43 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-               
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Date</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assign Date</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prefer Date</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Package</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Township</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Installation Status</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th @click="sortBy('ftth_id')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  ID <i :class="getSortIcon('ftth_id')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('order_date')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Order Date <i :class="getSortIcon('order_date')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('subcom_assign_date')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Assign Date <i :class="getSortIcon('subcom_assign_date')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('prefer_install_date')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Prefer Date <i :class="getSortIcon('prefer_install_date')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('way_list_date')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  WayList Date <i :class="getSortIcon('way_list_date')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('name')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Name <i :class="getSortIcon('name')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('package')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Package <i :class="getSortIcon('package')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('township')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Township <i :class="getSortIcon('township')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('installation_status')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Installation Status <i :class="getSortIcon('installation_status')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('status')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Status <i :class="getSortIcon('status')" class="fas fa-sort ml-1"></i>
+                </th>
                 <th class="px-3 py-3">
                   <a @click="goAll" class="cursor-pointer text-gray-200 hover:text-gray-500">
                     <i class="fas fa-undo"></i>
                   </a>
                 </th>
               </tr>
+             
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="row in customers.data" :key="row.id" :class="getRowClass(row)">
@@ -140,6 +161,7 @@
                 <td class="px-3 py-3 text-xs font-medium">{{ row.order_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.subcom_assign_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.prefer_install_date }}</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.way_list_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.package.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.township.name }}</td>
@@ -255,6 +277,32 @@ export default {
       // Define row colors based on row properties (e.g., row.color or row.status)
       return row.status.color ? `text-${row.status.color}` : "";
     };
+    const currentSort = ref('');
+    const currentSortDir = ref('asc');
+
+    const sortBy = (field) => {
+      if (currentSort.value === field) {
+        currentSortDir.value = currentSortDir.value === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSort.value = field;
+        currentSortDir.value = 'asc';
+      }
+      
+      router.post("/customer/search", { 
+        sort: field,
+        direction: currentSortDir.value 
+      }, { 
+        preserveState: true 
+      });
+    };
+
+    const getSortIcon = (field) => {
+      if (currentSort.value === field) {
+        return currentSortDir.value === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+      }
+      return 'fa-sort';
+    };
+
     return {
       search,
       show_search,
@@ -265,6 +313,8 @@ export default {
       goAll,
       deleteRow,
       getRowClass,
+      sortBy,
+      getSortIcon,
     };
   },
 };

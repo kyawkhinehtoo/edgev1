@@ -182,30 +182,10 @@
                           Installation Timeline
                         </label>
                         <div class="mt-1 p-2 space-x-2 inline-flex">
-                          <div class="flex items-center">
-                            <input type="radio" 
-                                   id="24hours" 
-                                   name="installation_timeline" 
-                                   value="24" 
-                                   v-model="form.installation_timeline"
-                                   class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                   :disabled="checkPerm('installation_timeline')" />
-                            <label for="24hours" class="ml-2 text-sm text-gray-700">24 Hours</label>
-                          </div>
-                          <div class="flex items-center">
-                            <input type="radio" 
-                                   id="48hours" 
-                                   name="installation_timeline" 
-                                   value="48" 
-                                   v-model="form.installation_timeline"
-                                   class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                                   :disabled="checkPerm('installation_timeline')" />
-                            <label for="48hours" class="ml-2 text-sm text-gray-700">48 Hours</label>
-                          </div>
+                         {{ form.package?.installation_timeline }} {{form.package?' Hours':''}}
+                          
                         </div>
-                        <p v-show="$page.props.errors.installation_timeline" class="mt-2 text-sm text-red-500">
-                          {{ $page.props.errors.installation_timeline }}
-                        </p>
+                        
                       </div>
                       <div class="col-span-1 sm:col-span-1">
                         <label for="prefer_install_date" class="block text-sm font-medium text-gray-700"><span
@@ -691,7 +671,7 @@
                       Location – {{ form.latitude }},{{ form.longitude }} <br />
                       Applied Mbps – {{ form.package.name }} ({{ form.package.speed }}
                       Mbps)<br />
-                      Installation Timeline – {{ form.installation_timeline }} Hrs<br />
+                      Installation Timeline – {{ form.package?.installation_timeline }} Hrs<br />
                       Preferred installation date & time – {{ form.prefer_install_date }}<br />
                       <span v-if="form.order_remark">Order Remark : {{ form.order_remark }}</span>
                       <hr />
@@ -849,7 +829,7 @@ export default {
       start_meter_image: props.customer.start_meter_image,
       end_meter_txt: props.customer.end_meter_txt,
       end_meter_image: props.customer.end_meter_image,
-      installation_timeline: props.customer.installation_timeline,
+  
     });
 
     function submit() {
@@ -1165,7 +1145,7 @@ export default {
         gponInfo.value = `${dnInfo.value}`;
       }
       if (gponInfo.value && props.customer.gpon_ontid) {
-        gponInfo.value += '/' + gponOnuIdOptions.value.filter((d) => d.name == props.customer.gpon_ontid)[0].name;
+        gponInfo.value += '/' + props.customer.gpon_ontid;
       }
    
       if (props.customer.bundle) {
@@ -1186,7 +1166,7 @@ export default {
         form.bundles = bundleLists;
       }
       if (props.customer.splitter_no) {
-        form.splitter_no = snPortNoOptions.value.filter((d) => d.id == props.customer.splitter_no)[0];
+        form.splitter_no = snPortNoOptions.value.filter((d) => d.name == props.customer.splitter_no)[0];
         snPort.value = form.splitter_no.name;
       }
       if (props.customer.gpon_ontid) {

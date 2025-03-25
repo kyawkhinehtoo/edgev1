@@ -82,7 +82,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::resource('isps', IspController::class);
 	Route::get('/isps/{isp}', [IspController::class, 'show'])->name('isps.show');
 	Route::resource('zone', ZoneController::class);
-
+	
 });
 
 
@@ -124,12 +124,15 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	//SNReport
 	Route::get('/dnSnReport',[ReportController::class,'dnSNReport'])->name('dnSnReport');
 	Route::post('/dnSnReport',[ReportController::class,'dnSNReport']);
+	Route::post('/exportExcel',[ExcelController::class,'exportExcel'])->name('exportExcel');
+
+	Route::get('/home', [HomeController::class, 'index'])->name('home');
 	});
 
 
 	Route::group(['middleware'=>['auth','user.type:internal']],function(){
     Route::get('importExportView',[ExcelController::class,'importExportView'])->name('importExportView');
-    Route::post('/exportExcel',[ExcelController::class,'exportExcel'])->name('exportExcel');
+
 	Route::post('importExcel',[ExcelController::class,'importExcel'])->name('importExcel');
 	Route::post('updateExcel',[ExcelController::class,'updateExcel'])->name('updateExcel');
 
@@ -175,6 +178,8 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::post('updateCustomer',[ExcelController::class,'updateCustomer'])->name('updateCustomer');
 	Route::post('/exportBillingExcel',[ExcelController::class,'exportBillingExcel'])->name('exportBillingExcel');
 	Route::post('/exportTempBillingExcel',[ExcelController::class,'exportTempBillingExcel'])->name('exportTempBillingExcel');
+	Route::post('/exportTempBillingItemExcel',[ExcelController::class,'exportTempBillingItemExcel'])->name('exportTempBillingItemExcel');
+	Route::post('/exportBillingItemExcel',[ExcelController::class,'exportBillingItemExcel'])->name('exportBillingItemExcel');
 	Route::post('/exportRevenue',[ExcelController::class,'exportRevenue'])->name('exportRevenue');
 	Route::get('/billGenerator',[BillingController::class,'BillGenerator'])->name('billGenerator');
 	Route::post('/updateTemp',[BillingController::class,'updateTemp'])->name('updateTemp');
@@ -185,7 +190,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::post('/doGenerate',[BillingController::class,'doGenerate']);
 	Route::post('/saveFinal',[BillingController::class,'saveFinal']);
 	//Route::post('/showbill',[BillingController::class,'showBill'])->name('showbill');
-	Route::get('/showbill',[BillingController::class,'showBill'])->name('showbill');
+	
 
 	Route::get('/tempBilling',[BillingController::class,'goTemp'])->name('tempBilling');
 	Route::post('/tempBilling/search/',[BillingController::class,'goTemp']);
@@ -295,8 +300,18 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::get('/getPOPsByTownship/{township}', [PopController::class, 'getPOPsByTownship']);
 
 	Route::get('/s/{shortURLKey}', '\AshAllenDesign\ShortURL\Controllers\ShortURLController');
+	Route::get('/temp-invoice/{id}', [BillingController::class, 'viewTempInvoiceDetails'])->name('tempInvoice.details');
+	Route::put('/temp-invoice-items/{id}', [BillingController::class, 'updateTempInvoiceItem'])->name('tempInvoiceItems.update');
+	Route::delete('/temp-invoice-items/{id}', [BillingController::class, 'destroyTempInvoiceItem'])->name('tempInvoiceItems.destroy');
+	Route::put('/temp-invoices/{id}', [BillingController::class, 'updateTempInvoice'])->name('tempInvoice.update');
 
+	Route::get('/invoice/{id}', [BillingController::class, 'viewInvoiceDetails'])->name('invoice.details');
+	Route::put('/invoice-items/{id}', [BillingController::class, 'updateInvoiceItem'])->name('invoiceItems.update');
+	Route::delete('/invoice-items/{id}', [BillingController::class, 'destroyInvoiceItem'])->name('invoiceItems.destroy');
+	Route::put('/invoices/{id}', [BillingController::class, 'updateInvoice'])->name('invoice.update');
 
+	Route::get('/showbill', [BillingController::class, 'showBill'])->name('showbill');
+	Route::post('/showbill', [BillingController::class, 'showBill'])->name('showbill.show');
 });
 // Replace this line:
 Route::middleware(['auth:sanctum', 'verified'])->get('/home', function () {
@@ -304,5 +319,7 @@ Route::middleware(['auth:sanctum', 'verified'])->get('/home', function () {
 })->name('home');
 
 // With this:
-Route::middleware(['auth:sanctum', 'verified'])->get('/home', [HomeController::class, 'index'])->name('home');
+
+
+
 

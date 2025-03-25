@@ -32,10 +32,14 @@
                 </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Package Name</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  v-if="radius_services != null">Radius Package</th>
+                
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Service Type</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Instllation Timeline</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  OTC
+                </th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   MRC
                 </th>
@@ -50,9 +54,13 @@
                 <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap">{{ packages.from + index }}</td>
                 <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap">{{ row.name }}</td>
                 <!-- <td class="px-6 py-3  text-left text-sm font-medium whitespace-nowrap"><Bundle :data="row.id" :key="form.componentKey" /></td> -->
-                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase"
-                  v-if="radius_services != null">{{ getRadiusPackage(row.id) }}</td>
+
+                
                 <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.type }}</td>
+                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.installation_timeline }} Hours</td>
+                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.otc }}  <span
+                  class="uppercase">{{ row.currency }}</span>  </td>
+
                 <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.price }} <span
                     class="uppercase">{{ row.currency }}</span> </td>
                 <td class="px-6 py-3  text-left text-md font-medium  whitespace-nowrap">{{ row.contract_period }} Months
@@ -106,9 +114,20 @@
                                   value="mmk" /><span class="ml-2 text-gray-700 text-sm">MMK</span> </label>
                             </div>
                           </div>
-                          <div class="py-2 grid md:grid-cols-2 gap-4">
+                          <div class="py-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="col-span-1">
-                              <label for="price" class="block text-md font-medium text-gray-700"> Package Price </label>
+                              <label for="otc" class="block text-md font-medium text-gray-700"> OTC Price </label>
+                              <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="text" v-model="form.otc" name="otc" id="otc"
+                                  class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
+                                  placeholder="OTC Cost" required />
+                                <span
+                                  class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm uppercase">
+                                  {{ form.currency }} </span>
+                              </div>
+                            </div>
+                            <div class="col-span-1">
+                              <label for="price" class="block text-md font-medium text-gray-700"> MRC Price </label>
                               <div class="mt-1 flex rounded-md shadow-sm">
                                 <input type="text" v-model="form.price" name="price" id="price"
                                   class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
@@ -119,7 +138,7 @@
                               </div>
                             </div>
                             <div class="col-span-1">
-                              <label for="speed" class="block text-md font-medium text-gray-700"> Max Bandwidth </label>
+                              <label for="speed" class="block text-md font-medium text-gray-700"> Max Allow Bandwidth </label>
                               <div class="mt-1 flex rounded-md shadow-sm">
                                 <input type="text" name="speed" v-model="form.speed" id="speed"
                                   class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
@@ -129,7 +148,23 @@
                                   Mbps </span>
                               </div>
                             </div>
-
+                            <div class="col-span-1 sm:col-span-1">
+                            
+                              <label for="installation_timeline" class="block text-md font-medium text-gray-700"> Installation Timeline </label>
+                              <div class="mt-1 flex">
+                                <label class="flex-auto items-center mt-3"> <input type="radio"
+                                    class="form-radio h-5 w-5 text-blue-600" name="installation_timeline" v-model="form.installation_timeline"
+                                    value="24" /><span class="ml-2 text-gray-700">24 Hours</span> </label>
+                                <label class="flex-auto items-center mt-3"> <input type="radio"
+                                    class="form-radio h-5 w-5 text-green-600" name="installation_timeline" v-model="form.installation_timeline"
+                                    value="48" /><span class="ml-2 text-gray-700">48 Hours</span> </label>
+                           
+                                
+                              </div>
+                              <p v-show="$page.props.errors.installation_timeline" class="mt-2 text-sm text-red-500">
+                                {{ $page.props.errors.installation_timeline }}
+                              </p>
+                            </div>
                           </div>
 
                        
@@ -332,8 +367,10 @@ export default {
 
     function resetForm() {
       form.name = null;
+      form.otc = null;
       form.price = null;
       form.speed = null;
+      form.installation_timeline = 48;
       form.currency = "mmk";
       form.contract_period = 1;
       form.package_id = null;
@@ -386,8 +423,10 @@ export default {
     function edit(data) {
       form.id = data.id;
       form.name = data.name;
+      form.otc = data.otc;
       form.price = data.price;
       form.speed = data.speed;
+      form.installation_timeline = data.installation_timeline;
       form.currency = data.currency;
       form.contract_period = data.contract_period;
       form.package_id = data.package_id;

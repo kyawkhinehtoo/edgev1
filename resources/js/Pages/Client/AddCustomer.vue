@@ -163,30 +163,9 @@
                       Installation Timeline
                     </label>
                     <div class="mt-1 p-2 space-x-2 inline-flex">
-                      <div class="flex items-center">
-                        <input type="radio" 
-                               id="24hours" 
-                               name="installation_timeline" 
-                               value="24" 
-                               v-model="form.installation_timeline"
-                               class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                               :disabled="checkPerm('installation_timeline')" />
-                        <label for="24hours" class="ml-2 text-sm text-gray-700">24 Hours</label>
-                      </div>
-                      <div class="flex items-center">
-                        <input type="radio" 
-                               id="48hours" 
-                               name="installation_timeline" 
-                               value="48" 
-                               v-model="form.installation_timeline"
-                               class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                               :disabled="checkPerm('installation_timeline')" />
-                        <label for="48hours" class="ml-2 text-sm text-gray-700">48 Hours</label>
-                      </div>
+                        {{ form.package?.installation_timeline }} {{form.package?' Hours':''}}
                     </div>
-                    <p v-show="$page.props.errors.installation_timeline" class="mt-2 text-sm text-red-500">
-                      {{ $page.props.errors.installation_timeline }}
-                    </p>
+                    
                   </div>
                   <div class="col-span-1 sm:col-span-1">
                     <label for="prefer_install_date" class="block text-sm font-medium text-gray-700"><span
@@ -334,7 +313,6 @@ export default {
       partner_id: "",
       created_by: "",
       isp_id: "",
-      installation_timeline: 48,
     });
 
     function resetForm() {

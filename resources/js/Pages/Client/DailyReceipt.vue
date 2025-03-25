@@ -35,7 +35,7 @@
               <div class="py-2">
                 <label for="date" class="block text-sm font-medium text-gray-700">Receipt Date </label>
                 <div class="mt-1 flex rounded-md shadow-sm">
-                   <VueDatePicker v-model="form.date" :range="{ partialRange: true }" placeholder="Please choose Order Date" 
+                   <VueDatePicker v-model="form.date" :range="{ partialRange: false }" placeholder="Please choose Order Date" 
               :enable-time-picker="false" model-type="yyyy-MM-dd" id="order_date"
               class="text-gray-400 text-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-xs focus:ring-opacity-10 focus:outline-none" />
                 </div>
@@ -106,15 +106,14 @@
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Invoice Number</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer ID</th>
+                  ISP Name</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Issue
                   Amount</th>
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Receipt Amount</th>
 
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Receipt Date</th>
+       
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Customer Paid Date</th>
               </tr>
@@ -122,13 +121,13 @@
             <tbody class="bg-white divide-y divide-gray-200 text-sm">
               <tr v-for="row in receipt_records.data" v-bind:key="row.id">
                 <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.bill_name }}</td>
-                <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.year }}-{{ row.month }}</td>
+                <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.billing_period }}</td>
                 <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.bill_number }}</td>
-                <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.ftth_id }}</td>
-                <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.issue_amount }}</td>
+                <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.isp_name }}</td>
+                <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.total_amount }}</td>
                 <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.collected_amount }}</td>
 
-                <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.created_at }}</td>
+      
                 <td class="px-6 py-3 text-xs font-medium whitespace-nowrap">{{ row.receipt_date }}</td>
               </tr>
             </tbody>

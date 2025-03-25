@@ -233,7 +233,7 @@ export default {
             { name: "Bill Generator", route: "billGenerator", icon: "fas fa-cogs mr-2" },
             { name: "Temp Bill List", route: "tempBilling", icon: "fas fa-clipboard-list mr-2" },
             { name: "Final Bill List", route: "showbill", icon: "fas fa-coins mr-2" },
-            { name: "Bill Receipt", route: "receipt.index", icon: "fas fa-file-invoice-dollar mr-2" },
+            // { name: "Bill Receipt", route: "receipt.index", icon: "fas fa-file-invoice-dollar mr-2" },
           ],
         },
         {

@@ -33,12 +33,14 @@ class Package extends Model
     protected $fillable = [
         'name',
         'speed',
+        'installation_timeline',
         'type',
         'status',
         'sla_id',
         'price',
         'contract_period',
         'radius_package',
+        'otc',
         'created_at',
         'updated_at'
     ];

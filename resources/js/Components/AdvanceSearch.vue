@@ -223,7 +223,7 @@
         class="ml-2 cursor-pointer inline-flex items-center px-4 py-2 bg-gray-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-400 active:bg-gray-500 focus:outline-none focus:border-gray-500 focus:ring focus:ring-gray-200 disabled:opacity-25 transition">Reset
         <i class="ml-1 fa fa-undo-alt text-white" tabindex="10"></i></a>
     </div>
-    <div class="flex" v-if="user?.role?.enable_customer_export">
+    <div class="flex" v-if="user?.role?.enable_customer_export || user.user_type != 'internal'">
       <a @click="doExcel"
         class="cursor-pointer inline-flex items-center px-4 py-2 bg-green-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring focus:ring-green-300 disabled:opacity-25 transition">Export
         Excel <i class="ml-1 fa fa-download text-white" tabindex="11"></i></a>

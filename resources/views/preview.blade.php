@@ -18,32 +18,15 @@
                 height: 29.7cm;
                 margin: 30mm 45mm 30mm 45mm;
                 page-break-inside: avoid;
-                /* change the margins as you want them to be. */
             }
             .container {
                 width: 100%;
                 top: 0;
                 position: absolute;
             }
-            /* .footer {
-                width: 100%;
-                bottom: 0;
-                position: absolute;
-            } */
         }
 
-        html,
-        body {
-            margin: 0 auto;
-            height: 297mm;
-            width: 210mm;
-        }
-
-
-        body {
-            font-family: sans-serif;
-            font-size: 0.9rem;
-        }
+    
     
         .header-img {
             width: 100%;
@@ -51,18 +34,35 @@
             height: auto;
         }
 
-        .footer {
-            float: left;
-            margin-top: 50px;
-            width: 100%;
-            color: #ffffff;
-            text-align: center;
-        }
+     
  
         .container {
             width: 100%;
+            min-height: 100%;
+            position: relative;
         }
 
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            margin-top: 50px;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        /* Update body to ensure full height */
+        html,
+        body {
+            margin: 0 auto;
+            min-height: 100%;
+            height: 297mm;
+            width: 210mm;
+            font-family: sans-serif;
+            font-size: 0.9rem;
+            position: relative;
+        }
         .center {
             margin: 0 auto;
             width: 85%;
@@ -116,9 +116,7 @@
         .collapse > tbody > tr {
             display: table-row;
         }
-        .collapse > tbody tr:last-child{
-            height: 250px;
-        }
+    
         tbody td{
             text-align: center;
             vertical-align: top;
@@ -141,6 +139,9 @@
 
         .left {
             text-align: left;
+        }
+        .right {
+            text-align: right;
         }
 
         .space {
@@ -230,17 +231,6 @@
 </head>
 
 <body class="font-sans antialiased" style="border-top:0 !important">
-@php
-                        if (strpos($period_covered, ' to ')) {
-                            $p_months = explode(" to ", ($period_covered));
-                            $from = (new DateTime($p_months[0]));
-                            $to = (new DateTime($p_months[1]));
-                            $first_date = $from->format("d-M-Y");
-                            $last_date = $to->format("d-M-Y");
-                            $period_covered = $first_date.' to '.$last_date;
-                        }  
-                   
-                @endphp
     <div class="container">
         <div class="header">
             <img src="{{ asset('storage/images/invoice-header.png') }}" class="header-img" />
@@ -251,101 +241,97 @@
         <div class="center" style="margin-top:5px;">
      
             <div class="header_warapper">
-                    <div>Customer Name :  {{$bill_to}}</div>
-                    <div>&nbsp;</div>
-                    <div>Customer ID :  {{$ftth_id}}</div>
-                    <div>Invoice No. :  </div>
-                    <div>Address : {{$attn}}</div>
-                    <div>Date :  {{ date("j F Y",strtotime($date_issued)) }}</div>
-                   
-                    <div>Package : {{$service_description}}</div>
-                    <div>Contact No. : {{$phone}}</div>
-                    <div>Internet Speed : {{$qty}}</div>
-            </div>
-               
-                
+                    <div>Attention : {{$isp->isp->name}}</div>
                   
-               
+                    <div>Bill Number : {{$isp->tempBill->bill_number}}</div>
+                    <div>Address : {{$isp->isp->address}}</div>
+                    <div>Invoice No. : </div>
+                    
+                    <div>Issue Date : {{ date("j F Y", strtotime($isp->issue_date)) }}</div>
+                    <div>Description : {{ $isp->tempBill->name }}</div>
+                    <div>Due Date : {{ date("j F Y", strtotime($isp->due_date)) }}</div>
+                 
+                
+                        @if ($isp->tempBill->exchange_rate > 1)
+                        <div>Exchange Rate : {{$isp->tempBill->exchange_rate}}</div>
+                        @endif
+                    
+                 
+                    
+                 
+            </div>
 
-               <!-- </tbody>
-       </table>
-                        <table class="collapse" style="margin-top:0px; width:100%; ">
-                        <thead>
-
-                        </thead>
-                        <tbody> -->
-             <table class="collapse" style="width:100%; ">
-               <tbody>
-                    <tr>
+            <table class="collapse" style="width:100%; ">
+                <thead>
+                    <tr >
                         <td>No.</td>
                         <td>Description</td>
-                        <td>Qty</td>
-                        <td>Price (THB)</td>
-                        <td>Total Amount (THB)</td>
+         
+                        <td class="right">Unit Price (MMK)</td>
+                        <td>QTY</td>
+                        <td class="right">Total (MMK)</td>
                     </tr>
-
-                 <tr >
-                            <td>1</td>
-                            <td>{{$service_description}} for <br /> {{$period_covered}} </td>
-                            <td >1</td>
-                            <td>{{number_format($normal_cost,2,'.')}}</td>
-                            <td>{{number_format($sub_total,2,'.')}}</td>
-                        </tr>
-                        @php
-                        if($discount){
-                        @endphp 
-                        <tr >
-                            <td>2</td>
-                            <td>Discount </td>
-                            <td >1</td>
-                         
-                            <td>{{number_format($discount,2,'.')}}</td>
-                            <td>{{number_format($discount,2,'.')}}</td>
-                        </tr>
+                </thead>
+                   
+                    <tbody>
                         @php 
-                        }
+                        $index =1;
                         @endphp
-                       
-                       
-                        </tbody>
-           
-                    <tfoot>
+                    @foreach ($tempInvoices as $tempInvoice )
+                        
+      
                     <tr>
-                          
-                            <td class="title" colspan="4">Subtotal</td>
-                            <td class="text">{{number_format($sub_total,2,'.')}}</td>
-                        </tr>
-                        <tr>
-                          
-                          <td class="title" colspan="4">Discount</td>
-                          <td class="text">{{number_format($discount,2,'.')}}</td>
-                      </tr>
-                      <tr>
-                          
-                          <td class="title" colspan="4">Commercial Tax</td>
-                          <td class="text">{{number_format($tax,2,'.')}}</td>
-                      </tr>
-                      <tr>
-                          
-                          <td class="title" colspan="4">Grand Total </td>
-                          <td class="text">{{number_format($total_payable,2,'.')}}</td>
-                      </tr>
-                      <tr>
+                        <td>{{ $index++ }}</td>
+                        <td class="left"> {{$tempInvoice->category}} </td>
+                        <td class="right">{{number_format($tempInvoice->unit_price)}}</td>
+                        <td>{{ $tempInvoice->total_customers }}</td>
+                        <td class="right">{{number_format($tempInvoice->total_amount)}}</td>
+                   
+                    </tr>
+                    @endforeach
+                    @if($isp->additional_description )
+                    <tr>
+                        <td>{{ $index++ }}</td>
+                        <td class="left"> {{$isp->additional_description}} </td>
+                        <td class="right">{{$isp->additional_fees}}</td>
+                        <td>1</td>
+                        <td class="right">{{number_format($isp->additional_fees)}}</td>
+                   
+                    </tr>
+                    @endif
+                </tbody>
+           
+                <tfoot>
+                    <tr>
+                        <td class="title" colspan="4">Sub Total</td>
+                        <td class="text right">{{number_format($isp->sub_total) }}</td>
+                    </tr>
+                    @if($isp->discount_amount > 0)
+                    <tr>
+                        <td class="title" colspan="4">Discount</td>
+                        <td class="text right">{{number_format($isp->discount_amount, 2, '.')}}</td>
+                    </tr>
+                    @endif
+                    @if($isp->tax_percent > 0)
+                    <tr>
+                        <td class="title" colspan="4">Commercial Tax ({{$isp->tax_percent}})%</td>
+                        <td class="text right">{{number_format(($isp->tax_amount), 2, '.')}}</td>
+                    </tr>
+                    @endif
+                    <tr>
+                        <td class="title" colspan="4">Grand Total</td>
+                        <td class="text right">{{number_format(($isp->total_amount ), 2, '.')}}</td>
+                    </tr>
+                    <tr>
                         <td class="thankyou" colspan="5">
                             Thank you For Choosing Our Services.
                         </td>
-                      </tr>
-                                                
-                    </tfoot>
-                       
-                   
-                </table>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>         
             
-        
-        
-            
-
-        </div>
+         </div>
         <div class="footer">
         <img src="{{ asset('storage/images/invoice-footer.png') }}" class="header-img" />
         </div>

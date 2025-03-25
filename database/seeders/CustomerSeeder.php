@@ -2,64 +2,69 @@
 
 namespace Database\Seeders;
 
-use App\Models\Customer;
 use Illuminate\Database\Seeder;
+use App\Models\Customer;
+use Carbon\Carbon;
 use Faker\Factory as Faker;
 
 class CustomerSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
-        //
-
         $faker = Faker::create();
-        foreach (range(1, 50) as $index) {
-            $latitude = $faker->latitude(16.7, 17.2); // Adjust the range according to Yangon's latitude
-            $longitude = $faker->longitude(96.0, 96.3); // Adjust the range according to Yangon's longitude
-            $phoneNumberFormat = '09#########';
+        $usedCombinations = [];
+        
+        for ($i = 1; $i <= 50; $i++) {
+            $installationDate = Carbon::now()->subDays(rand(30, 365));
+            $orderDate = Carbon::parse($installationDate)->subDays(rand(2, 5));
+            $activationDate = Carbon::parse($installationDate)->addDays(1);
+            
+            $gponOnuId = rand(0, 127);
+            $gponOnuIdJson = 'OnuID' . $gponOnuId;
+
+            // Generate unique combination
+            do {
+                $dn_id = rand(1, 2);
+                $sn_ports = \App\Models\SnPorts::where('dn_id', $dn_id)->pluck('id')->toArray();
+                $pop_device_id = \App\Models\DnPorts::where('id', $dn_id)->pluck('pop_device_id')->first();
+                $pop_id = \App\Models\PopDevice::where('id', $pop_device_id)->pluck('pop_id')->first();
+                $sn_id = !empty($sn_ports) ? $sn_ports[array_rand($sn_ports)] : null;
+                $splitter_id = rand(1, 17);
+                $splitter_no = 'SN Port '.$splitter_id;
+                $combination = $dn_id . '-' . $sn_id . '-' . $splitter_no;
+            } while (in_array($combination, $usedCombinations));
+            
+            $usedCombinations[] = $combination;
+
             Customer::create([
-                'ftth_id' => $faker->unique()->numerify('FTTH-#####'),
+                'ftth_id' => 'FTTH-' . str_pad($i, 4, '0', STR_PAD_LEFT),
                 'name' => $faker->name,
-                'nrc' => $faker->numerify('##/L(N)###(###)'),
-                'phone_1' => $faker->unique()->numerify($phoneNumberFormat),
-                'phone_2' => $faker->unique()->numerify($phoneNumberFormat),
+                'phone_1' => '09' . $faker->numberBetween(100000000, 999999999),
                 'address' => $faker->address,
-                'location' => "$latitude, $longitude",
-                'order_date' => $faker->dateTimeBetween('-1 year', 'now'),
-                'installation_date' => $faker->dateTimeBetween('now', '+1 month'),
-                'prefer_install_date' => $faker->dateTimeBetween('now', '+1 month'),
-                'sale_channel' => $faker->randomElement(['Online', 'In-store', 'Agent']),
-                'sale_remark' => $faker->sentence,
-                'township_id' => $faker->numberBetween(1, 33), // Assuming 33 townships as per previous conversation
-                'package_id' => 1, // Adjust according to your package IDs
-                'sale_person_id' => 2, // Adjust according to your sale person IDs
-                'status_id' => $faker->numberBetween(1, 5), // Adjust according to your status IDs
-                'subcom_id' => 1, // Adjust according to your subcom IDs
-                'sn_id' => 1,
-                'splitter_no' => $faker->numberBetween(1, 5),
-                'fiber_distance' => $faker->numberBetween(100, 400),
-                'installation_remark' => $faker->sentence,
-                'fc_used' => $faker->boolean,
-                'fc_damaged' => $faker->boolean,
-                'onu_serial' => $faker->unique()->numerify('ONU-#####'),
-                'onu_power' => $faker->randomFloat(2, 10, 50),
-                'contract_term' => $faker->numberBetween(6, 12),
-                'foc' => null,
-                'foc_period' => null,
-                'advance_payment' => 0,
-                'advance_payment_day' => null,
-                'extra_bandwidth' => null,
-                'deleted' => 0,
-                'pop_device_id'=>1,
-                'pppoe_account' => $faker->userName,
-                'pppoe_password' => $faker->password,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'location' => $faker->latitude(16.0, 22.0) . ',' . $faker->longitude(94.0, 99.0),
+                'order_date' => $orderDate,
+                'installation_date' => $installationDate,
+                'subcom_assign_date' => $installationDate,
+                'prefer_install_date' => $installationDate,
+                'service_activation_date' => $activationDate,
+                'township_id' => 2,
+                'package_id' => rand(1, 4),
+                'status_id' => 2,
+                'subcom_id' => 1,
+                'isp_id' => rand(1, 3),
+                'partner_id' => 2,
+                'installation_status' => 'completed',
+                'fiber_distance' => $faker->randomFloat(2, 0.3, 2.0),
+                'onu_serial' => 'ONU' . str_pad($i, 4, '0', STR_PAD_LEFT),
+                'onu_power' => $faker->randomFloat(2, -25, -15),
+                'splitter_no' => $splitter_no,
+                'gpon_ontid' => $gponOnuIdJson,
+                'created_at' => $orderDate,
+                'updated_at' => $activationDate,
+                'pop_device_id' => $pop_device_id,
+                'pop_id' => $pop_id,
+                'sn_id' => $sn_id,
+                'dn_id' => $dn_id,
             ]);
         }
     }

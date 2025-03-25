@@ -179,8 +179,10 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
                             $query->where('customers.installation_status', $sh_installation_status);
                         })
                         ->when($request->sh_installation_timeline, function ($query, $sh_installation_timeline) {
-                        
-                            $query->where('customers.installation_timeline', $sh_installation_timeline);
+                            $query->whereHas('package', function($q) use ($sh_installation_timeline) {
+                                $q->where('installation_timeline', '=', $sh_installation_timeline);
+                            });
+                            
                         });
         return $mycustomer;
     }
@@ -202,6 +204,7 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
            
             'Order Date',
             'Prefer Install Date',
+            'Installation Assign DateTime',
             'Installation Date',
             'Installation Remark',
             'Service Activation Date',
@@ -226,7 +229,8 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
         return [
             'I' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
             'J' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
-            'K' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
+            'K' => StyleNumberFormat::FORMAT_DATE_DATETIME,
+            'L' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
             'M' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
             'AB' => StyleNumberFormat::FORMAT_TEXT,
         ];
@@ -265,6 +269,7 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
             $mycustomer->subcon?->name,
             ($mycustomer->order_date) ? Date::stringToExcel($mycustomer->order_date) : null,
             ($mycustomer->prefer_install_date) ? Date::stringToExcel($mycustomer->prefer_install_date) : null,
+            ($mycustomer->subcom_assign_date) ? Date::stringToExcel($mycustomer->subcom_assign_date) : null,
             ($mycustomer->installation_date) ? Date::stringToExcel($mycustomer->installation_date) : null,
             $mycustomer->installation_remark,
             ($mycustomer->service_activation_date) ? Date::stringToExcel($mycustomer->service_activation_date) : null,

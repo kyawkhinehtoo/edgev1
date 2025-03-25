@@ -1,1 +1,0 @@
-import{A as t}from"./AppLayout-D63VICQs.js";import{_ as o}from"./_plugin-vue_export-helper-DlAUqK2U.js";import"./app-DCS0_BnL.js";import"./DropdownLink-BmMJwfGZ.js";const s={name:"DNList",components:{AppLayout:t},props:{dnlist:Object},setup(){}};function p(r,e,n,c,a,i){return null}const d=o(s,[["render",p]]);export{d as default};

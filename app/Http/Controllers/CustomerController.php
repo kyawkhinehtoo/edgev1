@@ -285,29 +285,36 @@ class CustomerController extends Controller
                 $query->where('customers.installation_status', $sh_installation_status);
             })
             ->when($request->sh_installation_timeline, function ($query, $sh_installation_timeline) {
-            
-                $query->where('customers.installation_timeline', $sh_installation_timeline);
+                $query->whereHas('package', function($q) use ($sh_installation_timeline) {
+                    $q->where('installation_timeline', '=', $sh_installation_timeline);
+                });
+                
             })
             
-
-            ->when($request->sort, function ($query, $sort = null) {
-                $sort_by = 'customers.id';
-                if ($sort == 'cid') {
-                    $sort_by = 'customers.id';
-                } elseif ($sort == 'cname') {
-                    $sort_by = 'customers.name';
-                } elseif ($sort == 'township') {
-                    $sort_by = 'customers.township.name';
-                } elseif ($sort == 'package') {
-                    $sort_by = 'customers.package.name';
-                } elseif ($sort == 'order') {
-                    $sort_by = 'customers.order_date';
+            ->when($request->sort, function ($query, $sort) use ($request) {
+                $direction = $request->direction ?? 'asc';
+                
+                // Handle special cases for related tables
+                switch ($sort) {
+                    case 'package':
+                        
+                        $query->orderBy('package_id', $direction);
+                        break;
+                    case 'township':
+                        $query->orderBy('township_id', $direction);
+                        break;
+                    case 'status':
+                        $query->orderBy('status_id', $direction);
+                        break;
+                    default:
+                        // For direct customer table columns
+                        $query->orderBy("customers.{$sort}", $direction);
                 }
-
-                $query->orderBy($sort_by, 'desc');
             }, function ($query) {
+                // Default sorting if no sort parameter is provided
                 $query->orderBy('customers.ftth_id', 'desc');
             })
+          
             ->paginate(10);
             $dynamicRanderPage = "Client/Customer";
             if($user->user_type == 'subcon') {
@@ -820,7 +827,7 @@ class CustomerController extends Controller
                 if($value == 'subcom_assign_date'){
                     if (!empty($request->subcom)){
                         if(!$customer->subcom_assign_date){
-                            $customer->$value = Carbon::now()->format('Y-m-d');
+                            $customer->$value = Carbon::now()->format('Y-m-d H:i:s');
                         }
                     }
                 }

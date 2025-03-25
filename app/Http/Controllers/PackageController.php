@@ -19,7 +19,7 @@ class PackageController extends Controller
         $packages = Package::when($request->package, function ($query, $pkg) {
             $query->where('name', 'LIKE', '%' . $pkg . '%');
         })
-        ->orderBy('id', 'desc')
+        ->orderBy('name', 'desc')
         ->paginate(10);
 
         $radius_services = null;
@@ -52,23 +52,26 @@ class PackageController extends Controller
         Validator::make($request->all(), [
             'name' => ['required'],
             'speed' => ['required'],
+            'installation_timeline' => ['required'],
             'sla_id' => ['required'],
             'type' => ['required', 'in:ftth,dplc,ipvpn'],
             'contract_period' => ['required', 'in:1,3,6,12,24'],
+            'price' => ['required', 'numeric'], // Added validation for price
+            'otc' => ['required', 'numeric'],   // Added validation for otc
         ])->validate();
         $radius = new RadiusController();
         $radius_services =  $radius->getRadiusServices();
 
         $package = new Package();
         $package->name = $request->name;
+        $package->installation_timeline = $request->installation_timeline;
         $package->speed = $request->speed;
         $package->currency = $request->currency;
         $package->type = $request->type;
         $package->status = $request->status;
         $package->sla_id = $request->sla_id;
         $package->price = $request->price;
-        if ($radius_services && isset($request->radius_srvid['srvid']))
-            $package->radius_package = $request->radius_srvid['srvid'];
+        $package->otc = $request->otc;
         $package->contract_period = (string)$request->contract_period;
         $package->save();
         $id = $package->id;
@@ -92,9 +95,12 @@ class PackageController extends Controller
         Validator::make($request->all(), [
             'name' => ['required'],
             'speed' => ['required'],
+            'installation_timeline' => ['required'],
             'type' => ['required', 'in:ftth,dplc,ipvpn'],
             'sla_id' => ['required'],
             'contract_period' => ['required', 'in:1,3,6,12,24'],
+            'price' => ['required', 'numeric'], // Added validation for price
+            'otc' => ['required', 'numeric'],   // Added validation for otc
         ])->validate();
 
         if ($request->has('id')) {
@@ -105,13 +111,13 @@ class PackageController extends Controller
             $package = Package::find($request->input('id'));
             $package->name = $request->name;
             $package->speed = $request->speed;
+            $package->installation_timeline = $request->installation_timeline;
             $package->currency = $request->currency;
             $package->type = $request->type;
             $package->sla_id = $request->sla_id;
             $package->status = $request->status;
             $package->price = $request->price;
-            if ($radius_services && isset($request->radius_srvid['srvid']))
-                $package->radius_package = $request->radius_srvid['srvid'];
+            $package->otc = $request->otc;
             $package->contract_period = (string)$request->contract_period;
             $package->update();
             PackageBundle::where('package_id', $request->input('id'))->delete();
