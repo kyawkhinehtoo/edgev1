@@ -806,7 +806,7 @@ class CustomerController extends Controller
                 }
                 if ($value == 'splitter_no') {
                     if (isset($request->splitter_no))
-                        $customer->$value =  $request->splitter_no?json_decode($request->splitter_no)?->id:null;
+                        $customer->$value =  $request->splitter_no?json_decode($request->splitter_no)?->name:null;
                 }
                 if ($value == 'gpon_ontid') {
                     if (isset($request->gpon_ontid))

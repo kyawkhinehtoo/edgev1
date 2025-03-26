@@ -129,8 +129,7 @@
 
 <script>
 import { defineComponent, watch } from 'vue'
-import { useForm } from '@inertiajs/vue3'
-
+import { router,useForm } from '@inertiajs/vue3'
 export default defineComponent({
   props: {
     show: Boolean,
@@ -170,7 +169,8 @@ export default defineComponent({
     }, { immediate: true, deep: true })
  
     const submit = () => {
-      form.put(route('tempInvoiceItems.update', form.id), {
+      form.method = 'PUT';
+      router.put(route('tempInvoiceItems.update', { id: form.id }), form, {
         onSuccess: (page) => {
           Toast.fire({
             icon: "success",
