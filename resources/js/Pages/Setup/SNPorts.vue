@@ -233,7 +233,8 @@ export default {
 
       } else {
         form._method = "PUT";
-        form.put("/snport" + form.id, {
+
+        form.put(route('snport.update', form.id), {
           preserveState: true,
           onSuccess: (page) => {
             showSN.value = false;

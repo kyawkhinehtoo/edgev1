@@ -323,7 +323,7 @@ export default {
       } else {
         form._method = "PUT";
         form.devices = devices;
-        form.put("/pop" + form.id, {
+        form.put(route('pop.update', form.id), {
           preserveState: true,
           onSuccess: (page) => {
             show.value = false;
