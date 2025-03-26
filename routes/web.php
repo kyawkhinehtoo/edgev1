@@ -61,7 +61,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::resource('/port',PortController::class);
 	Route::resource('/snport',SNPortController::class);
 	Route::resource('/subcom',SubcomController::class);
-	Route::get('/subcoms/{subcom}', [SubcomController::class, 'show'])->name('subcom.show');
+	Route::get('/subcoms/{subcom}', [SubcomController::class, 'show'])->name('subcom.details');
 	Route::resource('/township',TownshipController::class);
 	Route::resource('/city',CityController::class);
 	Route::resource('/equiptment',EquiptmentController::class);
