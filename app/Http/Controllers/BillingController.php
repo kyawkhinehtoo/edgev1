@@ -730,16 +730,27 @@ class BillingController extends Controller
             'total_amount' => 'required|numeric',
         ]);
 
-        $invoiceItem = TempInvoiceItem::findOrFail($id);
+        $invoiceItem = InvoiceItem::findOrFail($id);
         $invoiceItem->update($validated);
 
         // Update invoice totals
-        $invoice = $invoiceItem->tempInvoice;
-        $totalMRC = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->sum('total_amount');
-        $totalMRCCustomer = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->count();
-        $totalInstallation = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->sum('total_amount');
-        $totalInstallationCustomer = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->count();
+        $invoice = $invoiceItem->invoice;
+        // Recalculate invoice totals using InvoiceItem model directly
+        $totalMRC = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'like', '%Recurring%')
+            ->sum('total_amount');
 
+        $totalMRCCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'like', '%Recurring%')
+            ->count();
+
+        $totalInstallation = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'NewInstallation')
+            ->sum('total_amount');
+
+        $totalInstallationCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'NewInstallation')
+            ->count();
        
 
         // Calculate sub total (MRC + Installation + Additional Fees)
@@ -771,16 +782,26 @@ class BillingController extends Controller
     }
     public function destroyInvoiceItem($id)
     {
-        $invoiceItem = TempInvoiceItem::findOrFail($id);
-        $invoice = $invoiceItem->tempInvoice;
+        $invoiceItem = InvoiceItem::findOrFail($id);
+        $invoice = $invoiceItem->invoice;
         
         $invoiceItem->delete();
-       
-        // Recalculate invoice totals
-        $totalMRC = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->sum('total_amount');
-        $totalMRCCustomer = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->count();
-        $totalInstallation = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->sum('total_amount');
-        $totalInstallationCustomer = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->count();
+        // Recalculate invoice totals using InvoiceItem model directly
+        $totalMRC = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'like', '%Recurring%')
+            ->sum('total_amount');
+
+        $totalMRCCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'like', '%Recurring%')
+            ->count();
+
+        $totalInstallation = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'NewInstallation')
+            ->sum('total_amount');
+
+        $totalInstallationCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'NewInstallation')
+            ->count();
 
         // Calculate sub total (MRC + Installation + Additional Fees)
         $subTotal = $totalMRC + $totalInstallation + ($invoice->additional_fees ?? 0);

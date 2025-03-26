@@ -239,9 +239,16 @@ export default defineComponent({
     deleteItem(item) {
       if (confirm('Are you sure you want to delete this item?')) {
         router.delete(route('tempInvoiceItems.destroy', item.id), {
-          onSuccess: () => {
-            // The page will automatically refresh with updated data
-          },
+          onSuccess: (page) => {
+          Toast.fire({
+            icon: "success",
+            title: page.props.flash.message,
+          });
+         
+        },
+        onError: (errors) => {
+          console.error("Error submitting form:", errors);
+        }
         })
       }
     },

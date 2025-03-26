@@ -168,10 +168,19 @@ export default defineComponent({
         form.total_amount = newValue.total_amount
       }
     }, { immediate: true, deep: true })
-
+ 
     const submit = () => {
-      form.put(route('invoiceItems.update', form.id), {
-        onSuccess: () => closeModal(),
+      form.put(route('tempInvoiceItems.update', form.id), {
+        onSuccess: (page) => {
+          Toast.fire({
+            icon: "success",
+            title: page.props.flash.message,
+          });
+          closeModal()
+        },
+        onError: (errors) => {
+          console.error("Error submitting form:", errors);
+        }
       })
     }
 

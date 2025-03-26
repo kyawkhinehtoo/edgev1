@@ -217,7 +217,16 @@ export default defineComponent({
 
     const submit = () => {
       form.put(route('tempInvoice.update', form.id), {
-        onSuccess: () => closeModal(),
+        onSuccess: (page) => {
+          Toast.fire({
+            icon: "success",
+            title: page.props.flash.message,
+          });
+          closeModal()
+        },
+        onError: (errors) => {
+          console.error("Error submitting form:", errors);
+        }
       })
     }
 
