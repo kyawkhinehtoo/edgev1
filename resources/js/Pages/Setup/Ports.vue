@@ -428,7 +428,7 @@ export default {
         });
 
       } else {
-        form._method = "PUT";
+        form._method = "PATCH";
         form.put(route('port.update', form.id), {
           preserveState: true,
           onSuccess: (page) => {
