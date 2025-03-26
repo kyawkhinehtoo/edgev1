@@ -6,7 +6,7 @@
         <div class="py-2 md:inline-flex justify-between w-full gap-4">
           <div class="flex w-full">
             <span
-              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-4">
+              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-2">
               <i class="fas fa-search"></i>
             </span>
             <input type="text" placeholder="Ticket/Customer"
@@ -16,7 +16,7 @@
 
           <div class="flex w-full">
             <span
-              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-4">
+              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-2">
               <i class="fas fa-sliders-h"></i>
             </span>
             <select v-model="incidentType"
@@ -32,7 +32,7 @@
 
           <div class="flex w-full">
             <span
-              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-4">
+              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-2">
               <i class="fas fa-sliders-h"></i>
             </span>
             <select v-model="incidentBy"
@@ -45,7 +45,7 @@
           </div>
           <div class="flex w-full">
             <span
-              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-4">
+              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-2">
               <i class="fas fa-sliders-h"></i>
             </span>
             

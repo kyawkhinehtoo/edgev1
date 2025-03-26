@@ -141,6 +141,7 @@ class ServiceRequestController extends Controller
                 $new_history = new CustomerHistory();
                 $new_history->old_status = $request->status_id;
                 $new_history->customer_id = $customer->id;
+                $new_history->general = $request->type ;
                 $new_history->type = $request->type ;
                 $new_history->actor_id = Auth::user()->id;
                 $new_history->active = 1;
