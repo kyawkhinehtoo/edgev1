@@ -321,9 +321,11 @@ export default {
         });
 
       } else {
-        form._method = "PUT";
+    
+        form._method = 'PUT';
         form.devices = devices;
-        form.put(route('pop.update', form.id), {
+       
+        router.post('/pop/' + form.id, form, {
           preserveState: true,
           onSuccess: (page) => {
             show.value = false;

@@ -428,8 +428,9 @@ export default {
         });
 
       } else {
-        form._method = "PATCH";
-        form.put(route('port.update', form.id), {
+        form._method = "PUT";
+      
+        router.post('/port/' + form.id, form, {
           preserveState: true,
           onSuccess: (page) => {
             showDN.value = false;

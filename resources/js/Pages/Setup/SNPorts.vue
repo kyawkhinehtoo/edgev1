@@ -232,9 +232,10 @@ export default {
         });
 
       } else {
-        form._method = "PUT";
+        form._method = 'PUT';
 
-        form.put(route('snport.update', form.id), {
+       
+        router.post('/snport/' + form.id, form, {
           preserveState: true,
           onSuccess: (page) => {
             showSN.value = false;

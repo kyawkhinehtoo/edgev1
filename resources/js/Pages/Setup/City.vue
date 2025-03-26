@@ -172,7 +172,7 @@ export default {
         });
       } else {
 
-        form._method = 'PUT'; form._method = 'PUT';
+        form._method = 'PUT'; 
 
         router.post('/city/' + form.id, form, {
           onSuccess: (page) => {
