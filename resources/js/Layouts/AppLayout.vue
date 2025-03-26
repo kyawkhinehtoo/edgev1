@@ -206,7 +206,7 @@ export default {
             { name: "Template", route: "template.index", icon: "fas fa-envelope mr-2" },
             { name: "Announcement", route: "announcement.list", icon: "fas fa-bullhorn mr-2" },
             { name: "SMS Gateway", route: "smsgateway.index", icon: "fas fa-sms mr-2" },
-            { name: "Radius Config", route: "radiusconfig.index", icon: "fas fa-sms mr-2" },
+            // { name: "Radius Config", route: "radiusconfig.index", icon: "fas fa-sms mr-2" },
             { name: "Billing Config", route: "billconfig.index", icon: "fas fa-sms mr-2" },
             { name: "Activity Log", route: "activity-log.index", icon: "fas fa-circle-info mr-2" },
             { name: "System Setting", route: "setting.index", icon: "fas fa-screwdriver-wrench mr-2" },

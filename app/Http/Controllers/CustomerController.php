@@ -713,7 +713,25 @@ class CustomerController extends Controller
             // 'drum_no_image' => 'nullable|image|max:10240',
             // 'start_meter_image' => 'nullable|image|max:10240',
             // 'end_meter_image' => 'nullable|image|max:10240',
-
+            'splitter_no' => [
+                'nullable',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($value && $request->pop_id && $request->pop_device_id && $request->dn_id && $request->sn_id) {
+               
+                        $exists = Customer::where('splitter_no', json_decode($value)->name)
+                            ->where('pop_id', json_decode($request->pop_id)->id)
+                            ->where('pop_device_id', json_decode($request->pop_device_id)->id)
+                            ->where('dn_id', json_decode($request->dn_id)->id)
+                            ->where('sn_id', json_decode($request->sn_id)->id)
+                            ->where('id', '!=', $request->id ?? null)
+                            ->exists();
+                        
+                        if ($exists) {
+                            $fail('The splitter number is already in use for this combination of POP, POP Device, DN, and SN.');
+                        }
+                    }
+                }
+            ],
         ])->validate();
         if ($request->has('id') && !$user?->roles?->read_customer && $userPerms ){
             $customer = Customer::find($request->input('id'));

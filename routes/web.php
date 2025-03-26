@@ -314,9 +314,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::post('/showbill', [BillingController::class, 'showBill'])->name('showbill.show');
 });
 // Replace this line:
-Route::middleware(['auth:sanctum', 'verified'])->get('/home', function () {
-    return Inertia::render('Dashboard/Home');
-})->name('home');
+
 
 // With this:
 

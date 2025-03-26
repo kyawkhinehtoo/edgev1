@@ -304,15 +304,17 @@
                         </div>
                         <div class="col-span-1 sm:col-span-1">
                           <label for="splitter_no" class="block text-sm font-medium text-gray-700"> SN Port No. </label>
-                          <div class="mt-1 flex rounded-md shadow-sm" v-if="snPortNoOptions.length  !== 0">
+                          <div class="mt-1 flex rounded-md shadow-sm w-full" v-if="snPortNoOptions.length  !== 0">
                             <multiselect deselect-label="Selected already" :options="snPortNoOptions" track-by="id"
                               label="name" v-model="form.splitter_no" :allow-empty="true" :disabled="checkPerm('sn_id')">
                             </multiselect>
-                            <p v-show="$page.props.errors.splitter_no" class="mt-2 text-sm text-red-500">{{
-                              $page.props.errors.splitter_no }}</p>
+                           
                           </div>
+                          <p v-show="$page.props.errors.splitter_no" class="mt-2 text-sm text-red-500 w-full">{{
+                            $page.props.errors.splitter_no }}</p>
+                      
                         </div>
-      
+                        
                         <div class="col-span-1 sm:col-span-1">
                           <label for="port_balance" class="block text-sm font-medium text-gray-700"> Port Balance</label>
                           <div class="mt-1 flex rounded-md shadow-sm">
@@ -1167,7 +1169,7 @@ export default {
       }
       if (props.customer.splitter_no) {
         form.splitter_no = snPortNoOptions.value.filter((d) => d.name == props.customer.splitter_no)[0];
-        snPort.value = form.splitter_no.name;
+        snPort.value = form.splitter_no?.name;
       }
       if (props.customer.gpon_ontid) {
         form.gpon_ontid = gponOnuIdOptions.value.filter((d) => d.name == props.customer.gpon_ontid)[0];
