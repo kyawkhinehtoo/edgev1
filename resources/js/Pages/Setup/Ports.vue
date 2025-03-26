@@ -429,7 +429,7 @@ export default {
 
       } else {
         form._method = "PUT";
-        form.put("/port/" + form.id, {
+        form.put("/port" + form.id, {
           preserveState: true,
           onSuccess: (page) => {
             showDN.value = false;
