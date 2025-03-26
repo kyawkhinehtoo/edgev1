@@ -169,8 +169,8 @@ export default defineComponent({
     }, { immediate: true, deep: true })
  
     const submit = () => {
-      form.method = 'PUT';
-      router.put(route('tempInvoiceItems.update', { id: form.id }), form, {
+      form._method = 'PUT';
+      router.post(route('tempInvoiceItems.update', { id: form.id }), form, {
         onSuccess: (page) => {
           Toast.fire({
             icon: "success",

@@ -40,7 +40,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ partner.phone }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ partner.email }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <Link :href="route('partner.show', partner.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">View</Link>
+                  <Link :href="route('partner.view', partner.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">View</Link>
                   <Link :href="route('partner.edit', partner.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</Link>
                   <button @click="deletePartner(partner)" class="text-red-600 hover:text-red-900">Delete</button>
                 </td>

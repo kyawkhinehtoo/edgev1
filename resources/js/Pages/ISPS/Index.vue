@@ -42,7 +42,7 @@
                 <td class="px-6 py-4 whitespace-nowrap">{{ isp.phone }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ isp.service_type }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <Link :href="route('isps.show', isp.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">View</Link>
+                  <Link :href="route('isps.view', isp.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">View</Link>
                   <Link :href="route('isps.edit', isp.id)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</Link>
                   <button @click="deleteISP(isp)" class="text-red-600 hover:text-red-900">Delete</button>
                 </td>

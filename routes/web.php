@@ -78,9 +78,9 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::delete('/snport/group/{id}',[SNPortController::class,'deleteGroup']);
 	Route::delete('/port/group/{id}',[PortController::class,'deleteGroup']);
 	Route::resource('partner', PartnerController::class);
-	Route::get('/partners/{partner}', [PartnerController::class, 'show'])->name('partner.show');
+	Route::get('/partners/{partner}', [PartnerController::class, 'show'])->name('partner.view');
 	Route::resource('isps', IspController::class);
-	Route::get('/isps/{isp}', [IspController::class, 'show'])->name('isps.show');
+	Route::get('/isps/{isp}', [IspController::class, 'show'])->name('isps.view');
 	Route::resource('zone', ZoneController::class);
 	
 });
