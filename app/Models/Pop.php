@@ -38,4 +38,8 @@ class Pop extends Model
     {
         return $this->belongsToMany(Township::class)->withTimestamps();
     }
+    public function popDevices()
+    {
+        return $this->hasMany(PopDevice::class);
+    }
 }

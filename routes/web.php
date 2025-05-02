@@ -36,6 +36,10 @@ use App\Http\Controllers\StatusController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\VoipController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\CoreAssignmentController;
+use App\Http\Controllers\DnBoxController;
+use App\Http\Controllers\DnSplitterController;
+use App\Http\Controllers\FiberCableController;
 use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\IncidentTaskController;
 use App\Http\Controllers\IspController;
@@ -44,6 +48,13 @@ use App\Http\Controllers\TenantController;
 use App\Http\Controllers\ZoneController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\JcBoxController;
+use App\Http\Controllers\OdbController;
+use App\Http\Controllers\OdbFiberCableController;
+use App\Http\Controllers\OdfController;
+use App\Http\Controllers\SnBoxController;
+use App\Http\Controllers\SnSplitterController;
+
 Route::get('/', function () {
     if (auth()->check()) {
         return auth()->user()->user_type === 'internal' 
@@ -82,6 +93,14 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::resource('isps', IspController::class);
 	Route::get('/isps/{isp}', [IspController::class, 'show'])->name('isps.view');
 	Route::resource('zone', ZoneController::class);
+
+	Route::resource('fiber-cables', FiberCableController::class);
+	Route::resource('jc-boxes', JcBoxController::class);
+	Route::resource('core-assignments', CoreAssignmentController::class);
+	Route::resource('dn-boxes', DnBoxController::class);
+	Route::resource('dn-splitters', DnSplitterController::class);
+	Route::resource('sn-boxes', SnBoxController::class);
+	Route::resource('sn-splitters', SnSplitterController::class);
 	
 });
 
@@ -312,6 +331,11 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 
 	Route::get('/showbill', [BillingController::class, 'showBill'])->name('showbill');
 	Route::post('/showbill', [BillingController::class, 'showBill'])->name('showbill.show');
+	Route::get('odnImportView',[ExcelController::class,'odnImportView'])->name('odnImportView');
+	Route::post('importODN',[ExcelController::class,'importODN'])->name('importODN');
+	Route::resource('odfs', OdfController::class);
+	Route::resource('odb-fiber-cables', OdbFiberCableController::class);
+	Route::resource('odbs', OdbController::class);
 });
 // Replace this line:
 

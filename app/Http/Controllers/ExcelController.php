@@ -21,6 +21,7 @@ use App\Exports\RevenueExport;
 use App\Exports\PublicIpExport;
 use App\Imports\CustomersUpdate;
 use App\Imports\DNUpdate;
+use App\Imports\ODNImport;
 use App\Imports\SNUpdate;
 use App\Imports\TempBillingUpdate;
 use Excel;
@@ -65,7 +66,10 @@ class ExcelController extends Controller
     {
         return view('excel.snupdate');
     }
-
+    public function odnImportView()
+    {
+        return view('excel.odnimport');
+    }
 
     /**
      * @return \Illuminate\Support\Collection
@@ -199,5 +203,13 @@ class ExcelController extends Controller
     public function exportAnnouncementLog(Request $request)
     {
         return (new AnnouncementLogExport($request))->download('announcement_log.csv');
+    }
+    public function importODN(Request $request)
+    {
+        Excel::import(new ODNImport, $request->import_file);
+
+        Session::put('success', 'Your file is imported successfully in database.');
+
+        return back();
     }
 }

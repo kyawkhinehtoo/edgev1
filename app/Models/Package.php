@@ -41,6 +41,7 @@ class Package extends Model
         'contract_period',
         'radius_package',
         'otc',
+        'short_code',
         'created_at',
         'updated_at'
     ];

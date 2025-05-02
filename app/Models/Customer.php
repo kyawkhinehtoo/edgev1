@@ -26,7 +26,9 @@ class Customer extends Model
      * @var array
      */
     protected $fillable = [
+
         'ftth_id',
+        'isp_ftth_id',
         'name',
         'phone_1',
         'address',
@@ -39,21 +41,12 @@ class Customer extends Model
         'package_id',
         'status_id',
         'subcom_id',
-        'sn_id',
-        'dn_id',
-        'pop_id',
-        'splitter_no',
         'fiber_distance',
         'installation_remark',
         'onu_serial',
         'onu_power',
         'bundles',
-        'created_at',
-        'updated_at',
-        'deleted',
-        'pop_device_id',
         'gpon_ontid',
-        'port_balance',
         'partner_id',
         'created_by',
         'isp_id',
@@ -69,13 +62,15 @@ class Customer extends Model
         'installation_reappointment_date',
         'subcom_assign_date',
         'way_list_date',
+        'created_at',
+        'updated_at',
+        'deleted',
     ];
 
     protected $casts = [
         'ftth_id' => 'string',
         'name' => 'string',
         'phone_1' => 'string',
-        'phone_2' => 'string',
         'address' => 'string',
         'location' => 'string',
         'created_at' => 'timestamp',
@@ -141,18 +136,6 @@ class Customer extends Model
         return $this->belongsTo(Project::class);
     }
     
-     public function dn()
-     {
-         return $this->belongsTo(DnPorts::class, 'dn_id');
-     }
-     public function sn()
-     {
-         return $this->belongsTo(SnPorts::class, 'sn_id');
-     }
-     public function pop()
-     {
-         return $this->belongsTo(Pop::class, 'pop_id');
-     }
      public function partner()
      {
          return $this->belongsTo(Partner::class, 'partner_id');
@@ -161,10 +144,7 @@ class Customer extends Model
      {
          return $this->belongsTo(Isp::class, 'isp_id');
      }
-     public function pop_device()
-     {
-         return $this->belongsTo(PopDevice::class, 'pop_device_id');
-     }
+
      public function subcon()
      {
          return $this->belongsTo(Subcom::class, 'subcom_id');

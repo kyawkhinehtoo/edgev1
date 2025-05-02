@@ -27,46 +27,49 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   No.
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Package Name</th>
+                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Short Code</th>
                 
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Service Type</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Instllation Timeline</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   OTC
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   MRC
                 </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Contract Terms</th>
 
                 <th scope="col" class="relative px-6 py-3"><span class="sr-only">Action</span></th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-gray-200 text-sm">
               <tr v-for="(row, index) in packages.data" v-bind:key="row.id" :class="{ 'text-gray-400': !row.status }">
-                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap">{{ packages.from + index }}</td>
-                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap">{{ row.name }}</td>
+                <td class="px-3 py-3  text-left text-md font-medium whitespace-nowrap">{{ packages.from + index }}</td>
+                <td class="px-3 py-3  text-left text-md font-medium whitespace-nowrap">{{ row.name }}</td>
+                <td class="px-3 py-3  text-left text-md font-medium whitespace-nowrap">{{ row.short_code }}</td>
                 <!-- <td class="px-6 py-3  text-left text-sm font-medium whitespace-nowrap"><Bundle :data="row.id" :key="form.componentKey" /></td> -->
 
                 
-                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.type }}</td>
-                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.installation_timeline }} Hours</td>
-                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.otc }}  <span
+                <td class="px-3 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.type }}</td>
+                <td class="px-3 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.installation_timeline }} Hours</td>
+                <td class="px-3 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.otc }}  <span
                   class="uppercase">{{ row.currency }}</span>  </td>
 
-                <td class="px-6 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.price }} <span
+                <td class="px-3 py-3  text-left text-md font-medium whitespace-nowrap uppercase">{{ row.price }} <span
                     class="uppercase">{{ row.currency }}</span> </td>
-                <td class="px-6 py-3  text-left text-md font-medium  whitespace-nowrap">{{ row.contract_period }} Months
+                <td class="px-3 py-3  text-left text-md font-medium  whitespace-nowrap">{{ row.contract_period }} Months
                 </td>
 
-                <td class="px-6 py-3  text-md font-medium whitespace-nowrap text-right">
+                <td class="px-3 py-3  text-md font-medium whitespace-nowrap text-right">
                   <a href="#" @click="edit(row)" class="text-indigo-600 hover:text-indigo-900">Edit</a> |
                   <a href="#" @click="deleteRow(row)" class="text-red-600 hover:text-red-900">Delete</a>
                 </td>
@@ -88,12 +91,22 @@
                     <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
                       <div class="grid md:grid-cols-2 gap-6">
                         <div class="col-span-1 sm:col-span-1">
-                          <div class="py-2">
-                            <label for="name" class="block text-md font-medium text-gray-700"> Package Name </label>
-                            <div class="mt-1 flex rounded-md shadow-sm">
-                              <input type="text" v-model="form.name" name="name" id="name"
-                                class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                                placeholder="Package Name" required />
+                          <div class="py-2 grid grid-cols-3 gap-2">
+                            <div class="col-span-2">
+                              <label for="name" class="block text-md font-medium text-gray-700"> Package Name </label>
+                              <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="text" v-model="form.name" name="name" id="name"
+                                  class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                                  placeholder="Package Name" required />
+                              </div>
+                            </div>
+                            <div class="col-span-1">
+                              <label for="name" class="block text-md font-medium text-gray-700"> Short Code </label>
+                              <div class="mt-1 flex rounded-md shadow-sm">
+                                <input type="text" v-model="form.short_code" name="short_code" id="short_code"
+                                  class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                                  placeholder="Short Code" required />
+                              </div>
                             </div>
                           </div>
                           <div class="py-2">
@@ -343,6 +356,7 @@ export default {
     const form = reactive({
       id: null,
       name: null,
+      short_code: null,
       price: null,
       speed: null,
       type: "ftth",
@@ -423,6 +437,7 @@ export default {
     function edit(data) {
       form.id = data.id;
       form.name = data.name;
+      form.short_code = data.short_code;
       form.otc = data.otc;
       form.price = data.price;
       form.speed = data.speed;

@@ -214,6 +214,25 @@ export default {
         },
         {
           name: "user",
+          label: "ODN ",
+          icon:"fas fa-route",
+          isOpen: false,
+          links: [
+            { name: "ODF", route: "odfs.index", icon: "fas fa-network-wired mr-2" },
+            { name: "ODB", route: "odbs.index", icon: "fas fa-network-wired mr-2" },
+            { name: "ODB-Detail", route: "odb-fiber-cables.index", icon: "fas fa-network-wired mr-2" },
+            { name: "Fiber Core", route: "fiber-cables.index", icon: "fas fa-network-wired mr-2" },
+           
+            { name: "JC Box List", route: "jc-boxes.index", icon: "fas fa-square mr-2" },
+            { name: "Core Assignment", route: "core-assignments.index", icon: "fas fa-equals mr-2" },
+            { name: "DN Box", route: "dn-boxes.index", icon: "fas fa-tv mr-2" },
+            { name: "DN Splitter", route: "dn-splitters.index", icon: "fas fa-network-wired mr-2" },
+            { name: "SN Box", route: "sn-boxes.index", icon: "fas fa-tv mr-2" },
+            { name: "SN Splitter", route: "sn-splitters.index", icon: "fas fa-network-wired mr-2" },
+          ],
+        },
+        {
+          name: "user",
           label: "Operation ",
           icon:"fas fa-users",
           isOpen: false,

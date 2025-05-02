@@ -52,6 +52,7 @@ class PackageController extends Controller
         Validator::make($request->all(), [
             'name' => ['required'],
             'speed' => ['required'],
+            'short_code' => ['required'],
             'installation_timeline' => ['required'],
             'sla_id' => ['required'],
             'type' => ['required', 'in:ftth,dplc,ipvpn'],
@@ -64,6 +65,7 @@ class PackageController extends Controller
 
         $package = new Package();
         $package->name = $request->name;
+        $package->short_code = $request->short_code;
         $package->installation_timeline = $request->installation_timeline;
         $package->speed = $request->speed;
         $package->currency = $request->currency;
@@ -94,6 +96,7 @@ class PackageController extends Controller
     {
         Validator::make($request->all(), [
             'name' => ['required'],
+            'short_code' => ['required'],
             'speed' => ['required'],
             'installation_timeline' => ['required'],
             'type' => ['required', 'in:ftth,dplc,ipvpn'],
@@ -110,6 +113,7 @@ class PackageController extends Controller
 
             $package = Package::find($request->input('id'));
             $package->name = $request->name;
+            $package->short_code = $request->short_code;
             $package->speed = $request->speed;
             $package->installation_timeline = $request->installation_timeline;
             $package->currency = $request->currency;

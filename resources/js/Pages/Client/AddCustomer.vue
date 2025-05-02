@@ -115,7 +115,7 @@
                   Information</h6>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
                   <div class="col-span-1 sm:col-span-1 w-full">
-                    <label for="ftth_id" class="block text-sm font-medium text-gray-700"><span
+                    <label for="isp_ftth_id" class="block text-sm font-medium text-gray-700"><span
                         class="text-red-500">*</span>
                       Customer ID </label>
                     <div class="mt-1 flex rounded-md shadow-sm">
@@ -123,12 +123,12 @@
                         class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
                         <i class="fas fa-id-badge"></i>
                       </span>
-                      <input v-model="form.ftth_id" type="text" name="ftth_id" id="ftth_id"
+                      <input v-model="form.isp_ftth_id" type="text" name="isp_ftth_id" id="isp_ftth_id"
                         class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                        required :disabled="checkPerm('ftth_id')" />
+                        required :disabled="checkPerm('isp_ftth_id')" />
                     </div>
-                    <p v-show="$page.props.errors.ftth_id" class="mt-2 text-sm text-red-500">{{
-                      $page.props.errors.ftth_id }}</p>
+                    <p v-show="$page.props.errors.isp_ftth_id" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.isp_ftth_id }}</p>
                   </div>
                   <div class="col-span-1 sm:col-span-1">
                     <label for="order_date" class="block text-sm font-medium text-gray-700"><span
@@ -288,7 +288,7 @@ export default {
       longitude: "",
       order_date: "",
       installation_date: "",
-      ftth_id: "",
+      isp_ftth_id: "",
       package: "",
       status: "",
       subcom: "",
@@ -368,18 +368,18 @@ export default {
       let city_code = form.township['city_code'];
       let city_id = form.township['city_id'];
       var data = props.max_id.filter((id) => id.id == city_id)[0];
-      form.ftth_id = city_code + ('000000' + (parseInt(data.value) + 1)).slice(-6) + 'FX';
+      form.isp_ftth_id = city_code + ('000000' + (parseInt(data.value) + 1)).slice(-6) + 'FX';
     }
     function fillPppoe() {
       if (!form.pppoe_account) {
-        if (form.ftth_id && form.township) {
+        if (form.isp_ftth_id && form.township) {
           // let dn_no = getNumber(form.dn_id['name']);
           // let sn_no = getNumber(form.sn_id['name']);
           // let city_code = form.township['city_code'];
-          // var data = getNumber(form.ftth_id);
+          // var data = getNumber(form.isp_ftth_id);
           // let psw = dn_no.toString() + sn_no.toString() + ('00000' + (parseInt(data))).slice(-5);
           // let pppoe = city_code + psw + '@FIP';
-          form.pppoe_account = form.ftth_id;
+          form.pppoe_account = form.isp_ftth_id;
           pppoe_auto.value = true;
         }
       }
@@ -417,10 +417,10 @@ export default {
       //   password += chars.substring(randomNumber, randomNumber + 1);
       // }
       if (!form.pppoe_password) {
-        // if (form.ftth_id) {
+        // if (form.isp_ftth_id) {
         //   form.pppoe_password = password;
         // }
-        if (form.ftth_id && form.name && form.pppoe_account) {
+        if (form.isp_ftth_id && form.name && form.pppoe_account) {
 
           form.pppoe_password = getAbbreviation(form.name);
         }

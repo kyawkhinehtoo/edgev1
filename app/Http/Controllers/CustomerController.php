@@ -21,6 +21,7 @@ use App\Models\Partner;
 use App\Models\Pop;
 use App\Models\PopDevice;
 use App\Models\PublicIpAddress;
+use App\Models\SnPort;
 use App\Models\Subcom;
 use Carbon\Carbon;
 use Inertia\Inertia;
@@ -163,7 +164,7 @@ class CustomerController extends Controller
             ->groupBy('speed', 'type')
             ->orderBy('speed', 'ASC')->get();
          //dd($request);
-        $customers =  Customer::with('package','township','isp','sn','dn','pop','pop_device','status')
+        $customers =  Customer::with('package','township','isp','status')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
@@ -353,7 +354,7 @@ class CustomerController extends Controller
     {
 
         $packages = Package::get();
-        $sn = SnPorts::get();
+        $sn = SnPort::get();
         $projects = Project::get();
         $pops = Pop::get();
         $bundle_equiptments = BundleEquiptment::get();
@@ -627,7 +628,7 @@ class CustomerController extends Controller
                 return abort(403, 'Unauthorized access.');
             }
         }
-        $customer = Customer::with('sn','dn','pop','pop_device','township','partner','package','isp')
+        $customer = Customer::with('township','partner','package','isp')
             ->where(function ($query) {
                 $query->where('deleted', 0)->orWhereNull('deleted');
             })->find($id);

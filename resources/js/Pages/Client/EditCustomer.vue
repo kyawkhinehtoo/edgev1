@@ -147,12 +147,12 @@
                             class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
                             <i class="fas fa-id-badge"></i>
                           </span>
-                          <input v-model="form.ftth_id" type="text" name="ftth_id" id="ftth_id"
+                          <input v-model="form.isp_ftth_id" type="text" name="isp_ftth_id" id="isp_ftth_id"
                             class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            required :disabled="checkPerm('ftth_id')" />
+                            required :disabled="checkPerm('isp_ftth_id')" />
                         </div>
-                        <p v-show="$page.props.errors.ftth_id" class="mt-2 text-sm text-red-500">{{
-                          $page.props.errors.ftth_id }}</p>
+                        <p v-show="$page.props.errors.isp_ftth_id" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.isp_ftth_id }}</p>
                       </div>
                       <div class="col-span-1 sm:col-span-1">
                         <label for="order_date" class="block text-sm font-medium text-gray-700"><span
@@ -242,6 +242,19 @@
                         ODN Information</h6>
                       
                       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-4">
+                        <div class="col-span-1 sm:col-span-1">
+                          <label for="isp" class="block text-sm font-medium text-gray-700"> Customer ID </label>
+                          <span
+                          class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                          <i class="fas fa-id-badge"></i>
+                        </span>
+                        <input v-model="form.ftth_id" type="text" name="ftth_id" id="ftth_id"
+                          class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                          required :disabled="checkPerm('ftth_id')" />
+                          <p v-show="$page.props.errors.ftth_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.ftth_id
+                          }}</p>
+                        </div>
                         <div class="col-span-1 sm:col-span-1">
                           <label for="isp" class="block text-sm font-medium text-gray-700"> ISP Assignment </label>
                           <div class="mt-1 flex rounded-md shadow-sm" v-if="isps.length !== 0">
@@ -799,6 +812,7 @@ export default {
       order_remark: props.customer.order_remark,
       installation_date: props.customer.installation_date,
       service_activation_date: props.customer.service_activation_date,
+      isp_ftth_id: props.customer.isp_ftth_id,
       ftth_id: props.customer.ftth_id,
       township: props.customer.township,
       package: props.customer.package,
