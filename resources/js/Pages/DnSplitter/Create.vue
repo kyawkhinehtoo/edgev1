@@ -1,14 +1,20 @@
 <script setup>
+import {  ref,watch } from "vue";
 import { useForm, Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Multiselect from "@suadelabs/vue3-multiselect";
 const props = defineProps({
+  pops: Object,
   dnBoxes: Array,
   fiberCables: Array
 })
-
+const popDevices = ref([]);
 const form = useForm({
   name: '',
+  pop:'',
+  pop_id : '',
+  pop_device: '',
+  pop_device_id: '',
   dn:'',
   dn_id: '',
   fiber:'',
@@ -29,6 +35,28 @@ const submit = () => {
     }
   })
 }
+const fetchPopDevices = async () => {
+      if (!form.pop_id) {
+        popDevices.value = [];
+        return;
+      }
+      try {
+        const response = await fetch(`/getOLTByPOP/${form.pop_id}`);
+        const data = await response.json();
+        popDevices.value = data || [];
+        console.log('fetch POP Devices');
+      } catch (error) {
+        console.error("Failed to fetch POP devices", error);
+      }
+    };
+watch(
+      () => form.pop_id,
+      ()=>{
+        fetchPopDevices();
+        form.pop_device = null;
+        form.pop_device_id = null;
+      }
+    );
 </script>
 
 <template>
@@ -44,15 +72,18 @@ const submit = () => {
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
           <form @submit.prevent="submit">
             <div class="grid grid-cols-1 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  v-model="form.name"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-                <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
-              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Name</label>
+                  <input
+                    type="text"
+                    v-model="form.name"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                  <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
+                </div>
+             
+              
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">DN Box</label>
@@ -62,7 +93,23 @@ const submit = () => {
               </multiselect>
                 <div v-if="form.errors.dn_id" class="text-red-500 text-sm mt-1">{{ form.errors.dn_id }}</div>
               </div>
-              <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">POP Site</label>
+                <multiselect deselect-label="Selected already" :options="pops" track-by="id"
+                label="site_name" v-model="form.pop" :allow-empty="false" :multiple="false" tabindex="2"
+                @update:modelValue="form.pop_id = $event?.id">
+              </multiselect>
+               
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">POP Device</label>
+                <multiselect deselect-label="Selected already" :options="popDevices" track-by="id"
+                label="device_name" v-model="form.pop_device" :allow-empty="false" :multiple="false" tabindex="2"
+                @update:modelValue="form.pop_device_id = $event?.id">
+              </multiselect>
+               
+              </div>
+           
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Source Fiber Cable</label>
                     <multiselect deselect-label="Selected already" :options="fiberCables" track-by="id"

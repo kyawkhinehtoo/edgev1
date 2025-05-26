@@ -1,4 +1,5 @@
 <script setup>
+import {  ref,watch } from "vue";
 import { useForm, Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Multiselect from "@suadelabs/vue3-multiselect";
@@ -6,11 +7,17 @@ import Multiselect from "@suadelabs/vue3-multiselect";
 const props = defineProps({
   dnSplitter: Object,
   dnBoxes: Array,
-  fiberCables: Array
+  fiberCables: Array,
+  pops: Object,
+  
 })
-
+const popDevices = ref([]);
 const form = useForm({
   name: props.dnSplitter.name,
+  pop: props.dnSplitter?.pop_device?.pop,
+  pop_id : props.dnSplitter?.pop_device?.pop.id,
+  pop_device: props.dnSplitter?.pop_device,
+  pop_device_id: props.dnSplitter?.pop_device?.id,
   dn: props.dnBoxes.find(box => box.id === props.dnSplitter.dn_id),
   dn_id: props.dnSplitter.dn_id,
   fiber: props.fiberCables.find(cable => cable.id === props.dnSplitter.fiber_id),
@@ -36,6 +43,28 @@ const submit = () => {
     }
   })
 }
+const fetchPopDevices = async () => {
+      if (!form.pop_id) {
+        popDevices.value = [];
+        return;
+      }
+      try {
+        const response = await fetch(`/getOLTByPOP/${form.pop_id}`);
+        const data = await response.json();
+        popDevices.value = data || [];
+        console.log('fetch POP Devices');
+      } catch (error) {
+        console.error("Failed to fetch POP devices", error);
+      }
+    };
+watch(
+      () => form.pop_id,
+      ()=>{
+        fetchPopDevices();
+        form.pop_device = null;
+        form.pop_device_id = null;
+      }
+    );
 </script>
 
 <template>
@@ -51,26 +80,44 @@ const submit = () => {
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
           <form @submit.prevent="submit">
             <div class="grid grid-cols-1 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  v-model="form.name"
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-                <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
-              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Name</label>
+                  <input
+                    type="text"
+                    v-model="form.name"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                  <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
+                </div>
+             
+              
 
               <div>
                 <label class="block text-sm font-medium text-gray-700">DN Box</label>
                 <multiselect deselect-label="Selected already" :options="dnBoxes" track-by="id"
-                  label="name" v-model="form.dn" :allow-empty="false" :multiple="false" tabindex="2"
-                  @update:modelValue="form.dn_id = $event?.id">
-                </multiselect>
+                label="name" v-model="form.dn" :allow-empty="false" :multiple="false" tabindex="2"
+                @update:modelValue="form.dn_id = $event?.id">
+              </multiselect>
                 <div v-if="form.errors.dn_id" class="text-red-500 text-sm mt-1">{{ form.errors.dn_id }}</div>
               </div>
-
-              <div class="grid grid-cols-2 gap-2">
+              <div v-if="pops">
+                <label class="block text-sm font-medium text-gray-700">POP Site</label>
+                <multiselect deselect-label="Selected already" :options="pops" track-by="id"
+                label="site_name" v-model="form.pop" :allow-empty="false" :multiple="false" tabindex="2"
+                @update:modelValue="form.pop_id = $event?.id">
+              </multiselect>
+               
+              </div>
+              <div v-if="popDevices">
+                <label class="block text-sm font-medium text-gray-700">POP Device</label>
+                <multiselect deselect-label="Selected already" :options="popDevices" track-by="id"
+                label="device_name" v-model="form.pop_device" :allow-empty="false" :multiple="false" tabindex="2"
+                @update:modelValue="form.pop_device_id = $event?.id">
+              </multiselect>
+               
+              </div>
+            
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Source Fiber Cable</label>
                   <multiselect deselect-label="Selected already" :options="fiberCables" track-by="id"

@@ -3,12 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Township;
+use App\Models\User;
 use App\Models\Zone;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ZoneController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         $search = $request->input('search');

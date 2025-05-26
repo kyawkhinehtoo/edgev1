@@ -5,12 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 use DB;
 
 class ProjectController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         $projects = Project::when($request->project, function ($query, $pkg) {

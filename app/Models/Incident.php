@@ -47,6 +47,9 @@ class Incident extends Model
         'description',
         'status',
         'closed_by',
+        'root_cause_id',
+        'sub_root_cause_id',
+        'rca_notes',
         'created_at',
         'updated_at'
     ];
@@ -83,11 +86,14 @@ class Incident extends Model
         'close_date'=> 'timestamp',
         'time'=> 'timestamp',
         'close_time'=> 'timestamp',
-       'description' => 'string',
-       'status' => 'string', 
-       'closed_by'=> 'string',
-       'created_at' => 'timestamp', 
-       'updated_at' => 'timestamp'
+        'description' => 'string',
+        'status' => 'string', 
+        'closed_by'=> 'string',
+        'root_cause_id' => 'integer',
+        'sub_root_cause_id' => 'integer',
+        'rca_notes' => 'string',
+        'created_at' => 'timestamp', 
+        'updated_at' => 'timestamp'
     ];
 
     /**
@@ -106,4 +112,19 @@ class Incident extends Model
      */
     public $timestamps = false;
 
+    /**
+     * Get the root cause associated with the incident.
+     */
+    public function rootCause()
+    {
+        return $this->belongsTo(RootCause::class);
+    }
+
+    /**
+     * Get the sub root cause associated with the incident.
+     */
+    public function subRootCause()
+    {
+        return $this->belongsTo(SubRootCause::class);
+    }
 }

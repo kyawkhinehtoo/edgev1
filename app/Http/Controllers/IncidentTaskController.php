@@ -20,7 +20,9 @@ use Illuminate\Support\Facades\Auth;
 use DateTime;
 use App\Events\AddIncident;
 use App\Events\UpdateIncident;
+use App\Models\RootCause;
 use App\Models\Subcom;
+use App\Models\SubRootCause;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewIncidentNotification;
 use App\Notifications\NewTaskNotification;
@@ -31,6 +33,8 @@ class IncidentTaskController extends Controller
     {
         //Auth::id();
         $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
+        $pendingRootCause = RootCause::with('subRootCauses')->where('is_maintenance',true)->where('is_pending',true)->get();
+        $subRootCause = SubRootCause::get();
         if($user->user_type == 'isp' ){
             return abort(403, 'Unauthorized action.');
         }
@@ -73,8 +77,9 @@ class IncidentTaskController extends Controller
             ->when($user->user_type=='subcon', function ($query) use ($id){
                 $query->where('assigned', $id);
             })
+            ->whereIn('i.status',[1,2,3,5])
             ->when($request->status, function ($query, $status) {
-                if ($status == 1 || $status == 2)
+                if ($status == 1 || $status == 2 || $status == 3)
                     $query->where('t.status', '=', $status);
             }, function ($query) {
                 $query->where('t.status', '=', 1);
@@ -82,13 +87,14 @@ class IncidentTaskController extends Controller
             ->select(
                 't.*',
                 'u1.name as incharge',
+                'i.code',
                 'c.ftth_id',
                 'i.priority',
                 'i.type',
                 'i.topic',
                 'i.description as incident_description',
                 'i.date',
-                'i.time'
+                'i.time',
             )
             ->orderBy('t.id', 'DESC')
             ->paginate(10);
@@ -101,7 +107,9 @@ class IncidentTaskController extends Controller
                 'subcon' => $subcon,
                 'subcons' => $subcons,
                 'user' => $user,
-                'task_write' => $task_write
+                'task_write' => $task_write,
+                'pendingRootCause'=>$pendingRootCause,
+                'subRootCause'=>$subRootCause,
             ]
         );
     }
@@ -112,19 +120,76 @@ class IncidentTaskController extends Controller
 
         Validator::make($request->all(), [
             'incident_id' => ['required'],
+            'assigned' => ['required'], 
             'target' => ['required'],
             'description' => ['required'],
             'status' => ['required'],
-        ])->validate();
+            'comment' => ['required_if:status,2,3', 'nullable', 'string'],
+            'root_causes_id' => ['required_if:status,3', 'nullable'],
+            'sub_root_causes_id' => ['required_if:status,3', 'nullable'],
+        ],
+        [
+            'comment.required_if' => 'Please write comment before closing the task',
+            'root_causes_id.required_if' => 'Please Choose Main Root Cause for Pending Task',
+            'sub_root_causes_id.required_if' => 'Please Choose Sub Root Cause for Pending Task',
+        ]
+        )->validate();
         if ($request->has('id')) {
             $task = Task::find($request->input('id'));
+            $originalValues = [
+                'incident_id' => $task->incident_id,
+                'assigned' => $task->assigned,
+                'target' => $task->target,
+                'description' => $task->description,
+                'status' => $task->status,
+                'comment' => $task->comment,
+                'root_causes_id' => $task->root_causes_id,
+                'sub_root_causes_id' => $task->sub_root_causes_id
+            ];
+          
             $task->incident_id = $request->incident_id;
-            $task->assigned = json_encode($request->assigned);
+            $task->assigned = $request->assigned['id'];
             $task->target = $request->target;
             $task->description = $request->description;
             $task->status = $request->status;
+            $task->comment = $request->comment;
+            $task->root_causes_id = $request->root_causes_id;
+            $task->sub_root_causes_id = $request->sub_root_causes_id;
             $task->updated_at = NOW();
             $task->update();
+
+            $newValues = [
+                'incident_id' => $request->incident_id,
+                'assigned' => $request->assigned['id'],
+                'target' => $request->target,
+                'description' => $request->description,
+                'status' => $request->status,
+                'comment' => $request->comment,
+                'root_causes_id' => $request->root_causes_id,
+                'sub_root_causes_id' => $request->sub_root_causes_id
+            ];
+            
+            $hasChanges = false;
+            foreach ($originalValues as $field => $value) {
+                if ($value != $newValues[$field]) {
+                    $hasChanges = true;
+                    break;
+                }
+            }
+                // If changes detected, create TaskHistory record
+                if ($hasChanges) {
+                    TaskHistory::create([
+                        'task_id' => $task->id,
+                        'incident_id' => $task->incident_id,
+                        'assigned' => $task->assigned,
+                        'target' => $task->target,
+                        'status' => $task->status,
+                        'description' => $task->description,
+                        'comment' => $task->comment,
+                        'root_causes_id' => $task->root_causes_id,
+                        'sub_root_causes_id' => $task->sub_root_causes_id
+                    ]);
+                }
             $data = array();
 
             $data['incident_id'] = $request->incident_id;

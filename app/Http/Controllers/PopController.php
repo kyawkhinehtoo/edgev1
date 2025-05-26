@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Pop;
 use App\Models\PopDevice;
 use App\Models\Township;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,12 @@ use Illuminate\Support\Facades\DB;
 class PopController extends Controller
 {
     //
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->dn_panel){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         $pops = Pop::with(['townships','partner'])

@@ -5,11 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Odf;
 use App\Models\Pop;
 use App\Models\PopDevice;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class OdfController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->dn_panel){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index()
     {
        $popDevices = PopDevice::with('pop')->get();

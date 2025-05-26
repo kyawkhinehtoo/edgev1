@@ -7,11 +7,18 @@ use App\Models\FiberCable;
 use App\Models\Odb;
 use App\Models\OdbFiberCable;
 use App\Models\PopDevice;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class OdbFiberCableController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->dn_panel){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         $query = OdbFiberCable::with(['odb','odb.odf', 'fiberCable', 'popDevice']);

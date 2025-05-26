@@ -190,15 +190,22 @@ export default {
             { name: "Partner Setup", route: "partner.index", icon: "fas fa-user-tag mr-2" },
             { name: "ISP Setup", route: "isps.index", icon: "fas fa-user-tag mr-2" },
             { name: "Subcon Setup", route: "subcom.index", icon: "fas fa-handshake mr-2" },
+            { name: "Subcon CheckList", route: "subcon-checklists.index", icon: "fas fa-handshake mr-2" },
+            { name: "Main RCA Setup", route: "root-causes.index", icon: "fas fa-handshake mr-2" },
+            { name: "Sub RCA Setup", route: "sub-root-causes.index", icon: "fas fa-handshake mr-2" },
+            
+
+
+
+
             { name: "City Setup", route: "city.index", icon: "fas fa-city mr-2" },
             { name: "Township Setup", route: "township.index", icon: "fas fa-city mr-2" },
             { name: "Zone Setup", route: "zone.index", icon: "fas fa-handshake mr-2" },
             { name: "Project Setup", route: "project.index", icon: "fas fa-handshake mr-2" },
             { name: "Bundle Setup", route: "equiptment.index", icon: "fas fa-gamepad mr-2" },
 
-            { name: "POP Setup", route: "pop.index", icon: "fas fa-building mr-2" },
-            { name: "DN Setup", route: "port.index", icon: "fas fa-server mr-2" },
-            { name: "SN Setup", route: "snport.index", icon: "fas fa-network-wired mr-2" },
+           
+            
             { name: "SLA Setup", route: "sla.index", icon: "fas fa-percentage mr-2" },
             { name: "Package Setup", route: "package.index", icon: "fas fa-cube mr-2" },
           
@@ -208,16 +215,17 @@ export default {
             { name: "SMS Gateway", route: "smsgateway.index", icon: "fas fa-sms mr-2" },
             // { name: "Radius Config", route: "radiusconfig.index", icon: "fas fa-sms mr-2" },
             { name: "Billing Config", route: "billconfig.index", icon: "fas fa-sms mr-2" },
-            { name: "Activity Log", route: "activity-log.index", icon: "fas fa-circle-info mr-2" },
+          
             { name: "System Setting", route: "setting.index", icon: "fas fa-screwdriver-wrench mr-2" },
           ],
         },
         {
-          name: "user",
+          name: "odn",
           label: "ODN ",
           icon:"fas fa-route",
           isOpen: false,
           links: [
+            { name: "POP Setup", route: "pop.index", icon: "fas fa-building mr-2" },
             { name: "ODF", route: "odfs.index", icon: "fas fa-network-wired mr-2" },
             { name: "ODB", route: "odbs.index", icon: "fas fa-network-wired mr-2" },
             { name: "ODB-Detail", route: "odb-fiber-cables.index", icon: "fas fa-network-wired mr-2" },
@@ -300,6 +308,7 @@ export default {
             // { name: "Radius User Report", route: "showRadius", icon: "fas fa-server mr-2" },
             // { name: "IP Usages Report", route: "publicIpReport", icon: "fas fa-server mr-2" },
             { name: "DN SN Report", route: "dnSnReport", icon: "fas fa-tower-broadcast mr-2" },
+            { name: "Activity Log", route: "activity-log.index", icon: "fas fa-circle-info mr-2" },
           ],
         },
       ],
@@ -316,6 +325,8 @@ export default {
             return this.$page.props?.role?.admin_panel;
           case 'user':
             return this.$page.props?.role?.customer_panel;
+          case 'odn':
+            return this.$page.props?.role?.dn_panel;
           case 'billing':
             return this.$page.props?.role?.billing_panel;
           case 'report':

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\EmailTemplate;
 use App\Models\AnnouncementLog;
 use App\Models\Announcement;
+use App\Models\User;
 use App\Rules\UniqueJsonValue;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +14,12 @@ use Illuminate\Validation\Rule;
 
 class EmailTemplateController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         // $data = BundleEquiptment::all();
@@ -23,16 +30,30 @@ class EmailTemplateController extends Controller
     }
     public function store(Request $request)
     {
-        $to_validate = array(
+        $to_validate = [
             ['key' => 'bill_invoice', 'name' => 'Bill Invoice'],
             ['key' => 'unpaid_reminder', 'name' => 'Unpaid Reminder'],
-        );
+            ['key' => 'new_ticket', 'name' => 'Unpaid Reminder'],
+            ['key' => 'closed_ticket', 'name' => 'Unpaid Reminder'],
+            ['key' => 'new_order', 'name' => 'New Order'],
+            ['key' => 'subcon_assign_new', 'name' => 'Subcon Assign New Site'],
+            ['key' => 'subcon_complete_new', 'name' => 'Subcon Complete New Site'],
+            ['key' => 'subcon_assign_maintain', 'name' => 'Subcon Assign Maintain'],
+            ['key' => 'subcon_complete_maintain', 'name' => 'Subcon Complete Maintain'],
+        ];
+        
         $table = 'email_templates';
-        Validator::make($request->all(), [
+        
+        $rules = [
             'name' => 'required|unique:email_templates,name|max:255',
             'body' => 'required|max:280',
-            'default_name' => ['required',  new UniqueJsonValue($table, $request->id, $to_validate)],
-        ])->validate();
+            'default_name' => [
+                'required',
+                new UniqueJsonValue($table, $request->id, $to_validate, $request->type),
+            ],
+        ];
+        
+        Validator::make($request->all(), $rules)->validate();
         if ($request->default) {
             $type = ($request->type) ? 'email' : 'sms';
             EmailTemplate::where('type', '=', $type)->update(['default' => 0]);
@@ -41,6 +62,7 @@ class EmailTemplateController extends Controller
         $template->name = $request->name;
         $template->title = $request->title;
         $template->body = $request->body;
+        $template->default = 0;
         $template->cc_email = $request->cc_email;
         $template->type = ($request->type) ? 'email' : 'sms';
         $template->is_bulk = ($request->is_bulk && !$request->type)?1:0;
@@ -50,16 +72,31 @@ class EmailTemplateController extends Controller
     }
     public function update(Request $request)
     {
-        $table = 'email_templates';
-        $to_validate = array(
+        $to_validate = [
             ['key' => 'bill_invoice', 'name' => 'Bill Invoice'],
             ['key' => 'unpaid_reminder', 'name' => 'Unpaid Reminder'],
-        );
-        Validator::make($request->all(), [
-            'name' => ['required'],
-            'body' => ['required'],
-            'default_name' => ['required',  new UniqueJsonValue($table, $request->id, $to_validate),]
-        ])->validate();
+            ['key' => 'new_ticket', 'name' => 'Unpaid Reminder'],
+            ['key' => 'closed_ticket', 'name' => 'Unpaid Reminder'],
+            ['key' => 'new_order', 'name' => 'New Order'],
+            ['key' => 'subcon_assign_new', 'name' => 'Subcon Assign New Site'],
+            ['key' => 'subcon_complete_new', 'name' => 'Subcon Complete New Site'],
+            ['key' => 'subcon_assign_maintain', 'name' => 'Subcon Assign Maintain'],
+            ['key' => 'subcon_complete_maintain', 'name' => 'Subcon Complete Maintain'],
+        ];
+        
+        $table = 'email_templates';
+        
+        $rules = [
+            'name' => 'required|max:255|unique:email_templates,name,' . $request->id,
+            'body' => 'required|max:280',
+           
+            'default_name' => [
+                'required',
+                new UniqueJsonValue($table, $request->id, $to_validate, $request->type),
+            ],
+        ];
+        
+        Validator::make($request->all(), $rules)->validate();
         if ($request->has('id')) {
             if ($request->default) {
                 $type = ($request->type) ? 'email' : 'sms';
@@ -69,6 +106,7 @@ class EmailTemplateController extends Controller
             $template->name = $request->name;
             $template->title = $request->title;
             $template->body = $request->body;
+            $template->default = 0;
             $template->cc_email = $request->cc_email;
             $template->type = ($request->type) ? 'email' : 'sms';
             $template->is_bulk = ($request->is_bulk && !$request->type)?1:0;

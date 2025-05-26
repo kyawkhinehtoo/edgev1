@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use App\Models\Package;
 use App\Models\Project;
 use App\Models\Status;
@@ -30,6 +31,9 @@ class DashboardController extends Controller
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->count();
         $total = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
@@ -38,6 +42,9 @@ class DashboardController extends Controller
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
+            })
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
             ->count();
 
@@ -48,6 +55,9 @@ class DashboardController extends Controller
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->count();
 
         $suspense = DB::table('customers')
@@ -57,6 +67,9 @@ class DashboardController extends Controller
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->count();
         $terminate = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
@@ -64,6 +77,9 @@ class DashboardController extends Controller
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
+            })
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
             ->count();
 
@@ -73,6 +89,9 @@ class DashboardController extends Controller
                     ->orwherenull('customers.deleted');
             })
             ->whereRaw('week(installation_date)=week(now()) AND year(installation_date)=year(NOW())')
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->count();
 
         $ftth = DB::table('customers')
@@ -84,6 +103,9 @@ class DashboardController extends Controller
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('packages.type', '=', 'ftth')
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->count();
 
         $b2b = DB::table('customers')
@@ -95,6 +117,9 @@ class DashboardController extends Controller
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('packages.type', '=', 'b2b')
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->count();
 
         $dia = DB::table('customers')
@@ -106,6 +131,9 @@ class DashboardController extends Controller
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('packages.type', '=', 'dia')
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->count();
         //SELECT p.name,COUNT(c.ftth_id) AS customers FROM packages p JOIN customers c ON c.package_id=p.id  WHERE p.`type`='ftth' GROUP BY p.name;
         $ftth_total = DB::table('customers')
@@ -117,9 +145,13 @@ class DashboardController extends Controller
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('packages.type', '=', 'ftth')
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->select('packages.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
             ->groupBy('packages.name')
             ->orderBy('packages.name', 'DESC')
+            
             ->get();
 
         $b2b_total = DB::table('customers')
@@ -131,6 +163,9 @@ class DashboardController extends Controller
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('packages.type', '=', 'b2b')
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->select('packages.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
             ->groupBy('packages.name')
             ->orderBy('packages.name', 'DESC')
@@ -145,6 +180,9 @@ class DashboardController extends Controller
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('packages.type', '=', 'dia')
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            })
             ->select('packages.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
             ->groupBy('packages.name')
             ->orderBy('packages.name', 'DESC')

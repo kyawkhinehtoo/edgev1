@@ -19,6 +19,8 @@ use App\Models\Role;
 use App\Models\ReceiptRecord;
 use App\Models\BillAdjustment;
 use App\Models\DnPorts;
+use App\Models\DnSplitter;
+use App\Models\OdbFiberCable;
 use App\Models\Partner;
 use App\Models\ReceiptSummery;
 use Inertia\Inertia;
@@ -31,6 +33,7 @@ use Mail;
 use DateTime;
 use App\Models\SmsGateway;
 use App\Models\SnPorts;
+use App\Models\SnSplitter;
 use Carbon\Carbon;
 
 class ReportController extends Controller
@@ -747,52 +750,58 @@ class ReportController extends Controller
         if($user->user_type == 'partner'){
             $partners = Partner::where('id',$user->partner_id)->get();
         }
-        
-        $dns = DnPorts::get();
-        $sns = DB::table('sn_ports')
-            ->leftjoin('dn_ports', 'sn_ports.dn_id', '=', 'dn_ports.id')
+   
+        $dns = DnSplitter::get();
+        $sns = SnSplitter::join('sn_boxes', 'sn_splitters.sn_id', '=', 'sn_boxes.id')
+            ->join('dn_splitters','sn_boxes.dn_splitter_id', '=','dn_splitters.id')
             ->when($request->general, function ($query, $keyword) {
-                $query->where('sn_ports.name', 'LIKE', '%' . $keyword . '%');
-                $query->orwhere('sn_ports.description', 'LIKE', '%' . $keyword . '%');
+                $query->where('sn_boxes.name', 'LIKE', '%' . $keyword . '%');
+                $query->orwhere('sn_splitters.name', 'LIKE', '%' . $keyword . '%');
             })
 
-            ->select('sn_ports.*', 'dn_ports.name as dn_name')
+            ->select('sn_splitters.*', 'dn_splitters.name as dn_name')
             ->paginate(10);
-        $sns_all = SnPorts::get();
-        $overall = DB::table('sn_ports')
-            ->leftjoin('dn_ports', 'sn_ports.dn_id', '=', 'dn_ports.id')
-            ->leftjoin('pop_devices','dn_ports.pop_device_id', '=', 'pop_devices.id')
-            ->leftjoin('pops','pop_devices.pop_id', '=', 'pops.id')
-            ->leftjoin('partners','pops.partner_id', '=', 'partners.id')
-            ->leftjoin('customers', 'sn_ports.id', '=', 'customers.sn_id')
+        $sns_all = SnSplitter::get();
+        
+        
+        // $odb = OdbFiberCable::with('popDevice')->where('fiber_cable_id', $fc->id)->where('status', 1)->
+        // where('odb_port',$dn->core_number)->first();
+
+        $overall = DB::table('sn_splitters')
+            ->join('sn_boxes','sn_splitters.sn_id', '=','sn_boxes.id')
+            ->join('dn_splitters','sn_boxes.dn_splitter_id', '=','dn_splitters.id')
+            ->join('pop_devices','dn_splitters.pop_device_id', '=','pop_devices.id')
+            ->join('pops','pop_devices.id', '=','pops.id')
+            ->join('partners','pops.partner_id', '=','partners.id')
+            ->leftjoin('sn_ports', 'sn_ports.sn_splitter_id', '=', 'sn_splitters.id')
+            ->leftjoin('customers', 'sn_ports.customer_id', '=', 'customers.id')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
                 }
             })
-            ->select('sn_ports.id', 'sn_ports.name', 'sn_ports.description', 'sn_ports.dn_id', 'sn_ports.location', 'sn_ports.input_dbm', 'dn_ports.name as dn_name', DB::raw('count(customers.id) as ports'))
+            ->select('sn_splitters.id', 'sn_splitters.name',  'sn_splitters.location', 'dn_splitters.name as dn_name', DB::raw('count(customers.id) as ports'))
             ->when($request->general, function ($query, $general) {
                 $query->where(function ($query) use ($general) {
-                    $query->where('sn_ports.name', 'LIKE', '%' . $general . '%')
-                        ->orWhere('sn_ports.description', 'LIKE', '%' . $general . '%')
-                        ->orWhere('dn_ports.name', 'LIKE', '%' . $general . '%')
-                        ->orWhere('dn_ports.description', 'LIKE', '%' . $general . '%');
+                    $query->where('sn_splitters.name', 'LIKE', '%' . $general . '%')
+                        ->orWhere('dn_splitters.name', 'LIKE', '%' . $general . '%');
                 });
             })
             ->when($request->partner, function ($query, $partner) {
                 $query->where('partners.id', '=', $partner['id']);
             })
             ->when($request->pop, function ($query, $pop) {
+              
                 $query->where('pops.id', '=', $pop['id']);
             })
             ->when($request->pop_device, function ($query, $pop_device) {
                 $query->where('pop_devices.id', '=', $pop_device['id']);
             })
             ->when($request->dn, function ($query, $dn) {
-                $query->where('dn_ports.id', '=', $dn['id']);
+                $query->where('dn_splitters.id', '=', $dn['id']);
             })
             ->when($request->sn, function ($query, $sn) {
-                $query->where('sn_ports.id', '=', $sn['id']);
+                $query->where('sn_splitters.id', '=', $sn['id']);
             })
             ->when($min !== null, function ($query) use ($min) {
                 $query->havingRaw('count(customers.id) >= ?', [$min]);
@@ -801,11 +810,11 @@ class ReportController extends Controller
                 $query->havingRaw('count(customers.id) <= ?', [$max]);
             })
 
-            ->groupBy(['sn_ports.id', 'sn_ports.dn_id', 'sn_ports.name','sn_ports.description','sn_ports.location','sn_ports.input_dbm','dn_ports.name'])
+            ->groupBy(['sn_splitters.id'])
             ->paginate(20);
         $overall->appends($request->all())->links();
         return Inertia::render(
-            'Client/SNPorts',
+            'Client/DnsnReport',
             ['partners'=>$partners,'sns' => $sns, 'dns' => $dns, 'overall' => $overall, 'sns_all' => $sns_all]
         );
     }

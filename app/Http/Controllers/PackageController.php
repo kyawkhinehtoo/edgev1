@@ -8,12 +8,19 @@ use App\Models\Sla;
 use App\Models\PackageBundle;
 use App\Models\BundleEquiptment;
 use App\Models\Customer;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 
 class PackageController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         $packages = Package::when($request->package, function ($query, $pkg) {

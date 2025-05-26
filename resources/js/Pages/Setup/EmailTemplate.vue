@@ -256,7 +256,37 @@ export default {
     }, {
       key: 'unpaid_reminder',
       name: 'Unpaid Reminder',
-    }]);
+    }, {
+      key: 'new_ticket',
+      name: 'New Ticket',
+    }
+    ,{
+      key: 'closed_ticket',
+      name: 'Close Ticket',
+    }
+    ,{
+      key: 'new_order',
+      name: 'New Customer Order',
+    }
+    ,{
+      key: 'subcon_assign_new',
+      name: 'Subcon Assign New Site',
+    }
+    ,{
+      key: 'subcon_complete_new',
+      name: 'Subcon Complete New Site',
+    }
+    ,{
+      key: 'subcon_assign_maintain',
+      name: 'Subcon Assign Maintain',
+    }
+    ,{
+      key: 'subcon_complete_maintain',
+      name: 'Subcon Complete Maintain',
+    }
+  
+  ]);
+
     const form = reactive({
       id: null,
       name: null,
@@ -377,7 +407,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style>
 @import "@vueup/vue-quill/dist/vue-quill.snow.css";
 
 input[type="number"]::-webkit-inner-spin-button {

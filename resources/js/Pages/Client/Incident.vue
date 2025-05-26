@@ -6,7 +6,7 @@
         <div class="py-2 md:inline-flex justify-between w-full gap-4">
           <div class="flex w-full">
             <span
-              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-2">
+              class="z-10  font-normal text-gray-400 absolute selection:rounded text-base items-center justify-center self-center p-2">
               <i class="fas fa-search"></i>
             </span>
             <input type="text" placeholder="Ticket/Customer"
@@ -16,7 +16,7 @@
 
           <div class="flex w-full">
             <span
-              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-2">
+              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
               <i class="fas fa-sliders-h"></i>
             </span>
             <select v-model="incidentType"
@@ -32,7 +32,7 @@
 
           <div class="flex w-full">
             <span
-              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-2">
+              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
               <i class="fas fa-sliders-h"></i>
             </span>
             <select v-model="incidentBy"
@@ -45,10 +45,10 @@
           </div>
           <div class="flex w-full">
             <span
-              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  w-8 pl-3 py-2">
+              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
               <i class="fas fa-sliders-h"></i>
             </span>
-            
+
             <select v-model="incidentStatus"
               class="relative self-center block w-full pr-12 py-2 rounded-md text-gray-400 text-sm border-gray-300 focus:ring focus:ring-indigo-500 focus:border-indigo-500 focus:ring-opacity-10 focus:outline-none pl-10"
               tabindex="5" @change="changeStatus">
@@ -61,8 +61,8 @@
             </select>
           </div>
           <div class="flex w-full self-center">
-             
-            <VueDatePicker v-model="incidentDate" :range="{ partialRange: true }" placeholder="Ticket Date" 
+
+            <VueDatePicker v-model="incidentDate" :range="{ partialRange: true }" placeholder="Ticket Date"
               :enable-time-picker="false" model-type="yyyy-MM-dd" id="order_date"
               class="text-gray-400 text-sm focus:ring focus:ring-indigo-500 focus:border-indigo-500 focus:ring-opacity-10 focus:outline-none" />
           </div>
@@ -79,8 +79,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-6 gap-6 w-full"
-           v-if="write_permission || read_permission">
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-6 w-full" v-if="write_permission || read_permission">
           <!--ticket list -->
 
           <div class="lg:col-span-4 md:col-span-6">
@@ -207,10 +206,10 @@
                   </div>
                   <div class="flex">
                     <span
-                      class="border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white bg-white rounded-l-md text-sm shadow outline-none focus:outline-none">
+                      class="border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white  rounded-l-md text-sm shadow outline-none focus:outline-none">
                       Ticket ID </span>
                     <input type="text" v-model="form.code" name="code" id="code"
-                      class="mr-2 border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white bg-white rounded-r-md text-sm shadow outline-none focus:outline-none"
+                      class="mr-2 border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded-r-md text-sm shadow outline-none focus:outline-none"
                       disabled />
                     <ul class="flex col-span-1">
                       <li class="px-2 lg:px-3">
@@ -278,7 +277,7 @@
                             class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
                         </div>
                         <p v-if="$page.props.errors.date" class="mt-2 text-sm text-red-500">{{ $page.props.errors.date
-                          }}</p>
+                        }}</p>
                       </div>
                       <div class="py-2 col-span-2 sm:col-span-2">
                         <div class="mt-1 flex rounded-md shadow-sm">
@@ -286,7 +285,7 @@
                             class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
                         </div>
                         <p v-if="$page.props.errors.time" class="mt-2 text-sm text-red-500">{{ $page.props.errors.time
-                          }}</p>
+                        }}</p>
                       </div>
                       <!-- end of date -->
                       <!-- ticket id -->
@@ -309,7 +308,8 @@
                       <div class="py-2 col-span-4 sm:col-span-4">
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="customers.length !== 0">
                           <multiselect deselect-label="Selected already" :options="customers" track-by="id"
-                            label="ftth_id" v-model="form.customer_id" :allow-empty="false"></multiselect>
+                            label="ftth_id" v-model="form.customer_id" :allow-empty="false"
+                            :disabled="!write_permission"></multiselect>
                         </div>
                         <p v-if="$page.props.errors.customer" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.customer }}</p>
@@ -341,17 +341,17 @@
                         <div class="mt-1 flex">
                           <select v-model="form.type"
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            required @change="form.topic = null">
+                            required @change="form.topic = null" :disabled="!write_permission">
                             <option value="default">Please Choose Ticket Type</option>
                             <option value="service_complaint">Service Complaint</option>
-                         
+
                             <option value="plan_change">Plan Change</option>
                             <option value="suspension">Suspension</option>
                             <option value="termination">Termination</option>
                           </select>
                         </div>
                         <p v-if="$page.props.errors.type" class="mt-2 text-sm text-red-500">{{ $page.props.errors.type
-                          }}</p>
+                        }}</p>
                       </div>
                       <!-- end of type -->
                       <!-- topic -->
@@ -364,7 +364,8 @@
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'service_complaint'">
                         <div class="mt-1 flex">
                           <select v-model="form.topic"
-                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300">
+                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="!write_permission">
                             <option value="los_redlight">LOS Redlight</option>
                             <option value="pon_blinking">PON Blinking</option>
                             <option value="high_loss">High Loss</option>
@@ -376,12 +377,13 @@
                           </select>
                         </div>
                         <p v-if="$page.props.errors.topic" class="mt-2 text-sm text-red-500">{{ $page.props.errors.topic
-                          }}</p>
+                        }}</p>
                       </div>
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'onsite_complaint'">
                         <div class="mt-1 flex">
                           <select v-model="form.topic"
-                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300">
+                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="!write_permission">
                             <option value="no_internet">No Internet</option>
                             <option value="slow_performance">Slow Performance</option>
                             <option value="wifi_issue">Wifi Issue</option>
@@ -393,12 +395,13 @@
                           </select>
                         </div>
                         <p v-if="$page.props.errors.topic" class="mt-2 text-sm text-red-500">{{ $page.props.errors.topic
-                          }}</p>
+                        }}</p>
                       </div>
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'technical_complaint'">
                         <div class="mt-1 flex">
                           <select v-model="form.topic"
-                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300">
+                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="!write_permission">
                             <option value="website_delay_issue">Website Delay Issue</option>
                             <option value="gaming_delay_issue">Gaming Delay Issue</option>
                             <option value="application_delay_issue">Application Delay Issue</option>
@@ -406,7 +409,7 @@
                           </select>
                         </div>
                         <p v-if="$page.props.errors.topic" class="mt-2 text-sm text-red-500">{{ $page.props.errors.topic
-                          }}</p>
+                        }}</p>
                       </div>
                       <!-- end of topic -->
                       <!-- status -->
@@ -419,10 +422,11 @@
                       <div class="py-2 col-span-4 sm:col-span-4">
                         <div class="mt-1 flex">
                           <select v-model="form.status"
-                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300">
+                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="!write_permission">
                             <option value="1">Open</option>
                             <option value="2" disabled>Escalated</option>
-                            <option value="5" disabled>Resolved</option>
+                            <option value="5" disabled>Resolved Open</option>
                             <option value="3">Closed</option>
                           </select>
                         </div>
@@ -494,7 +498,7 @@
                           <div class="col-span-1 sm:col-span-1">
                             <div class="mt-1 flex rounded-md shadow-sm">
                               <span
-                                class="-mt-1 z-10 leading-snug font-normal absolute text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                                class="-mt-1 z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                                 <i class="fas fa-pause"></i>
                               </span>
                               <input type="date" v-model="form.start_date" name="start_date" id="start_date"
@@ -506,7 +510,7 @@
                           <div class="col-span-1 sm:col-span-1">
                             <div class="mt-1 flex rounded-md shadow-sm">
                               <span
-                                class="-mt-1 z-10 leading-snug font-normal absolute text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                                class="-mt-1 z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                                 <i class="fas fa-play"></i>
                               </span>
                               <input type="date" v-model="form.end_date" name="end_date" id="end_date"
@@ -528,7 +532,7 @@
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'resume'">
                         <div class="mt-1 flex rounded-md shadow-sm">
                           <span
-                            class="z-10 -mt-1 leading-snug font-normal absolute text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                            class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                             <i class="fas fa-play"></i>
                           </span>
                           <input type="date" v-model="form.start_date" name="start_date" id="start_date"
@@ -548,7 +552,7 @@
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'termination'">
                         <div class="mt-1 flex rounded-md shadow-sm">
                           <span
-                            class="z-10 -mt-1 leading-snug font-normal absolute text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                            class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                             <i class="fas fa-stop"></i>
                           </span>
                           <input type="date" v-model="form.start_date" name="start_date" id="start_date"
@@ -568,7 +572,8 @@
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'relocation'">
                         <div class="mt-1 flex">
                           <textarea v-model="form.new_address" name="new_address" id="new_address"
-                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"> </textarea>
+                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="!write_permission"> </textarea>
                         </div>
                         <p v-if="$page.props.errors.new_address" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.new_address }}</p>
@@ -584,7 +589,8 @@
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'relocation'">
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="townships.length !== 0">
                           <multiselect deselect-label="Selected already" :options="townships" track-by="id" label="name"
-                            v-model="form.new_township" :allow-empty="false"></multiselect>
+                            v-model="form.new_township" :allow-empty="false" :disabled="!write_permission">
+                          </multiselect>
                         </div>
                         <p v-if="$page.props.errors.new_township" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.new_township }}</p>
@@ -602,12 +608,12 @@
                           <div class="col-span-1 sm:col-span-1">
                             <div class="mt-1 flex rounded-md shadow-sm">
                               <span
-                                class="z-10 -mt-1 leading-snug font-normal absolute text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                                class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                                 <i class="fas fa-location-arrow"></i>
                               </span>
                               <input type="text" v-model="form.latitude" name="latitude" id="latitude"
                                 class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                                placeholder="Latitude" />
+                                placeholder="Latitude" :disabled="!write_permission" />
                             </div>
                             <p v-if="$page.props.errors.latitude" class="mt-2 text-sm text-red-500">{{
                               $page.props.errors.latitude }}</p>
@@ -615,12 +621,12 @@
                           <div class="col-span-1 sm:col-span-1">
                             <div class="mt-1 flex rounded-md shadow-sm">
                               <span
-                                class="z-10 -mt-1 leading-snug font-normal absolute text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                                class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                                 <i class="fas fa-location-arrow"></i>
                               </span>
                               <input type="text" v-model="form.longitude" name="longitude" id="longitude"
                                 class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                                placeholder="Longitude" />
+                                placeholder="Longitude" :disabled="!write_permission" />
                             </div>
                             <p v-if="$page.props.errors.longitude" class="mt-2 text-sm text-red-500">{{
                               $page.props.errors.longitude }}</p>
@@ -638,11 +644,12 @@
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'relocation'">
                         <div class="mt-1 flex rounded-md shadow-sm">
                           <span
-                            class="z-10 -mt-1 leading-snug font-normal absolute text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                            class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                             <i class="fas fa-truck"></i>
                           </span>
                           <input type="date" v-model="form.start_date" name="start_date" id="start_date"
-                            class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
+                            class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="!write_permission" />
                         </div>
                         <p v-if="$page.props.errors.start_date" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.start_date }}</p>
@@ -658,7 +665,8 @@
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'plan_change'">
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="packages.length !== 0">
                           <multiselect deselect-label="Selected already" :options="packages" track-by="id"
-                            label="item_data" v-model="form.package_id" :allow-empty="false"></multiselect>
+                            label="item_data" v-model="form.package_id" :allow-empty="false"
+                            :disabled="!write_permission"></multiselect>
                         </div>
                         <p v-if="$page.props.errors.package" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.package }}</p>
@@ -674,11 +682,12 @@
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'plan_change'">
                         <div class="mt-1 flex rounded-md shadow-sm">
                           <span
-                            class="z-10 -mt-1 leading-snug font-normal absolute text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                            class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                             <i class="fas fa-random"></i>
                           </span>
                           <input type="date" v-model="form.start_date" name="start_date" id="start_date"
-                            class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
+                            class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="!write_permission" />
                         </div>
                         <p v-if="$page.props.errors.start_date" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.start_date }}</p>
@@ -694,18 +703,77 @@
                       <div class="py-2 col-span-4 sm:col-span-4">
                         <div class="mt-1 flex">
                           <textarea v-model="form.description" name="detail" id="detail"
-                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"> </textarea>
+                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="!write_permission"> </textarea>
                         </div>
                         <p v-if="$page.props.errors.description" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.description }}</p>
                       </div>
                       <!-- end of detail -->
+                      <template v-if="editMode && form.status == 3">
+                        <!--  RCA -->
+                          <div class="col-span-5">
+                            <hr />
+                          </div>
+                        <div class="py-2 col-span-1 sm:col-span-1">
+                          <div class="mt-1 flex">
+                            <label for="rca" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> RCA :
+                            </label>
+                          </div>
+                        </div>
+                        <div class="py-2 col-span-4 sm:col-span-4">
+                          <div class="mt-1 flex rounded-md shadow-sm" v-if="rootCause?.length !== 0">
+                            <multiselect deselect-label="Selected already" :options="rootCause" track-by="id"
+                              label="name" v-model="form.rca" :allow-empty="false" :disabled="!write_permission"
+                              @update:modelValue="form.root_cause_id = $event?.id"></multiselect>
+                          </div>
+                          <p v-if="$page.props.errors.root_cause_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.root_cause_id }}</p>
+                        </div>
+                        <!--  RCA-->
+                        <!-- Sub RCA -->
+                        <div class="py-2 col-span-1 sm:col-span-1">
+                          <div class="mt-1 flex">
+                            <label for="sub_rca" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Sub RCA :
+                            </label>
+                          </div>
+                        </div>
+                        <div class="py-2 col-span-4 sm:col-span-4">
+                          <div class="mt-1 flex rounded-md shadow-sm" v-if="subRCA?.length !== 0">
+                            <multiselect deselect-label="Selected already" :options="subRCA" track-by="id" label="name"
+                              v-model="form.sub_rca" :allow-empty="false" :disabled="!write_permission"
+                              @update:modelValue="form.sub_root_cause_id = $event?.id"></multiselect>
+                          </div>
+                          <p v-if="$page.props.errors.sub_root_cause_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.sub_root_cause_id }}</p>
+                        </div>
+                        <!-- Sub RCA-->
+                        <!-- RCA Note -->
+                        <div class="py-2 col-span-1 sm:col-span-1">
+                          <div class="mt-1 flex">
+                            <label for="rca_notes" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> RCA Note :
+                            </label>
+                          </div>
+                        </div>
+                        <div class="py-2 col-span-4 sm:col-span-4">
+                          <div class="mt-1 flex">
+                            <textarea v-model="form.rca_notes" name="rca_notes" id="rca_notes"
+                              class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              :disabled="!write_permission"> </textarea>
+                          </div>
+                          <p v-if="$page.props.errors.rca_notes" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.rca_notes }}</p>
+                        </div>
+                        <!-- end of RCA Note -->
+                      </template>
+
+
                     </div>
                   </div>
                   <!-- end of tab1 -->
                   <div class="p-4" :class="[tab == 2 ? '' : 'hidden']">
                     <keep-alive>
-                      <task :data="selected_id" :key="page_update" v-if="tab == 2" />
+                      <task :data="selected_id" :errors="$page.props.errors" :key="page_update" v-if="tab == 2" />
                     </keep-alive>
                   </div>
                   <div class="p-4" :class="[tab == 3 ? '' : 'hidden']">
@@ -753,7 +821,7 @@
         </div>
       </div>
     </div>
-    <div v-if="loading" wire:loading
+    <div v-if="loading"
       class="fixed top-0 left-0 right-0 bottom-0 w-full h-screen z-50 overflow-hidden bg-gray-700 opacity-75 flex flex-col items-center justify-center">
       <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
       <h2 class="text-center text-white text-xl font-semibold">Loading...</h2>
@@ -774,7 +842,7 @@ import File from "@/Components/File";
 import CustomerDetail from "@/Components/CustomerDetail";
 import NoData from "@/Components/NoData";
 import Pagination from "@/Components/Pagination";
-import { reactive, ref, onMounted, onUpdated, provide } from "vue";
+import { reactive, ref, onMounted, onUpdated, provide, watch } from "vue";
 import Multiselect from "@suadelabs/vue3-multiselect";
 import { router } from '@inertiajs/vue3';
 import { useForm } from "@inertiajs/vue3";
@@ -813,6 +881,9 @@ export default {
     task_write: Boolean,
     user: Object,
     subcons: Object,
+    rootCause: Object,
+    subRootCause: Object,
+    pendingRootCause:Object,
   },
   setup(props) {
     const search = ref("");
@@ -825,6 +896,7 @@ export default {
     let incidentType = ref("default");
     let incidentBy = ref("default");
     let incidentDate = ref([]);
+    let subRCA = ref([]);
     const formatter = ref({
       date: "YYYY-MM-DD",
       month: "MMM",
@@ -841,6 +913,9 @@ export default {
     provide("write_permission", props.write_permission);
     provide("task_write", props.task_write);
     provide("customers", props.customers);
+    provide("pendingRootCause", props.pendingRootCause);
+    provide("rootCause", props.rootCause);
+    provide("subRootCause", props.subRootCause);
 
     const form = useForm({
       id: null,
@@ -865,6 +940,11 @@ export default {
       close_time: null,
       resolved_date: null,
       resolved_time: null,
+      rca: null,
+      sub_rca: null,
+      root_cause_id: null,
+      sub_root_cause_id: null,
+      rca_notes: null,
     });
 
     let tab = ref(true);
@@ -939,7 +1019,11 @@ export default {
       form.close_time = data.close_time;
       form.resolved_date = data.resolved_date;
       form.resolved_time = data.resolved_time;
-
+      form.rca = props.rootCause.filter((d) => d.id == data.root_cause_id)[0];
+      form.sub_rca = '';
+      form.root_cause_id = data.root_cause_id;
+      form.sub_root_cause_id = data.sub_root_cause_id;
+      form.rca_notes = data.rca_notes;
       openModal();
     }
     function clearform() {
@@ -967,6 +1051,11 @@ export default {
       form.close_time = "";
       form.resolved_date = "";
       form.resolved_time = "";
+      form.rca = "";
+      form.sub_rca = "";
+      form.rca_notes = "";
+      form.root_cause_id = null;
+      form.sub_root_cause_id = null;
     }
 
     function getStatus(data) {
@@ -1145,6 +1234,23 @@ export default {
       priorityColor();
     });
 
+    function getSubRCA(data) {
+   
+      subRCA.value = [];
+
+      let RCA = props.rootCause.filter((d) => d.id == data.id);
+      subRCA.value = RCA[0]?.sub_root_causes;
+      if(form.sub_root_cause_id){
+        form.sub_rca = subRCA.value.filter((d) => d.id == form.sub_root_cause_id)[0];
+        if(!form.sub_rca){
+          form.sub_root_cause_id = null;
+        }
+      }
+    }
+    watch(() => form.rca, (newVal) => {
+      if (newVal)
+        getSubRCA(newVal);
+    });
     onUpdated(() => {
       console.log("Incident - On Updated");
       props.packages.map(function (x) {
@@ -1153,7 +1259,7 @@ export default {
 
       priorityColor();
     });
-    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter };
+    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA };
   },
 };
 </script>

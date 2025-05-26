@@ -27,7 +27,7 @@ class Task extends Model
      * @var array
      */
     protected $fillable = [
-        'incident_id','description','assigned','target','status', 'created_at', 'updated_at'
+        'incident_id','description','assigned','target','status', 'comment', 'root_causes_id', 'sub_root_causes_id', 'created_at', 'updated_at'
     ];
 
     /**
@@ -45,7 +45,7 @@ class Task extends Model
      * @var array
      */
     protected $casts = [
-        'description' => 'string','assigned' => 'string','status' => 'string', 'created_at' => 'timestamp', 'updated_at' => 'timestamp'
+        'description' => 'string','assigned' => 'string','status' => 'string', 'comment' => 'string', 'created_at' => 'timestamp', 'updated_at' => 'timestamp'
     ];
 
     /**
@@ -63,4 +63,20 @@ class Task extends Model
      * @var boolean
      */
     public $timestamps = false;
+    
+    /**
+     * Get the root cause associated with the task.
+     */
+    public function rootCause()
+    {
+        return $this->belongsTo(RootCause::class, 'root_causes_id');
+    }
+
+    /**
+     * Get the sub root cause associated with the task.
+     */
+    public function subRootCause()
+    {
+        return $this->belongsTo(SubRootCause::class, 'sub_root_causes_id');
+    }
 }

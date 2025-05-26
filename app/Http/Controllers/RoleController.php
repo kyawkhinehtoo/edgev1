@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\Customer;
 use App\Models\Menu;
 use App\Models\Status;
+use App\Models\Township;
 use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
@@ -14,17 +15,30 @@ use DB;
 
 class RoleController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
-        $roles = Role::when($request->role, function ($query, $pkg) {
+        $roles = Role::with('townships')->when($request->role, function ($query, $pkg) {
             $query->where('name', 'LIKE', '%' . $pkg . '%');
         })
             ->paginate(10);
         $menus = Menu::all();
         $customerStatus = Status::all();
         $customer = new Customer();
+        $townships = Township::all();
         $col = $customer->getTableColumns();
-        return Inertia::render('Setup/Role', ['roles' => $roles, 'col' => $col, 'menus' => $menus,'customerStatus'=>$customerStatus]);
+        return Inertia::render('Setup/Role', [
+            'roles' => $roles,
+            'col' => $col,
+            'menus' => $menus,
+            'customerStatus' => $customerStatus,
+            'townships' => $townships
+        ]);
     }
 
     public function store(Request $request)
@@ -59,10 +73,16 @@ class RoleController extends Controller
             'incident_panel' => 'nullable|boolean',
             'billing_panel' => 'nullable|boolean',
             'report_panel' => 'nullable|boolean',
-            'customer_status' => 'nullable|array',
+            'limit_region' => 'nullable|boolean',
+            'dn_panel' => 'nullable|boolean',
+            'installation_supervisor' => 'nullable|boolean',
+            'townships' => 'nullable|array',
         ]);
 
-        Role::create($validated);
+       $role = Role::create($validated);
+        if ($request->townships) {
+            $role->townships()->attach(collect($request->townships)->pluck('id'));
+        }
         return redirect()->route('role.index')->with('message', 'Role Created Successfully.');
     }
     public function update(Request $request, Role $role)
@@ -97,11 +117,17 @@ class RoleController extends Controller
             'incident_panel' => 'nullable|boolean',
             'billing_panel' => 'nullable|boolean',
             'report_panel' => 'nullable|boolean',
+            'limit_region' => 'nullable|boolean',
             'customer_status' => 'nullable|array',
+            'dn_panel' => 'nullable|boolean',
+            'installation_supervisor' => 'nullable|boolean',
+            'townships' => 'nullable|array',
         ]);
 
         $role->update($validated);
-
+       if ($request->townships) {
+        $role->townships()->sync(collect($request->townships)->pluck('id'));
+        }
         return redirect()->back()
             ->with('message', 'Data updated successfully');
     }

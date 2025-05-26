@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\DnSplitter;
 use App\Models\DnBox;
 use App\Models\FiberCable;
+use App\Models\Pop;
+use App\Models\PopDevice;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -12,7 +14,7 @@ class DnSplitterController extends Controller
 {
     public function index()
     {
-        $dnSplitters = DnSplitter::with(['dnBox', 'fiberCable'])
+        $dnSplitters = DnSplitter::with(['dnBox', 'fiberCable','popDevice'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
         return Inertia::render('DnSplitter/Index', [
@@ -22,10 +24,14 @@ class DnSplitterController extends Controller
 
     public function create()
     {
+        $pops = Pop::all();
+        $popDevices = PopDevice::all();
         $dnBoxes = DnBox::where('status', 'active')->get();
         $fiberCables = FiberCable::get();
 
         return Inertia::render('DnSplitter/Create', [
+            'popDevices' => $popDevices,
+            'pops' => $pops,
             'dnBoxes' => $dnBoxes,
             'fiberCables' => $fiberCables
         ]);
@@ -35,6 +41,7 @@ class DnSplitterController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'pop_device_id' => 'required|exists:pop_devices,id',
             'dn_id' => 'required|exists:dn_boxes,id',
             'fiber_id' => 'required|exists:fiber_cables,id',
             'core_number' => 'required|integer|min:1',
@@ -74,11 +81,16 @@ class DnSplitterController extends Controller
     {
         $dnBoxes = DnBox::where('status', 'active')->get();
         $fiberCables = FiberCable::get();
+        $pops = Pop::all();
+        
+        // Load the popDevice relation
+        $dnSplitter->load('popDevice', 'popDevice.pop');
 
         return Inertia::render('DnSplitter/Edit', [
             'dnSplitter' => $dnSplitter,
             'dnBoxes' => $dnBoxes,
-            'fiberCables' => $fiberCables
+            'fiberCables' => $fiberCables,
+            'pops' => $pops
         ]);
     }
 
@@ -86,6 +98,7 @@ class DnSplitterController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'pop_device_id' => 'required|exists:pop_devices,id',
             'dn_id' => 'required|exists:dn_boxes,id',
             'fiber_id' => 'required|exists:fiber_cables,id',
             'core_number' => 'required|integer|min:1',

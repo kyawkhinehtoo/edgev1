@@ -15,7 +15,7 @@ class SystemSettingController extends Controller
 
     public function checkRole()
     {
-        $data = Role::join('users', 'users.role', 'roles.id')
+        $data = Role::join('users', 'users.role_id', 'roles.id')
             ->where('roles.system_setting', 1)
             ->where('users.id', Auth::id())
             ->first();

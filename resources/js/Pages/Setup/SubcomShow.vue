@@ -58,6 +58,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                   <tr v-for="user in subcom.users" :key="user.id">
                     <td class="px-6 py-4 whitespace-nowrap">{{ user.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap uppercase">{{ user.user_type }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">{{ user.email }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">{{ user.phone }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -99,6 +100,7 @@ export default {
   },
   props: {
     subcom: Object
+    
   }
 }
 </script>

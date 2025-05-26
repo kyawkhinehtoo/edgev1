@@ -12,7 +12,7 @@
           <!-- Table -->
            <div class="flex justify-between items-center mb-4">
             <div class="inline-flex items-center space-x-2">
-              <h2 class="text-xl font-semibold text-gray-600">Bill Number : </h2>  
+              <h2 class="text-xl font-semibold text-gray-600">Bill Name : </h2>  
               <div class="flex rounded-md shadow-sm w-48">
                 <multiselect deselect-label="Selected already" :options="bills" track-by="id" label="name" v-model="billForm.bill_id" :allow-empty="false"></multiselect>
               </div>

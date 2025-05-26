@@ -5,12 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Isp;
 use App\Models\Status;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 
 class IspController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         $search = $request->input('search');

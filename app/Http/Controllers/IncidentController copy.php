@@ -25,7 +25,7 @@ class IncidentController extends Controller
     {   
         //Auth::id();
         $permission =  DB::table('roles')
-        ->join('users', 'users.role', '=', 'roles.id')
+        ->join('users', 'users.role_id', '=', 'roles.id')
         ->where('users.id','=',Auth::id())
         ->select('roles.write_incident', 'roles.read_incident')
         ->get();
@@ -36,12 +36,12 @@ class IncidentController extends Controller
         $high = Incident::where('priority','=','high')->where('status','!=',3)->where('status','!=',4)->count();
         $normal = Incident::where('priority','=','normal')->where('status','!=',3)->where('status','!=',4)->count();
         $noc = DB::table('users')
-            ->join('roles', 'users.role', '=', 'roles.id')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
           //  ->where('roles.name', 'LIKE', '%noc%')
             ->select('users.name as name', 'users.id as id')
             ->get();
         $team = DB::table('users')
-            ->join('roles', 'users.role', '=', 'roles.id')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
             ->select('users.name as name', 'users.id as id')
             ->get();
         $customers = Customer::select('id','ftth_id')->where(function($query){

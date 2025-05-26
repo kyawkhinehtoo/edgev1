@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\BundleEquiptment;
 use App\Models\Customer;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,6 +16,12 @@ class EquiptmentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         // $data = BundleEquiptment::all();

@@ -42,7 +42,7 @@ class HandleInertiaRequests extends Middleware
         $role = null;
         if ($user != null) {
 
-            $role = Role::join('users', 'users.role', '=', 'roles.id')
+            $role = Role::join('users', 'users.role_id', '=', 'roles.id')
                 ->where('users.id', '=', $user->id)
                 ->first();
         }

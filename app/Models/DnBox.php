@@ -17,4 +17,5 @@ class DnBox extends Model
     {
         return $this->hasMany(DnSplitter::class, 'dn_id');
     }
+   
 }

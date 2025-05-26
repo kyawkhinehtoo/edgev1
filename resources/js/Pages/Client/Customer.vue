@@ -85,7 +85,7 @@
           :class="`p-4 bg-white rounded-lg shadow-md ${getRowClass(row)}`"
         >
           <div class="flex justify-between items-center mb-2">
-            <h3 class="text-sm font-bold" :class="getRowClass(row)">Customer ID: {{ row.ftth_id }}</h3>
+            <h3 class="text-sm font-bold" :class="getRowClass(row)">UID: {{ row.ftth_id }}</h3>
             <div class="flex space-x-2">
               <Link
                 :href="route('customer.edit', row.id)"
@@ -103,6 +103,7 @@
               </button>
             </div>
           </div>
+          <p class="text-sm text-gray-600"><strong>CID:</strong> {{ row.isp_ftth_id }}</p>
           <p class="text-sm text-gray-600"><strong>Name:</strong> {{ row.name }}</p>
           <p class="text-sm text-gray-600"><strong>Package:</strong> {{ row.package.name }}</p>
           <p class="text-sm text-gray-600"><strong>Township:</strong> {{ row.township.name }}</p>
@@ -117,7 +118,8 @@
             <thead class="bg-gray-50">
               <tr>
                
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">UID</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">CID</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Date</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assign Date</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prefer Date</th>
@@ -136,6 +138,7 @@
               <tr v-for="row in customers.data" :key="row.id" :class="getRowClass(row)">
                 
                 <td class="px-3 py-3 text-xs font-medium">{{ row.ftth_id }}</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.isp_ftth_id }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.order_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.subcom_assign_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.prefer_install_date }}</td>
@@ -144,7 +147,7 @@
                 <td class="px-3 py-3 text-xs font-medium">{{ row.township.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.status.name }}</td>
                 <td class="px-3 py-3 text-right">
-                  <Link :href="route('customer.edit', row.id)" method="get" as="button" class="text-indigo-400 hover:text-indigo-600 mr-2">
+                  <Link :href="route('customer.edit', row?.id)" method="get" as="button" class="text-indigo-400 hover:text-indigo-600 mr-2">
                     <i class="fas fa-folder"></i>
                   </Link>
                   <span v-if="user?.role?.delete_customer">

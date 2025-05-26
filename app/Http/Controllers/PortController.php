@@ -6,8 +6,15 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use App\Models\SnPorts;
 use App\Models\DnPorts;
+use App\Models\DnSplitter;
+use App\Models\Odb;
+use App\Models\OdbFiberCable;
+use App\Models\Odf;
 use App\Models\Pop;
 use App\Models\PopDevice;
+use App\Models\SnBox;
+use App\Models\SnPort;
+use App\Models\SnSplitter;
 use Hamcrest\Arrays\IsArray;
 use Hamcrest\Type\IsNumeric;
 use Inertia\Inertia;
@@ -16,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 
 class PortController extends Controller
 {
+    
     public function index(Request $request)
     {
 
@@ -112,37 +120,134 @@ class PortController extends Controller
     }
     public function getDNByOLT($request)
     {
-        $dn = null;
         if ($request && is_numeric($request)) {
-            $dn = DnPorts::where('pop_device_id', (int)$request)
-                ->get();
+           
+            $dns = DnSplitter::where('pop_device_id', (int)$request)->get();
+
+                return response()
+                ->json($dns, 200);
+            
         }
 
         return response()
-            ->json($dn, 200);
+            ->json([], 200);
     }
+    // public function getDNByOLT($request)
+    // {
+    //     if ($request && is_numeric($request)) {
+           
+    //         // Get all OdbFiberCable connections associated with these ODBs or directly with the PopDevice
+    //         $odbFiberCables = OdbFiberCable::where(function($query) use ($request) {
+    //                 $query->where('pop_device_id', (int)$request);
+    //             })
+    //             ->get();
+    //        $dnArray = [];
+    //             foreach($odbFiberCables as $odbFiberCable){
+    //                 $dnSplitters = DnSplitter::where('fiber_id', $odbFiberCable->fiber_cable_id)
+    //                 ->where('core_number',$odbFiberCable->odb_port)
+    //                 ->where('status', 'active')
+    //                 ->get();
+    //                 if($dnSplitters->isNotEmpty()){
+    //                     foreach($dnSplitters as $dnSplitter){
+    //                         $dnArray[] = $dnSplitter;
+    //                     }
+    //                 }
+    //             }
+    //         // Get all DN Splitters associated with these fiber cables
+           
+    
+    //         // If you also want to include SN Boxes and SN Splitters in the response
+
+    //             return response()
+    //             ->json($dnArray, 200);
+            
+    //     }
+
+    //     return response()
+    //         ->json([], 200);
+    // }
+    // public function getDnSplitterByOLT($request)
+    // {
+    //     $dnSplitters = null;
+
+    //     if ($request && is_numeric($request)) {
+    //         // Get all ODFs associated with this PopDevice (OLT)
+    //         $odfIds = Odf::where('pop_device_id', 'like', '%' . (int)$request . '%')
+    //             ->pluck('id');
+            
+    //         // Get all ODBs associated with these ODFs
+    //         $odbIds = Odb::whereIn('odf_id', $odfIds)
+    //             ->pluck('id');
+            
+    //         // Get all OdbFiberCable connections associated with these ODBs or directly with the PopDevice
+    //         $fiberCableIds = OdbFiberCable::where(function($query) use ($odbIds, $request) {
+    //                 $query->whereIn('odb_id', $odbIds)
+    //                       ->Where('pop_device_id', (int)$request);
+    //             })
+    //             ->pluck('fiber_cable_id')
+    //             ->unique();
+    //     //    dd($fiberCableIds);
+    //         // Get all DN Splitters associated with these fiber cables
+    //         $dnSplitters = DnSplitter::with(['dnBox', 'fiberCable'])
+    //             ->whereIn('fiber_id', $fiberCableIds)
+    //             ->where('status', 'active')
+    //             ->get();
+    
+    //         // If you also want to include SN Boxes and SN Splitters in the response
+    //         if ($dnSplitters->isNotEmpty()) {
+    //             $dnSplitterIds = $dnSplitters->pluck('id');
+                
+    //             // Get all SN Boxes associated with these DN Splitters
+    //             $snBoxes = SnBox::with(['dnSplitter'])
+    //                 ->whereIn('dn_splitter_id', $dnSplitterIds)
+    //                 ->where('status', 'active')
+    //                 ->get();
+               
+    //             // Get all SN Splitters associated with these SN Boxes
+    //             if ($snBoxes->isNotEmpty()) {
+    //                 $snBoxIds = $snBoxes->pluck('id');
+                    
+    //                 $snSplitters = SnSplitter::with(['snBox'])
+    //                     ->whereIn('sn_id', $snBoxIds)
+    //                     ->where('status', 'active')
+    //                     ->get();
+      
+    //                 // Add SN Boxes and SN Splitters to the response
+    //                 return response()->json([
+    //                     'dnSplitters' => $dnSplitters,
+    //                     'snBoxes' => $snBoxes,
+    //                     'snSplitters' => $snSplitters
+    //                 ], 200);
+    //             }
+    //         }
+    //     }
+        
+    //     return response()->json(['dnSplitters' => $dnSplitters], 200);
+    // }
     public function getSNByDN($request)
     {
 
         $sn = null;
         if ($request && is_numeric($request)) {
-
-            $sn = DB::table('sn_ports')
-                // ->join('dn_ports', 'sn_ports.dn_id', '=', 'dn_ports.id')
-                // ->join('pops', 'dn_ports.pop', '=', 'pops.id')
-                // ->join('pop_devices', 'dn_ports.pop_device_id', '=', 'pop_devices.id')
-                ->where('sn_ports.dn_id', '=', $request)
-                ->select(
-                    'sn_ports.id as id',
-                    'sn_ports.name as name',
-                    'sn_ports.port as port',
-                    'sn_ports.description as description',
-                    'sn_ports.dn_id as dn_id'
-                )
-                ->get();
-        }
+            $snBoxes = SnBox::with(['dnSplitter'])
+            ->where('dn_splitter_id', $request)
+            ->where('status', 'active')
+            ->get();
+            if ($snBoxes->isNotEmpty()) {
+                $snBoxIds = $snBoxes->pluck('id');
+                
+                $snSplitters = SnSplitter::with(['snBox'])
+                    ->whereIn('sn_id', $snBoxIds)
+                    ->where('status', 'active')
+                    ->get();
+  
+                // Add SN Boxes and SN Splitters to the response
+                return response()
+            ->json($snSplitters, 200);
+            }
+                   }
         return response()
-            ->json($sn, 200);
+            ->json([], 200);
     }
     public function getDNInfo($request)
     {
@@ -164,7 +269,32 @@ class PortController extends Controller
             ->json($dn, 200);
     }
 
+    public function getAvailablePortBySplitterId($request){
+        // Initialize port list with numbers 1-16
+        $portList = [];
+        for($n=1; $n <=16 ; $n++ ){
+            $portList[] = [
+                'id' => $n,
+                'name' => 'SN Port : '.(string)$n
+            ];
+        }
 
+        // Get the port numbers that are already in use for this splitter
+        $usedPorts = SnPort::where('sn_splitter_id', $request)
+                    ->pluck('port_number')
+                    ->toArray();
+        
+        // Mark used ports as disabled instead of removing them
+        foreach($portList as &$port) {
+            if(in_array($port['id'], $usedPorts)) {
+                $port['$isDisabled'] = true;
+            }
+        }
+        
+        // Return the complete port list with disabled flags as a JSON response
+        return response()
+            ->json($portList, 200);
+    }
 
     public function store(Request $request)
     {

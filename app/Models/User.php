@@ -24,7 +24,8 @@ class User extends Authenticatable
      * 2 - technical 
      * 3 - sale
      * 4 - billing
-     * 5 - subcom
+     * 5 - subcon_pic
+     * 6 - subcon_leader
      * 
      **/
     /**
@@ -77,7 +78,7 @@ class User extends Authenticatable
     ];
     public function role()
     {
-        return $this->belongsTo(Role::class, 'role', 'id');
+        return $this->belongsTo(Role::class, 'role_id');
         // 'role' is the foreign key in the users table
         // 'id' is the primary key in the roles table
     }

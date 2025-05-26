@@ -52,8 +52,11 @@ use App\Http\Controllers\JcBoxController;
 use App\Http\Controllers\OdbController;
 use App\Http\Controllers\OdbFiberCableController;
 use App\Http\Controllers\OdfController;
+use App\Http\Controllers\RootCauseController;
 use App\Http\Controllers\SnBoxController;
 use App\Http\Controllers\SnSplitterController;
+use App\Http\Controllers\SubconChecklistController;
+use App\Http\Controllers\SubRootCauseController;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -336,6 +339,16 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::resource('odfs', OdfController::class);
 	Route::resource('odb-fiber-cables', OdbFiberCableController::class);
 	Route::resource('odbs', OdbController::class);
+
+	Route::resource('subcon-checklists', SubconChecklistController::class);
+
+	Route::resource('root-causes', RootCauseController::class);
+	Route::resource('sub-root-causes', SubRootCauseController::class);
+	Route::get('sub-root-causes/by-root-cause/{rootCauseId}', [SubRootCauseController::class, 'getByRootCause'])->name('sub-root-causes.by-root-cause');
+	Route::post('installationApproval/{id}', [CustomerController::class, 'installationApproval'])->name('installationApproval.update');
+
+	Route::get('/getDnSplitterByOLT/{id}', [PortController::class, 'getDnSplitterByOLT']);
+	Route::get('/getAvailablePortBySplitterId/{id}', [PortController::class, 'getAvailablePortBySplitterId']);
 });
 // Replace this line:
 

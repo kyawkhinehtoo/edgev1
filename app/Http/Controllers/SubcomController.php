@@ -9,9 +9,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
 use App\Models\Township;
+use App\Models\User;
 
 class SubcomController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index()
     {
         return Inertia::render('Setup/Subcom', [
@@ -26,7 +33,7 @@ class SubcomController extends Controller
     public function show(Subcom $subcom)
     {
         $subcom->load(['users' => function ($query) {
-            $query->select('id', 'name', 'email', 'phone', 'disabled', 'subcom_id', 'last_login_ip', 'last_login_time');
+            $query->select('id', 'name', 'user_type','email', 'phone', 'disabled', 'subcom_id', 'last_login_ip', 'last_login_time');
         }]);
 
         return Inertia::render('Setup/SubcomShow', [

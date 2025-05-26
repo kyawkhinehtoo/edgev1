@@ -11,7 +11,7 @@
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
           <!-- Table -->
            <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold text-gray-600 mb-2">Bill Number : {{ tempInvoices.data[0]?.temp_bill?.bill_number }} </h2>
+            <h2 class="text-xl font-semibold text-gray-600 mb-2">Bill Name : {{ tempInvoices.data[0]?.temp_bill?.bill_number }} </h2>
             <div class="space-x-2">
               <a @click="doSave"
               class="cursor-pointer inline-flex items-center px-3 py-3 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-700 active:bg-yellow-800 focus:outline-none focus:border-yellow-800 focus:ring focus:ring-yellow-300 disabled:opacity-25 transition">Save Final

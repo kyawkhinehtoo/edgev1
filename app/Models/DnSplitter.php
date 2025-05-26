@@ -10,6 +10,7 @@ class DnSplitter extends Model
         'name',
         'dn_id',
         'fiber_id',
+        'pop_device_id',
         'core_number',
         'location',
         'status',
@@ -21,5 +22,9 @@ class DnSplitter extends Model
     public function fiberCable()
     {
         return $this->belongsTo(FiberCable::class, 'fiber_id');
+    }
+    public function popDevice()
+    {
+        return $this->belongsTo(PopDevice::class);
     }
 }

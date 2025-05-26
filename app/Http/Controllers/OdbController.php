@@ -4,13 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Odb;
 use App\Models\Odf;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class OdbController extends Controller
 {
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->dn_panel){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {   
+     
+
         $query = Odb::with(['odf']);
         if ($request->has('odf')) {
             $query->where('odf_id', $request->odf);

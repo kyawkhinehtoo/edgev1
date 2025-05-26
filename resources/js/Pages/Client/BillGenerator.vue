@@ -29,7 +29,7 @@
             <div class="px-4 py-2">
               <label for="bill_number" class="block text-gray-700 text-sm font-bold "><span
                   class="text-red-500">*</span>
-                Bill Number:</label>
+                Bill Name:</label>
 
               <div class=" flex rounded-md shadow-sm">
                 <input type="text" v-model="form.bill_number" name="bill_number" id="bill_number"

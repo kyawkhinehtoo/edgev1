@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Township;
 use App\Models\Package;
 use App\Models\Project;
+use App\Models\SnPort;
 use App\Models\SnPorts;
 use App\Models\User;
 use App\Models\Status;
@@ -57,10 +58,14 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
             ->get()
             ->toArray();
             $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
-        $mycustomer =   Customer::with('package','township','isp','sn','dn','pop','pop_device','status','subcon')
+        $mycustomer =   Customer::with('package','township','isp','status','subcon')
+                        ->leftJoin('sn_ports', 'sn_ports.customer_id', '=', 'customers.id')
                         ->where(function ($query) {
                             return $query->where('customers.deleted', '=', 0)
                                 ->orWhereNull('customers.deleted');
+                        })
+                        ->when($user->role?->limit_region, function ($query) use ($user) {
+                            return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
                         })
                         ->when($user->user_type, function ($query, $user_type) use ($user) {
                             if($user_type == 'partner') {
@@ -102,16 +107,16 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
                             $query->whereBetween('customers.prefer_install_date', [$startDate, $endDate]);
                         })
                         ->when($request->dn, function ($query, $dn_2) {
-                            $query->where('customers.dn_id', '=', $dn_2['id']);
+                            $query->where('sn_ports.dn_splitter_id', '=', $dn_2['id']);
                         })
                         ->when($request->sn, function ($query, $sn) {
-                            $query->where('customers.sn_id', '=', $sn['id']);
+                            $query->where('sn_ports.sn_splitter_id', '=', $sn['id']);
                         })
                         ->when($request->pop, function ($query, $pop) {
-                            $query->where('customers.pop_id', '=', $pop['id']);
+                            $query->where('sn_ports.pop_id', '=', $pop['id']);
                         })
                         ->when($request->pop_device, function ($query, $pop_device) {
-                            $query->where('customers.pop_device_id', '=', $pop_device['id']);
+                            $query->where('sn_ports.pop_device_id', '=', $pop_device['id']);
                         })
                         ->when($request->package, function ($query, $package) use ($all_packages) {
                             if ($package == 'empty') {
@@ -183,7 +188,8 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
                                 $q->where('installation_timeline', '=', $sh_installation_timeline);
                             });
                             
-                        });
+                        })
+                        ->select('customers.*');
         return $mycustomer;
     }
     public function headings(): array
@@ -240,6 +246,7 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
       
      
         $bundle = '';
+        $snPort =  SnPort::with('SnSplitter','DnSplitter','pop','popDevice')->where('customer_id', $mycustomer->id)->first();
         if (!empty($mycustomer->bundle)) {
             // Split bundle IDs into an array, handling both single and comma-separated values
             $bundle_ids = array_map('trim', explode(',', $mycustomer->bundle));
@@ -276,14 +283,14 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
             $mycustomer->fiber_distance,
             $mycustomer->onu_serial,
             $mycustomer->onu_power,
-            $mycustomer->pop?->site_name,
-            $mycustomer->pop_device?->device_name,
+            $snPort?->pop?->site_name,
+            $snPort?->popDevice?->device_name,
         
             $mycustomer->gpon_ontid,
         
-            $mycustomer->dn?->name,
-            $mycustomer->sn?->name,
-            $mycustomer->splitter_no,
+            $snPort?->DnSplitter?->name,
+            $snPort?->SnSplitter?->name,
+            $snPort?->port_number,
             $bundle,
             $mycustomer->status?->name,
             $mycustomer->partner?->name,

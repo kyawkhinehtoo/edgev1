@@ -117,7 +117,10 @@
             <thead class="bg-gray-50">
               <tr>
                 <th @click="sortBy('ftth_id')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
-                  ID <i :class="getSortIcon('ftth_id')" class="fas fa-sort ml-1"></i>
+                  UID <i :class="getSortIcon('ftth_id')" class="fas fa-sort ml-1"></i>
+                </th>
+                <th @click="sortBy('isp_ftth_id')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  CID <i :class="getSortIcon('isp_ftth_id')" class="fas fa-sort ml-1"></i>
                 </th>
                 <th @click="sortBy('order_date')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
                   Order Date <i :class="getSortIcon('order_date')" class="fas fa-sort ml-1"></i>
@@ -158,6 +161,7 @@
               <tr v-for="row in customers.data" :key="row.id" :class="getRowClass(row)">
                 
                 <td class="px-3 py-3 text-xs font-medium">{{ row.ftth_id }}</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.isp_ftth_id }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.order_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.subcom_assign_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.prefer_install_date }}</td>

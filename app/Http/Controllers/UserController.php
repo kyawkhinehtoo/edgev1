@@ -22,10 +22,16 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
 
-        $users = User::leftjoin('roles', 'users.role', 'roles.id')->when($request->user, function ($query, $tsp) {
+        $users = User::leftjoin('roles', 'users.role_id', 'roles.id')->when($request->user, function ($query, $tsp) {
             $query->where('users.name', 'LIKE', '%' . $tsp . '%')
                 ->orWhere('roles.name', 'LIKE', '%' . $tsp . '%')
                 ->orWhere('users.phone', 'LIKE', '%' . $tsp . '%');
@@ -64,10 +70,10 @@ class UserController extends Controller
             'email' => $request->email,
             'phone' => $request->phone,
             'user_type' => $request->user_type,
-            'role' => $request->user_type=='internal'?$request->role_id:null,
+            'role_id' => $request->user_type=='internal'?$request->role_id:null,
             'isp_id' => $request->user_type=='isp'?$request->isp_id:null,
             'partner_id' => $request->user_type=='partner'?$request->partner_id:null,
-            'subcom_id' => $request->user_type=='subcon'?$request->subcom_id:null,
+            'subcom_id' => $request->user_type=='subcon' ? $request->subcom_id : null,
             'disabled' => $request->disabled,
             'password' => Hash::make($request->password),
         ]);
@@ -115,10 +121,10 @@ class UserController extends Controller
             $user->email = $request->email;
             $user->phone = $request->phone;
             $user->user_type = $request->user_type;
-            $user->role = $request->user_type=='internal'?$request->role_id:null;
+            $user->role_id = $request->user_type=='internal'?$request->role_id:null;
             $user->isp_id = $request->user_type=='isp'?$request->isp_id:null;
             $user->partner_id = $request->user_type=='partner'?$request->partner_id:null;
-            $user->subcom_id = $request->user_type=='subcon'?$request->subcom_id:null;
+            $user->subcom_id = $request->user_type=='subcon' ? $request->subcom_id : null;
             $user->disabled = $request->disabled;
             if (!empty($request['password'])) {
                 $user->password = Hash::make($request->password);

@@ -9,51 +9,59 @@
         <dl>
           <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Customer ID</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].ftth_id }}</dd>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].ftth_id }} | {{ customer_detail[0]?.isp_ftth_id }} </dd>
           </div>
-          <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if="customer_detail[0].sale_channel">
-            <dt class="text-sm font-medium text-gray-500">Sales Source</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].sale_channel }}</dd>
-          </div>
-          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+         <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Customer Name</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].name }}</dd>
           </div>
-          <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Contact Number</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].phone_1 }} {{ customer_detail[0].phone_2 }}</dd>
-          </div>
-          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if="customer_detail[0].email">
-            <dt class="text-sm font-medium text-gray-500">Contact E Mail</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].email }}</dd>
           </div>
           <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Full Address</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].address }}</dd>
           </div>
-          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if=" customer_detail[0].latitude">
+          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if=" customer_detail[0].location">
             <dt class="text-sm font-medium text-gray-500">Location</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].latitude }},{{ customer_detail[0].longitude }}</dd>
-          </div>
-          <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if="customer_detail[0].billing_attention">
-            <dt class="text-sm font-medium text-gray-500">Contact Person Name</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].billing_attention }}</dd>
-          </div>
-          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if="customer_detail[0].nrc ">
-            <dt class="text-sm font-medium text-gray-500">NRC Number</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].nrc }}</dd>
-          </div>
-          <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if="customer_detail[0].dob">
-            <dt class="text-sm font-medium text-gray-500">Date of Birth</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">{{ customer_detail[0].dob }}</dd>
-          </div>
-          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-gray-500">Applied Mbps</dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3" v-if="customer_detail[0].payment_type == 1">
-              {{ customer_detail[0].package_name }} ({{ customer_detail[0].package_speed }} Mbps),MRC {{ customer_detail[0].package_price }} <span class="uppercase">{{ customer_detail[0].package_currency }}</span>, {{ customer_detail[0].package_contract_period }} Months Contract, {{ customer_detail[0].prepaid_period }} Months Prepaid
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
+              <a :href="'https://www.google.com/maps/search/?api=1&query=' + customer_detail[0].location" target="_blank">{{ customer_detail[0].location }}</a>
             </dd>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3" v-else>
-              {{ customer_detail[0].package_name }} ({{ customer_detail[0].package_speed }} Mbps), MRC {{ customer_detail[0].package_price }} <span class="uppercase">{{ customer_detail[0].package_currency }}</span>, {{ customer_detail[0].package_contract_period }} Months Contract, Monthly Postpaid
+          </div>
+      
+          <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-gray-500">Applied Mbps</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
+              {{ customer_detail[0].package_name }} ({{ customer_detail[0].package_speed }} Mbps),MRC {{ customer_detail[0].package_price }} <span class="uppercase">{{ customer_detail[0].package_currency }}</span>, {{ customer_detail[0].package_contract_period }} Month
+            </dd>            
+          </div>
+          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if=" customer_detail[0].sn_splitter_name">
+            <dt class="text-sm font-medium text-gray-500">SN Box Name</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
+              {{ customer_detail[0].sn_splitter_name }} 
+           
+            </dd>
+          </div>
+          <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if=" customer_detail[0].sn_location">
+            <dt class="text-sm font-medium text-gray-500">SN Box Location</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
+              <a :href="'https://www.google.com/maps/search/?api=1&query=' + customer_detail[0].sn_location" target="_blank">{{ customer_detail[0].sn_location }}</a>
+           
+            </dd>
+          </div>
+          <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if=" customer_detail[0].dn_splitter_name">
+            <dt class="text-sm font-medium text-gray-500">DN Box Name</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
+              {{ customer_detail[0].dn_splitter_name }} 
+           
+            </dd>
+          </div>
+          <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if=" customer_detail[0].dn_location">
+            <dt class="text-sm font-medium text-gray-500">DN Box Location</dt>
+            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
+              <a :href="'https://www.google.com/maps/search/?api=1&query=' + customer_detail[0].dn_location" target="_blank">{{ customer_detail[0].dn_location }}</a>
+           
             </dd>
           </div>
         </dl>

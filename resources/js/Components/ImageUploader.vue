@@ -11,11 +11,13 @@
           :class="{ 'border-indigo-500 bg-indigo-50': isDragging }"
           :disabled="disabled"
         >
+
           <div v-if="!imagePreview" class="space-y-1 text-center">
             <i class="fas fa-cloud-upload-alt text-3xl text-gray-400"></i>
             <div class="text-sm text-gray-600">
               <span class="font-medium text-indigo-600 hover:text-indigo-500">
                 {{ uploadText }}
+           
               </span>
               <span> or drag and drop</span>
             </div>
@@ -25,20 +27,21 @@
           </div>
           <div v-else class="relative w-full h-full">
             <img :src="imagePreview" :alt="`${label} Preview`" class="object-contain w-full h-full rounded-md" />
-            <div class="absolute top-1 right-1 flex space-x-1">
+            <div class="absolute top-1 right-1 flex space-x-1 z-20">
               <button 
-                @click.stop="openInNewTab" 
+                @click.stop="openFullView(id)" 
                 type="button" 
-                class="bg-blue-500 text-white rounded-full p-1 shadow-md hover:bg-blue-600 transition-colors duration-200"
-                title="View in new tab"
+                class="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md hover:bg-blue-600 transition-colors duration-200"
+                title="Open Full View"
               >
                 <i class="fas fa-external-link-alt text-xs"></i>
               </button>
               <button 
                 @click.stop="removeImage" 
                 type="button" 
-                class="bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors duration-200"
+                class="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center  shadow-md hover:bg-red-600 transition-colors duration-200"
                 title="Remove image"
+                v-if="submitStatus !== 'approved'"
               >
                 <i class="fas fa-times text-xs"></i>
               </button>
@@ -53,10 +56,29 @@
           class="hidden"
           :disabled="disabled" 
           :id="id"
+          v-if="submitStatus !== 'approved'"
         />
       </div>
       <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
     </div>
+        <!-- Full view modal -->
+      <div v-if="showFullView" 
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      @click="closeFullView">
+    <div class="relative">
+    <img 
+      class="max-h-[90vh] max-w-[90vw]" 
+      :src="imagePreview"
+      :alt="label || 'Image preview'"
+    >
+    <button 
+      class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center"
+      @click="closeFullView">
+      <span class="text-xl">&times;</span>
+    </button>
+    </div>
+    </div>
+    <!--full view modal-->
   </template>
   
   <script setup>
@@ -68,6 +90,10 @@
       default: null
     },
     imageUrl: {
+      type: String,
+      default: null
+    },
+    submitStatus: {
       type: String,
       default: null
     },
@@ -102,7 +128,8 @@
   const fileInput = ref(null);
   const isDragging = ref(false);
   const imagePreview = ref(props.imageUrl || props.existingImage);
-  
+  const showFullView = ref(false);
+  const selectedImageId = ref(null);
   // Watch for changes in existingImage prop
   watch(() => props.existingImage, (newValue) => {
     if (newValue) {
@@ -191,4 +218,14 @@
     imagePreview.value = null;
     emit('update:imageUrl', null);
   }
+
+    
+    function openFullView(checklistId) {
+      selectedImageId.value = checklistId;
+      showFullView.value = true;
+    }
+    function closeFullView() {
+      showFullView.value = false;
+      selectedImageId.value = null;
+    }
   </script>

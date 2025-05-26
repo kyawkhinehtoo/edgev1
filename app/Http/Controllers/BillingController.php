@@ -58,6 +58,7 @@ class BillingController extends Controller
     }
     public function doGenerate(Request $request)
     {
+ 
         $validated = $request->validate([
             'bill_year' => 'required|integer',
             'bill_month' => 'required|integer|between:1,12',
@@ -95,6 +96,9 @@ class BillingController extends Controller
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
+            })
+            ->when($request->isp_id, function ($query) use ($request) {
+                return $query->where('customers.isp_id', $request->isp_id['id']);
             })
             ->whereNotIn('status.type', ['new', 'pending', 'cancel'])
             ->get();
@@ -618,7 +622,7 @@ class BillingController extends Controller
     public function showBill(Request $request)
     {
         $bills  = Bills::orderBy('id','desc')->get();
-        $billingTeam = User::join('roles','roles.id','users.role')
+        $billingTeam = User::join('roles','roles.id','users.role_id')
                     ->where('roles.name','like','%bill%')
                     ->where('users.user_type','internal')
                     ->select('users.*')

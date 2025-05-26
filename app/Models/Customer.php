@@ -52,13 +52,7 @@ class Customer extends Model
         'isp_id',
         'order_remark',
         'installation_status',
-        'route_kmz_image',
-        'drum_no_txt',
-        'drum_no_image',
-        'start_meter_txt',
-        'start_meter_image',
-        'end_meter_txt',
-        'end_meter_image',
+    
         'installation_reappointment_date',
         'subcom_assign_date',
         'way_list_date',
@@ -153,11 +147,7 @@ class Customer extends Model
     {
         $columns = $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
         $column_array = array();
-        $excluded_columns = ['id', 'created_at', 'updated_at', 'deleted',        
-        'route_kmz_image',
-        'drum_no_image',
-        'start_meter_image',
-        'end_meter_image'];
+        $excluded_columns = ['id', 'created_at', 'updated_at', 'deleted'];
         
         foreach ($columns as $key => $value) {
             if (!in_array($value, $excluded_columns)) {
@@ -178,12 +168,10 @@ class Customer extends Model
         'updated_at',
         'phone_2',
         'subcom_id',
-        'dn_id',
-        'sn_id',
         'partner_id',
-        'pop_id',
+
         'isp_id',
-        'pop_device_id',
+
         'gpon_ontid',
         'port_balance',
         'fc_used',
@@ -198,13 +186,6 @@ class Customer extends Model
         'created_by',
         'customer_type',
         'installation_status',
-        'drum_no_txt',
-        'start_meter_txt',
-        'end_meter_txt',
-        'route_kmz_image',
-        'drum_no_image',
-        'start_meter_image',
-        'end_meter_image',
         'subcom_assign_date',
         'installation_reappointment_date',
         'service_termination_date',
@@ -220,5 +201,8 @@ class Customer extends Model
         });
         return $column_array;
     }
-   
+    public function snPort()
+    {
+        return $this->hasOne(SnPort::class);
+    }
 }

@@ -8,7 +8,7 @@
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
           <div class="flex justify-between mb-6">
-            <div class="flex items-center flex-1">
+            <div class="flex items-center flex-1 gap-4">
               <div class="w-1/3">
                 <input
                   v-model="search"
@@ -17,6 +17,17 @@
                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   @keyup.enter="searchTsp"
                 >
+              </div>
+              <div class="w-1/3">
+                <multiselect
+                  v-model="selectedCity"
+                  :options="cities"
+                  track-by="id"
+                  label="name"
+                  placeholder="Filter by city"
+                  :allow-empty="true"
+                  @update:modelValue="filterByCity"
+                ></multiselect>
               </div>
             </div>
             <button @click="openModal" 
@@ -171,6 +182,7 @@ export default {
       short_code: null
     })
     const search = ref('')
+    const selectedCity = ref(null)
     let editMode = ref(false)
     let isOpen = ref(false)
 
@@ -273,8 +285,16 @@ export default {
       console.log('search value is' + search.value)
       router.get('/township/', { township: search.value }, { preserveState: true })
     }
+    const filterByCity = () => {
+      router.get('/township/', { 
+        township: search.value,
+        city_id: selectedCity.value?.id
+      }, { 
+        preserveState: true 
+      })
+    }
 
-    return { form, submit, editMode, isOpen, openModal, closeModal, edit, deleteRow, searchTsp, search }
+    return { form, submit, editMode, isOpen, openModal, closeModal, edit, deleteRow, searchTsp, search,filterByCity,selectedCity}
   },
 
 

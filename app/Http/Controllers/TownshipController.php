@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Partner;
 use Illuminate\Http\Request;
 use App\Models\Township;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,12 +18,21 @@ class TownshipController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->system_setting){
+             abort(403); // Unauthorized access for non-dn_panel users
+        }
+    }
     public function index(Request $request)
     {
         $townships = Township::with(['city', 'partner'])
             ->when($request->township, function ($query, $tsp) {
                 $query->where('townships.name', 'LIKE', '%' . $tsp . '%')
                     ->orWhere('townships.short_code', 'LIKE', '%' . $tsp . '%');
+            })
+            ->when($request->city_id, function ($query, $city) {
+                $query->where('townships.city_id', $city); 
             })
               ->paginate(10);
      

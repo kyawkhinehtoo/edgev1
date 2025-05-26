@@ -58,9 +58,10 @@
               <div
                 class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full"
                 role="dialog" aria-modal="true" aria-labelledby="modal-headline">
-                <nav class="flex max-w-72 gap-1">
+                <nav class="flex max-w-xl gap-1">
                   <button
                   type="button"
+                  class="w-48"
                     @click="activeTab = 'data'"
                     :class="[
                       activeTab === 'data'
@@ -73,6 +74,7 @@
                   </button>
                   <button
                    type="button"
+                   class="w-48"
                     @click="activeTab = 'permission'"
                     :class="[
                       activeTab === 'permission'
@@ -80,8 +82,23 @@
                         : 'border-b border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700',
                       'bg-white  w-1/2 py-4 px-1 text-center border-0 border-b-2 font-medium text-sm focus:ring-0 focus:outline-none'
                     ]"
+                   
                   >
                     Data Edit Permission
+                  </button>
+                  <button
+                   type="button"
+                   class="w-48"
+                    @click="activeTab = 'region'"
+                    :class="[
+                      activeTab === 'region'
+                      ? 'border-b-2  border-indigo-500 text-indigo-600'
+                        : 'border-b border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                      'bg-white  w-1/2 py-4 px-1 text-center border-0 border-b-2 font-medium text-sm focus:ring-0 focus:outline-none'
+                    ]"
+                     v-if="form.limit_region"
+                  >
+                    Township Region Access
                   </button>
                 </nav>
                 <form @submit.prevent="submit">
@@ -94,6 +111,15 @@
                             class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                             id="name" placeholder="Enter Role Name" v-model="form.name" />
                           <div v-if="$page.props.errors.name" class="text-red-500">{{ $page.props.errors.name[0] }}</div>
+                          
+                        </div>
+                        <div class="mb-4">
+                          <label class="inline-flex ml-2 text-sm">
+                            <input
+                              class="text-red-500 text-sm w-6 h-6 mr-2 focus:ring-red-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                              type="checkbox" v-model="form.limit_region" />
+                          Region Limit
+                          </label>
                         </div>
                         <div class="mb-4">
                           <fieldset class="mt-4 border border-solid border-gray-300 p-3 rounded-md">
@@ -111,10 +137,16 @@
                               <label class="inline-flex ml-2 text-sm">
                                 <input
                                   class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                  type="checkbox" v-model="form.dn_panel" />
+                              ODN Setting
+                              </label>
+                              <label class="inline-flex ml-2 text-sm">
+                                <input
+                                  class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
                                   type="checkbox" v-model="form.system_setting" />
                               System Setting
                               </label>
-
+                            
 
                             </div>
                           </fieldset>
@@ -141,6 +173,12 @@
                                 class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
                                 type="checkbox" v-model="form.enable_customer_export" />
                               Enable Export Data
+                            </label>
+                            <label class="inline-flex ml-2 text-sm">
+                              <input
+                                class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                type="checkbox" v-model="form.installation_supervisor" />
+                              Installation Supervisor
                             </label>
                           
                           
@@ -262,6 +300,7 @@
                         </div>
                     </div>
                     <!--end of data -->
+                    <!--start of permission-->
                     <div v-if="activeTab === 'permission'">
                       <div class="mb-4 ">
                         <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Customer Permission</h4>
@@ -278,6 +317,18 @@
                       </div>
                     </div>
                     </div>
+                    <!--end of permission-->
+                    <!--start of region-->
+                    <div v-if="activeTab === 'region'">
+                      <div class="mb-4 ">
+                        <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Role Region Access</h4>
+                      <!-- Customer Permission -->
+                       <multiselect deselect-label="Selected already" :options="townships" track-by="id" label="name"
+                        v-model="form.townships" :allow-empty="true" :multiple="true" :taggable="true">
+                      </multiselect>
+                    </div>
+                    </div>
+                    <!--end of region-->
                   </div>
                   </div>
                   <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
@@ -334,7 +385,9 @@ export default {
     },
     customerStatus:Object,
     menus: Object,
+    townships: Object,
     errors: Object,
+  
   },
   setup(props) {
     const activeTab = ref('data');
@@ -369,6 +422,10 @@ export default {
       billing_panel : null,
       report_panel : null,
       customer_status:null,
+      dn_panel:null,
+      limit_region:null,
+      installation_supervisor:null,
+      townships:[],
     });
     const search = ref("");
     let editMode = ref(false);
@@ -405,6 +462,10 @@ export default {
       form.billing_panel = null;
       form.report_panel = null;
       form.customer_status = null;
+      form.limit_region = null;
+      form.dn_panel = null;
+      form.installation_supervisor = null;
+      form.townships = [];
     }
     function submit() {
       if (!editMode.value) {
@@ -475,7 +536,11 @@ export default {
       form.incident_panel = (data.incident_panel)? true : false;
       form.billing_panel = (data.billing_panel)? true : false;
       form.report_panel = (data.report_panel)? true : false;
+      form.dn_panel = (data.dn_panel)? true : false;
+      form.limit_region = (data.limit_region)? true : false;
+      form.installation_supervisor = (data.installation_supervisor)? true : false;
       form.customer_status = data.customer_status;
+      form.townships = data.townships || [];
       editMode.value = true;
       openModal();
     }

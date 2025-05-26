@@ -149,6 +149,7 @@
                             />
                             <span class="ml-2">Subcon</span>
                           </label>
+                        
                         </div>
                         <div v-if="$page.props.errors.user_type" class="mt-2 text-sm text-red-500">
                           {{ $page.props.errors.user_type }}
@@ -180,7 +181,7 @@
                     </multiselect>
                                 
                       </div>
-                      <div class="mb-4" v-if="form.user_type=='subcon'">
+                      <div class="mb-4" v-if="form.user_type == 'subcon' ">
                         <label for="role" class="block text-gray-700 text-sm font-bold mb-2">Subcon Name:</label>
                       <multiselect deselect-label="Selected already" :options="subcoms" track-by="id" label="name"
                       v-model="form.subcom" placeholder="Select Subcon" :allow-empty="false"  

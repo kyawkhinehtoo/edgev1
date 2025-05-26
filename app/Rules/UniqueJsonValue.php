@@ -7,27 +7,30 @@ use Illuminate\Support\Facades\DB;
 
 class UniqueJsonValue implements Rule
 {
-    private $validValues, $table, $id;
+    private $validValues, $table, $id, $type;
 
-    public function __construct($table, $id, array $validValues)
+    public function __construct($table, $id, array $validValues, $type)
     {
         $this->validValues = $validValues;
         $this->table = $table;
         $this->id = $id;
+        $this->type = $type;
     }
 
     public function passes($attribute, $value)
     {
-        $jsonValues = $value;
-
         if (json_last_error() !== JSON_ERROR_NONE) {
             return false;
         }
 
         foreach ($this->validValues as $validValue) {
-            if ($jsonValues === json_decode(json_encode($validValue), true)) {
-                $existingValues = DB::table($this->table)->whereJsonContains($attribute, $validValue)->where('id', '<>', $this->id)->exists();
-                return !$existingValues;
+            if ($value === json_decode(json_encode($validValue), true)) {
+                $query = DB::table($this->table)
+                    ->whereJsonContains($attribute, $validValue)
+                    ->where('type', $this->type)
+                    ->where('id', '<>', $this->id);
+
+                return !$query->exists();
             }
         }
 
@@ -36,6 +39,6 @@ class UniqueJsonValue implements Rule
 
     public function message()
     {
-        return 'This :attribute must not have more than one in template list !';
+        return 'This :attribute must not have more than one per type (sms/email) in the template list!';
     }
 }

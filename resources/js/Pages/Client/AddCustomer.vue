@@ -216,7 +216,16 @@
                       $page.props.errors.order_remark }}</p>
                   </div>
                   
-               
+                  <div class="col-span-1 sm:col-span-1">
+                    <label for="isp" class="block text-sm font-medium text-gray-700"> ISP Assignment </label>
+                    <div class="mt-1 flex rounded-md shadow-sm" v-if="isps.length !== 0">
+                      <multiselect deselect-label="Selected already" :options="isps" track-by="id" label="name"
+                        v-model="form.isp_id" :allow-empty="true" :disabled="checkPerm('isp_id')"></multiselect>
+                    </div>
+                    <p v-show="$page.props.errors.isp_id" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.isp_id
+                    }}</p>
+                  </div>
                
                 </div>
                 
@@ -270,14 +279,8 @@ export default {
   },
   setup(props) {
 
-    let pop_devices = ref("");
     let res_packages = ref("");
-    let pppoe_auto = ref(false);
-    const dnInfo = ref(null);
-
-    const popDevices = ref([]);
-    const dnOptions = ref([]);
-    const snOptions = ref([]);    
+    
 
     const form = useForm({
       id: null,
@@ -291,27 +294,9 @@ export default {
       isp_ftth_id: "",
       package: "",
       status: "",
-      subcom: "",
       township: "",
       prefer_install_date: "",
-      pop_id: "",
-      dn_id: "",
-      sn_id: "",
-      splitter_no: "",
-      installation_remark: "",
-      fc_used: "",
-      fc_damaged: "",
-      onu_serial: "",
-      onu_power: "",
-      fiber_distance: "",
-      vlan: "",
-      bundles: "",
-      pop_device_id: "",
-      gpon_ontid: "",
-      port_balance: "",
       order_remark:"",
-      partner_id: "",
-      created_by: "",
       isp_id: "",
     });
 
@@ -364,205 +349,16 @@ export default {
       return !props.userPerm.includes(data);
     }
 
-    function goID() {
-      let city_code = form.township['city_code'];
-      let city_id = form.township['city_id'];
-      var data = props.max_id.filter((id) => id.id == city_id)[0];
-      form.isp_ftth_id = city_code + ('000000' + (parseInt(data.value) + 1)).slice(-6) + 'FX';
-    }
-    function fillPppoe() {
-      if (!form.pppoe_account) {
-        if (form.isp_ftth_id && form.township) {
-          // let dn_no = getNumber(form.dn_id['name']);
-          // let sn_no = getNumber(form.sn_id['name']);
-          // let city_code = form.township['city_code'];
-          // var data = getNumber(form.isp_ftth_id);
-          // let psw = dn_no.toString() + sn_no.toString() + ('00000' + (parseInt(data))).slice(-5);
-          // let pppoe = city_code + psw + '@FIP';
-          form.pppoe_account = form.isp_ftth_id;
-          pppoe_auto.value = true;
-        }
-      }
+  
+ 
 
-    }
-    function getAbbreviation(name) {
-      // Remove any text inside parentheses
-      name = name.replace(/\(.*?\)/g, '').trim();
-
-      // Split the name by spaces to get individual words
-      const words = name.split(/\s+/);
-
-      // Initialize an abbreviation string
-      let abbreviation = '';
-
-      // Loop through the words to construct the abbreviation
-      for (let i = 0; i < words.length; i++) {
-        // Only add the first letter of each word until abbreviation reaches 3 characters
-        abbreviation += words[i][0].toUpperCase();
-        if (abbreviation.length === 3) break;
-      }
-
-      // Get the current year
-      const currentYear = new Date().getFullYear();
-
-      // If the abbreviation is less than 3 characters, pad it (optional) and add the current year
-      return abbreviation.padEnd(3, abbreviation[abbreviation.length - 1] || '') + '@' + currentYear + 'FIP';
-    }
-    function generatePassword() {
-      // var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      // var passwordLength = 8;
-      // var password = "";
-      // for (var i = 0; i <= passwordLength; i++) {
-      //   var randomNumber = Math.floor(Math.random() * chars.length);
-      //   password += chars.substring(randomNumber, randomNumber + 1);
-      // }
-      if (!form.pppoe_password) {
-        // if (form.isp_ftth_id) {
-        //   form.pppoe_password = password;
-        // }
-        if (form.isp_ftth_id && form.name && form.pppoe_account) {
-
-          form.pppoe_password = getAbbreviation(form.name);
-        }
-      }
-    }
-    function getNumber(data) {
-      const string = data;
-      const regex = /\d+/g;
-      const matches = string.match(regex);
-      const integerValue = matches ? parseInt(matches.join('')) : 0;
-      return integerValue;
-    }
-    function isEmptyObject(value) {
-      // Check if it's an array
-      if (Array.isArray(value)) {
-        console.log('array');
-        // If the array is empty, return true
-        if (value.length === 0) {
-          console.log('empty array');
-          return true;
-        }
-        // Check if the array contains only empty objects
-        return value.every(item => typeof item === 'object' && Object.keys(item).length === 0);
-      }
-
-      // Check if it's an object
-      if (value && typeof value === 'object') {
-        return Object.keys(value).length === 0;
-      }
-
-      // If it's neither an object nor an array, return false
-      return false;
-    }
-    // Fetch OLTs by POP
-    const fetchPopDevices = async () => {
-      if (!form.pop_id) {
-        popDevices.value = [];
-        return;
-      }
-      try {
-        const response = await fetch(`/getOLTByPOP/${form.pop_id['id']}`);
-        const data = await response.json();
-        popDevices.value = data || [];
-      } catch (error) {
-        console.error("Failed to fetch POP devices", error);
-      }
-    };
-
-    // Fetch DNs by OLT
-    const fetchDNs = async () => {
-      if (!form.pop_device_id) {
-        dnOptions.value = [];
-        return;
-      }
-      try {
-        const response = await fetch(`/getDNByOLT/${form.pop_device_id['id']}`);
-        const data = await response.json();
-        dnOptions.value = data || [];
-      } catch (error) {
-        console.error("Failed to fetch DNs", error);
-      }
-    };
-
-    // Fetch SNs by DN
-    const fetchSNs = async () => {
-      if (!form.dn_id) {
-        snOptions.value = [];
-        return;
-      }
-      try {
-        const response = await fetch(`/getDnId/${form.dn_id['id']}`);
-        const data = await response.json();
-        snOptions.value = data || [];
-      } catch (error) {
-        console.error("Failed to fetch SNs", error);
-      }
-    };
-    const filteredPops = ref([]);
-    watch(
-      () => form.township,
-      async (newTownship) => {
-        if (newTownship && props.user?.user_type=='internal') {
-          try {
-            // Reset POP-related fields
-            form.pop_id = null;
-            form.pop_device_id = null;
-            form.dn_id = null;
-            form.sn_id = null;
-            if (newTownship.partner_id) {
-              form.partner = props.partners.find(p => p.id === newTownship.partner_id);
-            }
-            // Filter POPs based on township
-            const response = await fetch(`/getPOPsByTownship/${newTownship.id}`);
-            const data = await response.json();
-            filteredPops.value = data || [];
-          
-          } catch (error) {
-            console.error("Failed to fetch POPs for township", error);
-            filteredPops.value = [];
-          }
-        } else {
-          filteredPops.value = [];
-          form.partner = null;
-        }
-      }
-    );
-    watch(
-      () => form.pop_id,
-      ()=>{
-        fetchPopDevices();
-        form.sn_id = null;
-        form.dn_id = null;
-        form.pop_device_id = null;
-        form.gpon_frame = null;
-        form.gpon_slot = null;
-        form.gpon_port = null;
-        form.gpon_ontid = null;
-        form.port_balance = null;
-      },
-    );
-    watch(
-      () => form.pop_device_id,
-      () => {
-        fetchDNs(); 
-        form.dn_id = null;
-        form.sn_id = null;
-      }
-    );
-    watch(
-      () => form.dn_id,
-      () => {
-        fetchSNs(); 
-        dnInfo.value = `Frame${form.dn_id.gpon_frame}/Slot${form.dn_id.gpon_slot}/Port${form.dn_id.gpon_port}`;
-        form.sn_id = null;
-      }
-    );
+   
     onMounted(() => {
      // form.township = props.townships.filter((d) => d.id == 1)[0];
       form.status = props.status_list[0];
   //    goID();
     });
-    return { form, submit, resetForm, isNumber, checkPerm, goID, fillPppoe, pppoe_auto, generatePassword,  res_packages, isEmptyObject, pop_devices, snPortNoOptions, gponOnuIdOptions, dnInfo,popDevices, dnOptions,snOptions,filteredPops };
+    return { form, submit, resetForm, isNumber, checkPerm,   res_packages };
   },
 };
 </script>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Activitylog\Models\Activity;
@@ -12,19 +13,15 @@ use Illuminate\Support\Facades\Auth;
 class ActivityLogController extends Controller
 {
     //
-    public function checkRole()
-    {
-        $data = Role::join('users', 'users.role', 'roles.id')
-            ->where('roles.activity_log', 1)
-            ->where('users.id', Auth::id())
-            ->first();
-        if (!$data) {
-            abort(403);
+    public function __construct(){
+        $user = User::with('role')->find(auth()->id());
+        if(!$user->role->activity_log){
+             abort(403); // Unauthorized access for non-dn_panel users
         }
     }
+    
     public function index(Request $request)
     {
-        $this->checkRole();
 
 
         $activities = Activity::when($request->option, function ($query, $option) {

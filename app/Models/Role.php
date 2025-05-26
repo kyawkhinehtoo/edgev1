@@ -61,6 +61,9 @@ class Role extends Model
         'incident_panel',
         'billing_panel',
         'report_panel',
+        'limit_region',
+        'dn_panel',
+        'installation_supervisor',
         'created_at',
         'updated_at'
     ];
@@ -105,6 +108,9 @@ class Role extends Model
         'billing_panel'=>'integer',
         'report_panel'=>'integer',
         'enable_customer_export' => 'integer',
+        'limit_region' => 'integer',
+        'dn_panel' => 'integer',
+        'installation_supervisor' => 'integer',
         'created_at' => 'timestamp',
         'updated_at' => 'timestamp'
     ];
@@ -133,8 +139,13 @@ class Role extends Model
     // Relations ...
     public function users()
     {
-        return $this->hasMany(User::class, 'role', 'id');
+        return $this->hasMany(User::class, 'role_id', 'id');
         // 'role' is the foreign key in the users table
         // 'id' is the primary key in the roles table
+    }
+    public function townships()
+    {
+        return $this->belongsToMany(Township::class, 'role_township')
+                    ->withTimestamps();
     }
 }
