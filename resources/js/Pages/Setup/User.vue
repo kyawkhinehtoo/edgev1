@@ -41,7 +41,7 @@
               <tr v-for="(row, index) in users.data" :key="row.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ (index + users.from) }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ row.name }}</td>
-                <td class="px-6 py-4 whitespace-nowrap" v-if="row.user_type == 'internal'">{{ getRole(row.role) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap" v-if="row.user_type == 'internal'">{{ getRole(row.role_id) }}</td>
                 <td class="px-6 py-4 whitespace-nowrap uppercase " v-else>{{ row.user_type }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="[
@@ -350,7 +350,7 @@ export default {
       form.name = data.name;
       form.email = data.email;
       form.phone = data.phone;
-      form.role =  props.roles.filter((obj) => obj.id == data.role)[0];
+      form.role =  props.roles.filter((obj) => obj.id == data.role_id)[0];
       form.role_id = data.role;
       form.isp_id = data.isp_id;
       form.partner_id = data.partner_id;
