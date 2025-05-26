@@ -216,8 +216,8 @@
                       $page.props.errors.order_remark }}</p>
                   </div>
                   
-                  <div class="col-span-1 sm:col-span-1">
-                    <label for="isp" class="block text-sm font-medium text-gray-700"> ISP Assignment </label>
+                  <div class="col-span-1 sm:col-span-1" v-if="user.user_type=='internal'">
+                    <label for="isp" class="block text-sm font-medium text-gray-700"> ISP Assignment</label>
                     <div class="mt-1 flex rounded-md shadow-sm" v-if="isps.length !== 0">
                       <multiselect deselect-label="Selected already" :options="isps" track-by="id" label="name"
                         v-model="form.isp_id" :allow-empty="true" :disabled="checkPerm('isp_id')"></multiselect>

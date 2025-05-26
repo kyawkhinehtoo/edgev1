@@ -428,21 +428,28 @@ class CustomerController extends Controller
         $user = User::with('role')->find(Auth::user()->id);
         $userPerms = $this->getPermision();
 
-        Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'name' => 'required|max:255',
             'phone_1' => 'required|max:255',
             'address' => 'required',
             'latitude' => 'required|max:255',
             'longitude' => 'required|max:255',
             'package' => 'required',
-            'isp_id' =>'required:if(user_type,internal)',
             'dob' => 'nullable|date',
             'status' => 'required',
             'order_date' => 'date',
             'township' => 'required',
             'installation_date' => 'nullable|date',
             'isp_ftth_id' => 'required|unique:customers,isp_ftth_id',
-        ])->validate();
+        ]);
+        
+        if ($user->user_type === 'internal') {
+            $validator->addRules([
+                'isp_id' => 'required',
+            ]);
+        }
+        
+        $validator->validate();
         $isp = null;
       
       
