@@ -16,12 +16,12 @@ use Illuminate\Support\Facades\DB;
 class PopController extends Controller
 {
     //
-    public function __construct(){
-        $user = User::with('role')->find(auth()->id());
-        if(!$user->role->dn_panel){
-             abort(403); // Unauthorized access for non-dn_panel users
-        }
-    }
+    // public function __construct(){
+    //     $user = User::with('role')->find(auth()->id());
+    //     if(!$user->role->dn_panel || !$user->role->customer_panel){
+    //          abort(403); // Unauthorized access for non-dn_panel users
+    //     }
+    // }
     public function index(Request $request)
     {
         $pops = Pop::with(['townships','partner'])

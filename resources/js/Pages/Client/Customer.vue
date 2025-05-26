@@ -98,6 +98,7 @@
               <button
                 @click="deleteRow(row)"
                 class="text-red-500 hover:text-red-700"
+                 v-if="user?.role?.delete_customer"
               >
                 <i class="fas fa-trash"></i>
               </button>

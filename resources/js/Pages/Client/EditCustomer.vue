@@ -248,7 +248,29 @@
                         <p v-show="$page.props.errors.order_remark" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.order_remark }}</p>
                       </div>
-
+                      <div class="col-span-1 sm:col-span-1"  v-if="$page.props.login_type == 'isp'">
+                        <label for="isp" class="block text-sm font-medium text-gray-700"> Installation Date </label>
+                        <span
+                          class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                          <i class="fas fa-calendar"></i>
+                        </span>
+                        <label  id="installation_date"
+                          class="pl-10 mt-2  flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                        > {{ form.installation_date??"NA" }}</label>
+         
+                      </div>
+                    
+                      <div class="col-span-1 sm:col-span-1"  v-if="$page.props.login_type == 'isp'">
+                        <label for="service_activation_date" class="block text-sm font-medium text-gray-700"> Service Activation Date</label>
+                        <span
+                          class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                          <i class="fas fa-calendar"></i>
+                        </span>
+                        <label  id="service_activation_date"
+                          class="pl-10 mt-2  flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                          >{{ form.service_activation_date??"NA" }}</label>
+                      
+                      </div>
 
 
                     </div>
@@ -461,6 +483,7 @@
                             </div>
                             <p v-show="$page.props.errors.installation_date" class="mt-2 text-sm text-red-500">{{
                               $page.props.errors.installation_date }}</p>
+                              
                           </div>
 
                           <div class="col-span-1 sm:col-span-1">
