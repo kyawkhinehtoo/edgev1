@@ -11,7 +11,7 @@ class BillingConfig extends Model
     protected $table = 'bill_configuration';
     protected $primaryKey = 'id';
     protected $fillable = [
-        'exclude_list','mrc_day','prepaid_day','mrc_month','prepaid_month', 'created_at', 'updated_at'
+       'max_suspension_month','port_maintenance_fee', 'exclude_list','mrc_day','prepaid_day','mrc_month','prepaid_month', 'created_at', 'updated_at'
     ];
     protected $casts = [
         'exclude_list' => 'string','mrc_day'=>'integer','prepaid_day'=>'integer','mrc_month'=>'integer','prepaid_month' => 'integer' ,'created_at' => 'timestamp', 'updated_at' => 'timestamp'

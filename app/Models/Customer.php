@@ -51,8 +51,11 @@ class Customer extends Model
         'created_by',
         'isp_id',
         'order_remark',
+        'bandwidth',
         'installation_status',
-    
+        'installation_service_id',
+        'port_sharing_service_id',
+        'maintenance_service_id',
         'installation_reappointment_date',
         'subcom_assign_date',
         'way_list_date',
@@ -143,6 +146,7 @@ class Customer extends Model
      {
          return $this->belongsTo(Subcom::class, 'subcom_id');
      }
+   
     public function getTableColumns()
     {
         $columns = $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
@@ -204,5 +208,21 @@ class Customer extends Model
     public function snPort()
     {
         return $this->hasOne(SnPort::class);
+    }
+
+    // Add relationships for the new service fields
+    public function installationService()
+    {
+        return $this->belongsTo(InstallationService::class);
+    }
+
+    public function portSharingService()
+    {
+        return $this->belongsTo(PortSharingService::class);
+    }
+
+    public function maintenanceService()
+    {
+        return $this->belongsTo(MaintenanceService::class);
     }
 }

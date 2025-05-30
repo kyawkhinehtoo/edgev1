@@ -48,10 +48,13 @@ use App\Http\Controllers\TenantController;
 use App\Http\Controllers\ZoneController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InstallationServiceController;
 use App\Http\Controllers\JcBoxController;
+use App\Http\Controllers\MaintenanceServiceController;
 use App\Http\Controllers\OdbController;
 use App\Http\Controllers\OdbFiberCableController;
 use App\Http\Controllers\OdfController;
+use App\Http\Controllers\PortSharingServiceController;
 use App\Http\Controllers\RootCauseController;
 use App\Http\Controllers\SnBoxController;
 use App\Http\Controllers\SnSplitterController;
@@ -104,7 +107,22 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::resource('dn-splitters', DnSplitterController::class);
 	Route::resource('sn-boxes', SnBoxController::class);
 	Route::resource('sn-splitters', SnSplitterController::class);
+
+
+	Route::get('/port-sharing-service', [PortSharingServiceController::class, 'index'])->name('port-sharing-service.index');
+    Route::post('/port-sharing-service', [PortSharingServiceController::class, 'store'])->name('port-sharing-service.store');
+    Route::put('/port-sharing-service/{id}', [PortSharingServiceController::class, 'update'])->name('port-sharing-service.update');
+    Route::delete('/port-sharing-service/{id}', [PortSharingServiceController::class, 'destroy'])->name('port-sharing-service.destroy');
 	
+	Route::get('/maintenance-service', [MaintenanceServiceController::class, 'index'])->name('maintenance-service.index');
+	Route::post('/maintenance-service', [MaintenanceServiceController::class, 'store'])->name('maintenance-service.store');
+	Route::put('/maintenance-service/{id}', [MaintenanceServiceController::class, 'update'])->name('maintenance-service.update');
+	Route::delete('/maintenance-service/{id}', [MaintenanceServiceController::class, 'destroy'])->name('maintenance-service.destroy');
+
+	Route::get('/installation-service', [InstallationServiceController::class, 'index'])->name('installation-service.index');
+	Route::post('/installation-service', [InstallationServiceController::class, 'store'])->name('installation-service.store');
+	Route::put('/installation-service/{id}', [InstallationServiceController::class, 'update'])->name('installation-service.update');
+	Route::delete('/installation-service/{id}', [InstallationServiceController::class, 'destroy'])->name('installation-service.destroy');
 });
 
 

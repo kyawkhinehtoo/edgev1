@@ -147,27 +147,6 @@
                       $page.props.errors.order_date }}</p>
                   </div>
                   <div class="col-span-1 sm:col-span-1">
-                    <label for="package" class="block text-sm font-medium text-gray-700"><span
-                        class="text-red-500">*</span>
-                      Package </label>
-                    <div class="mt-1 flex rounded-md shadow-sm" v-if="packages">
-                      <multiselect deselect-label="Selected already" :options="packages" track-by="id" label="name"
-                        v-model="form.package" :allow-empty="false" :disabled="checkPerm('package_id')">
-                      </multiselect>
-                    </div>
-                    <p v-show="$page.props.errors.package" class="mt-2 text-sm text-red-500">{{
-                      $page.props.errors.package }}</p>
-                  </div>
-                  <div class="col-span-1 sm:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700">
-                      Installation Timeline
-                    </label>
-                    <div class="mt-1 p-2 space-x-2 inline-flex">
-                        {{ form.package?.installation_timeline }} {{form.package?' Hours':''}}
-                    </div>
-                    
-                  </div>
-                  <div class="col-span-1 sm:col-span-1">
                     <label for="prefer_install_date" class="block text-sm font-medium text-gray-700"><span
                         class="text-red-500">*</span> Prefer
                       Installation Date </label>
@@ -196,6 +175,66 @@
                       $page.props.errors.status
                     }}</p>
                   </div>
+                  <div class="col-span-1 sm:col-span-1">
+                    <label for="bandwidth" class="block text-sm font-medium text-gray-700"><span
+                        class="text-red-500">*</span>
+                      Bandwith </label>
+                    <div class="mt-1 flex rounded-md shadow-sm" >
+                      <input type="number" v-model="form.bandwidth" name="bandwidth"
+                      id="bandwidth"
+                      class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
+                      placeholder="20, 30 e.g. " v-on:keypress="isNumber($event)"
+                       :disabled="checkPerm('bandwidth')"
+                      required />
+                  <span
+                      class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                      Mbps </span>
+                    </div>
+                    <p v-show="$page.props.errors.bandwidth" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.bandwidth }}</p>
+                  </div>
+                  <div class="col-span-1 sm:col-span-1">
+                    <label for="installation_service_id" class="block text-sm font-medium text-gray-700"><span
+                        class="text-red-500">*</span>
+                      Installation </label>
+                    <div class="mt-1 flex rounded-md shadow-sm" v-if="installationServices">
+                      <multiselect deselect-label="Selected already" :options="installationServices" track-by="id" label="name"
+                        v-model="form.installation_service" :allow-empty="false" 
+                        @update:modelValue="form.installation_service_id = $event?.id"
+                        :disabled="checkPerm('installation_service_id')">
+                      </multiselect>
+                    </div>
+                    <p v-show="$page.props.errors.installation_service_id" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.installation_service_id }}</p>
+                  </div>
+                  <div class="col-span-1 sm:col-span-2">
+                    <label for="package" class="block text-sm font-medium text-gray-700"><span
+                        class="text-red-500">*</span>
+                      Maintenance </label>
+                    <div class="mt-1 flex rounded-md shadow-sm " v-if="maintenanceServices">
+                      <multiselect deselect-label="Selected already" :options="maintenanceServices" track-by="id" label="name"
+                        v-model="form.maintenance_service" :allow-empty="false"
+                        @update:modelValue="form.maintenance_service_id = $event?.id"
+                        :disabled="checkPerm('maintenance_service_id')" :class="text-xs">
+                      </multiselect>
+                    </div>
+                    <p v-show="$page.props.errors.maintenance_service_id" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.maintenance_service_id }}</p>
+                  </div>
+                  <div class="col-span-1 md:col-span-2">
+                    <label for="bundle" class="block text-sm font-medium text-gray-700">
+                      Additional Materials Request (Leave blank for own materials)
+                    </label>
+                    <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
+                      <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
+                        label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
+                        :multiple="true" :taggable="false"></multiselect>
+                    </div>
+                    <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.bundles }}</p>
+                  </div>
+                 
+               
                  
                  
 
@@ -276,6 +315,9 @@ export default {
     partners:Object,
     isps:Object,
     userPerm:Array,
+    installationServices: Object,
+    portSharingServices: Object,
+    maintenanceServices: Object,
   },
   setup(props) {
 
@@ -293,26 +335,24 @@ export default {
       installation_date: "",
       isp_ftth_id: "",
       package: "",
-      status: "",
+      status:  "",
       township: "",
       prefer_install_date: "",
       order_remark:"",
       isp_id: "",
+      installation_service: "",
+      installation_service_id: "",
+      maintenance_service: "",
+      maintenance_service_id: "",
+      bandwidth: "",
+      bundles: "",
     });
 
     function resetForm() {
       form.reset();
     }
 
-    // SN Port Number
-    const snPortNoOptions = ref(
-      Array.from({ length: 16 }, (v, i) => ({ id: i + 1, name: `SN Port ${i + 1}` }))
-    );
-
-    const gponOnuIdOptions = ref(
-      Array.from({ length: 127 }, (v, i) => ({ id: i, name: `OnuID${i}` }))
-    );
-
+    
 
     function submit() {
       form._method = "POST";
@@ -355,8 +395,9 @@ export default {
    
     onMounted(() => {
      // form.township = props.townships.filter((d) => d.id == 1)[0];
-      form.status = props.status_list[0];
-  //    goID();
+      //form.status = props.status_list[0];
+  
+
     });
     return { form, submit, resetForm, isNumber, checkPerm,   res_packages };
   },

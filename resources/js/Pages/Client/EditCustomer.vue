@@ -153,7 +153,7 @@
                       
                       </div>
                       <div class="col-span-1 sm:col-span-1 w-full">
-                        <label for="ftth_id" class="block text-sm font-medium text-gray-700"><span
+                        <label for="isp_ftth_id" class="block text-sm font-medium text-gray-700"><span
                             class="text-red-500">*</span>
                           Customer ID </label>
                         <div class="mt-1 flex rounded-md shadow-sm">
@@ -171,35 +171,18 @@
                       <div class="col-span-1 sm:col-span-1">
                         <label for="order_date" class="block text-sm font-medium text-gray-700"><span
                             class="text-red-500">*</span> Order Date </label>
-                        <div class="mt-1 flex rounded-md shadow-sm">
-                          <input type="date" v-model="form.order_date" name="order_date" id="order_date"
-                            class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            required :disabled="checkPerm('order_date')" />
-                        </div>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <input type="date" 
+                                     v-model="form.order_date" 
+                                     name="order_date" 
+                                     id="order_date"
+                                   
+                                     class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                                     required 
+                                     :disabled="checkPerm('order_date')" />
+                            </div>
                         <p v-show="$page.props.errors.order_date" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.order_date }}</p>
-                      </div>
-                      <div class="col-span-1 sm:col-span-1">
-                        <label for="package" class="block text-sm font-medium text-gray-700"><span
-                            class="text-red-500">*</span>
-                          Package </label>
-                        <div class="mt-1 flex rounded-md shadow-sm" v-if="packages">
-                          <multiselect deselect-label="Selected already" :options="packages" track-by="id" label="name"
-                            v-model="form.package" :allow-empty="false" :disabled="checkPerm('package_id')">
-                          </multiselect>
-                        </div>
-                        <p v-show="$page.props.errors.package" class="mt-2 text-sm text-red-500">{{
-                          $page.props.errors.package }}</p>
-                      </div>
-                      <div class="col-span-1 sm:col-span-1">
-                        <label class="block text-sm font-medium text-gray-700">
-                          Installation Timeline
-                        </label>
-                        <div class="mt-1 p-2 space-x-2 inline-flex">
-                          {{ form.package?.installation_timeline }} {{ form.package ? ' Hours' : '' }}
-
-                        </div>
-
                       </div>
                       <div class="col-span-1 sm:col-span-1">
                         <label for="prefer_install_date" class="block text-sm font-medium text-gray-700"><span
@@ -212,6 +195,7 @@
                           </span>
                           <input v-model="form.prefer_install_date" type="date" name="prefer_install_date"
                             id="prefer_install_date"
+                            :min="new Date().toISOString().split('T')[0]"
                             class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="checkPerm('prefer_install_date')" />
                         </div>
@@ -222,17 +206,77 @@
                           Customer Status </label>
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="status_list.length !== 0">
                           <multiselect deselect-label="Selected already" :options="statusList" track-by="id"
-                            label="name" v-model="form.status" :allow-empty="false"
-                            :disabled="!disableStatus ? checkPerm('status_id') : disableStatus"></multiselect>
+                          label="name" v-model="form.status" :allow-empty="false"
+                          :disabled="!disableStatus ? checkPerm('status_id') : disableStatus"></multiselect>
                         </div>
                         <p v-show="$page.props.errors.status" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.status
                         }}</p>
                       </div>
-
-
-
-
+                      <div class="col-span-1 sm:col-span-1">
+                        <label for="bandwidth" class="block text-sm font-medium text-gray-700"><span
+                            class="text-red-500">*</span>
+                          Bandwith </label>
+                        <div class="mt-1 flex rounded-md shadow-sm" >
+                          <input type="number" v-model="form.bandwidth" name="bandwidth"
+                          id="bandwidth"
+                          class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
+                          placeholder="20, 30 e.g. " v-on:keypress="isNumber($event)"
+                           :disabled="checkPerm('bandwidth')"
+                          required />
+                      <span
+                          class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                          Mbps </span>
+                        </div>
+                        <p v-show="$page.props.errors.bandwidth" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.bandwidth }}</p>
+                      </div>
+                      <div class="col-span-1 sm:col-span-1">
+                        <label for="installation_service_id" class="block text-sm font-medium text-gray-700"><span
+                            class="text-red-500">*</span>
+                          Installation </label>
+                        <div class="mt-1 flex rounded-md shadow-sm" v-if="installationServices">
+                          <multiselect deselect-label="Selected already" :options="installationServices" track-by="id" label="name"
+                            v-model="form.installation_service" :allow-empty="false" 
+                            @update:modelValue="form.installation_service_id = $event?.id"
+                            :disabled="checkPerm('installation_service_id')">
+                          </multiselect>
+                        </div>
+                        <p v-show="$page.props.errors.installation_service_id" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.installation_service_id }}</p>
+                      </div>
+                      <div class="col-span-1 sm:col-span-2">
+                        <label for="package" class="block text-sm font-medium text-gray-700"><span
+                            class="text-red-500">*</span>
+                          Maintenance </label>
+                        <div class="mt-1 flex rounded-md shadow-sm " v-if="maintenanceServices">
+                          <multiselect deselect-label="Selected already" :options="maintenanceServices" track-by="id" label="name"
+                            v-model="form.maintenance_service" :allow-empty="false"
+                            @update:modelValue="form.maintenance_service_id = $event?.id"
+                            :disabled="checkPerm('maintenance_service_id')" :class="text-xs">
+                          </multiselect>
+                        </div>
+                        <p v-show="$page.props.errors.maintenance_service_id" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.maintenance_service_id }}</p>
+                      </div>
+                      <div class="col-span-1 md:col-span-2">
+                        <label for="bundle" class="block text-sm font-medium text-gray-700">
+                          Additional Materials Request (Leave blank for own materials)
+                        </label>
+                        <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
+                          <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
+                            label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
+                            :multiple="true" :taggable="false"></multiselect>
+                        </div>
+                        <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.bundles }}</p>
+                      </div>
+                     
+                    
+                     
+                     
+                    
+                      
                       <div class="col-span-1 sm:col-span-2">
                         <label for="order_remark" class="block text-sm font-medium text-gray-700"> Order
                           Remark </label>
@@ -248,6 +292,8 @@
                         <p v-show="$page.props.errors.order_remark" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.order_remark }}</p>
                       </div>
+
+
                       <div class="col-span-1 sm:col-span-1"  v-if="$page.props.login_type == 'isp'">
                         <label for="isp" class="block text-sm font-medium text-gray-700"> Installation Date </label>
                         <span
@@ -502,18 +548,7 @@
                                 $page.props.errors.fiber_distance }}</p>
                             </div>
                           </div>
-                          <div class="col-span-1 md:col-span-1">
-                            <label for="bundle" class="block text-sm font-medium text-gray-700">
-                              Devices
-                            </label>
-                            <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
-                              <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
-                                label="name" v-model="form.bundles" :allow-empty="false" :disabled="checkPerm('bundle')"
-                                :multiple="true" :taggable="false"></multiselect>
-                            </div>
-                            <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
-                              $page.props.errors.bundles }}</p>
-                          </div>
+                     
                           <div class="col-span-1 sm:col-span-1">
                             <label for="onu_serial" class="block text-sm font-medium text-gray-700"> ONU Serial </label>
                             <div class="mt-1 flex rounded-md shadow-sm">
@@ -636,8 +671,7 @@
                       Township – {{ form.township['name'] }}<br />
                       Fully Address – {{ form.address }}<br />
                       Location – {{ form.latitude }},{{ form.longitude }} <br />
-                      Applied Mbps – {{ form.package.name }} ({{ form.package.speed }}
-                      Mbps)<br />
+                      Applied Mbps – {{ form.bandwidth }} Mbps<br />
                       Installation Timeline – {{ form.package?.installation_timeline }} Hrs<br />
                       Preferred installation date & time – {{ form.prefer_install_date }}<br />
                       <span v-if="form.order_remark">Order Remark : {{ form.order_remark }}</span>
@@ -745,6 +779,7 @@ import CustomerFile from "@/Components/CustomerFile";
 import ImageUploader from "@/Components/ImageUploader";
 import CustomerHistory from "@/Components/CustomerHistory";
 import { router, useForm, Link } from "@inertiajs/vue3";
+
 export default {
   name: "EditCustomer",
   components: {
@@ -775,6 +810,9 @@ export default {
     subconCheckList: Object,
     popDevices: Object,
     snPort:Object,
+    installationServices: Object,
+    portSharingServices: Object,
+    maintenanceServices: Object,
   },
   setup(props) {
     provide('role', props.role);
@@ -847,7 +885,11 @@ export default {
       isp_ftth_id: props.customer.isp_ftth_id,
       ftth_id: props.customer.ftth_id,
       township: props.customer.township,
-      package: props.customer.package,
+      installation_service_id : props.customer.installation_service_id,
+      maintenance_service_id : props.customer.maintenance_service_id,
+      installation_service: props.customer.installation_service,
+      maintenance_service : props.customer.maintenance_service,
+      bandwidth: props.customer.bandwidth,
       status: "",
       subcom: "",
       prefer_install_date: props.customer.prefer_install_date,
@@ -877,7 +919,7 @@ export default {
       start_meter_image: props.customer.start_meter_image,
       end_meter_txt: props.customer.end_meter_txt,
       end_meter_image: props.customer.end_meter_image,
-
+      bundles : "",
     });
     const form2 = useForm({
       ...Object.fromEntries(
@@ -1227,7 +1269,7 @@ export default {
       }
     };
     onMounted(() => {
-
+      
       // Initialize form data
       form.installation_status = props.customer.installation_status ?
         installationStatus.value.filter((status) => status.id == props.customer.installation_status)[0] :

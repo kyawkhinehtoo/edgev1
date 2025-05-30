@@ -36,8 +36,10 @@ use App\Models\SmsGateway;
 use App\Jobs\PDFCreateJob;
 use App\Jobs\BillingSMSJob;
 use App\Jobs\ReminderSMSJob;
+use App\Models\InstallationService;
 use App\Models\InvoiceItem;
 use App\Models\Isp;
+use App\Models\PortSharingService;
 use App\Models\SystemSetting;
 use App\Models\TempBill;
 use App\Models\TempInvoice;
@@ -92,7 +94,8 @@ class BillingController extends Controller
                             ->where('bill_id', $request->bill_id['id']);
                 });
             })
-            ->whereDate('customers.installation_date', '<', $temp_date)
+          //  ->whereDate('customers.installation_date', '<', $temp_date)
+            ->whereDate('customers.service_activation_date', '<=', $temp_date)
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
@@ -138,14 +141,14 @@ class BillingController extends Controller
                 ]);
         
                 foreach ($customerList as $customer) {
-                 
+                    $portLeasing = $this->getPriceForCustomerByIsp($customer->id);
                     $package = Package::find($customer->package_id);
-                    if (!$package) continue;
-                    $mrc = $package->price;
-                    $installationFee = $package->otc;
-            
+                    $mrc = $portLeasing['fee'];
+                    $installationFee = InstallationService::find($customer->installation_service_id)->first()->fees;
+               
                     // **New Installations** (Prorated MRC)
-                    if ($customer->installation_date && $customer->installation_date->format('Y-m') == $billingPeriod) {
+                  //  if ($customer->installation_date && $customer->installation_date->format('Y-m') == $billingPeriod) {
+                    if ($customer->service_activation_date && $customer->service_activation_date->format('Y-m') == $billingPeriod) {
                         $totalNewCustomer++;
 
 
@@ -245,7 +248,45 @@ class BillingController extends Controller
 
       
     }
-
+    private function getPriceForCustomerByIsp($customer_id)
+    {
+        $customer = Customer::find($customer_id);
+    
+        if (!$customer) {
+            return null;
+        }
+    
+        // Get how many valid customers (with smaller or equal ID) exist for the same ISP
+        $position = Customer::join('status', 'status.id', 'customers.status_id')
+            ->where('customers.isp_id', $customer->isp_id)
+            ->where('customers.id', '<=', $customer->id)
+            ->whereIn('status.type', ['active', 'suspense'])
+            ->count();
+    
+        $bandwidth = (int) $customer->bandwidth;
+    
+        $selectedService = PortSharingService::where('max_speed', '>=', $bandwidth)
+            ->orderBy('max_speed', 'asc')
+            ->first();
+    
+        if (!$selectedService) {
+            return null;
+        }
+        
+        $tiers = json_decode($selectedService->rate, true);
+       
+        $fee = null;
+        foreach ($tiers as $tier) {
+            if ($position >= $tier['min']) {
+                $fee = $tier['fees'];
+            }
+        }
+    
+        return [
+            'fee' => $fee,
+            'position' => $position,
+        ];
+    }
     public function goTemp(Request $request)
     {
         //$billings = Billing::paginate(10);

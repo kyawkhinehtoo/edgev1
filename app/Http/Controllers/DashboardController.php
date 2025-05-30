@@ -96,13 +96,13 @@ class DashboardController extends Controller
 
         $ftth = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
+            ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
-            ->where('packages.type', '=', 'ftth')
+            ->where('port_sharing_services.type', 'ftth')
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
@@ -110,13 +110,13 @@ class DashboardController extends Controller
 
         $b2b = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
+            ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
-            ->where('packages.type', '=', 'b2b')
+            ->where('port_sharing_services.type', '=', 'b2b')
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
@@ -124,13 +124,13 @@ class DashboardController extends Controller
 
         $dia = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
+            ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
-            ->where('packages.type', '=', 'dia')
+            ->where('port_sharing_services.type', 'dia')
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
@@ -138,54 +138,54 @@ class DashboardController extends Controller
         //SELECT p.name,COUNT(c.ftth_id) AS customers FROM packages p JOIN customers c ON c.package_id=p.id  WHERE p.`type`='ftth' GROUP BY p.name;
         $ftth_total = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
+            ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
-            ->where('packages.type', '=', 'ftth')
+            ->where('port_sharing_services.type', 'ftth')
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
-            ->select('packages.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
-            ->groupBy('packages.name')
-            ->orderBy('packages.name', 'DESC')
+            ->select('port_sharing_services.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
+            ->groupBy('port_sharing_services.name')
+            ->orderBy('port_sharing_services.name', 'DESC')
             
             ->get();
 
         $b2b_total = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
+            ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
-            ->where('packages.type', '=', 'b2b')
+            ->where('port_sharing_services.type', 'b2b')
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
-            ->select('packages.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
-            ->groupBy('packages.name')
-            ->orderBy('packages.name', 'DESC')
+            ->select('port_sharing_services.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
+            ->groupBy('port_sharing_services.name')
+            ->orderBy('port_sharing_services.name', 'DESC')
             ->get();
 
         $dia_total = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
+            ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
-            ->where('packages.type', '=', 'dia')
+            ->where('port_sharing_services.type', 'dia')
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
-            ->select('packages.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
-            ->groupBy('packages.name')
-            ->orderBy('packages.name', 'DESC')
+            ->select('port_sharing_services.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
+            ->groupBy('port_sharing_services.name')
+            ->orderBy('port_sharing_services.name', 'DESC')
             ->get();
 
 
@@ -232,7 +232,7 @@ class DashboardController extends Controller
             })
             ->when($request->type, function ($query, $type) {
                 if ($type != 'all')
-                    $query->where('packages.type', '=',  $type);
+                    $query->where('port_sharing_services.type',  $type);
             })
             ->when($request->package, function ($query, $packages) use ($package_except) {
                 $package_list = array();
@@ -298,10 +298,10 @@ class DashboardController extends Controller
 
         $customers = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->join('packages', 'customers.package_id', '=', 'packages.id')
+            ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->when($request->type, function ($query, $type) {
                 if ($type != 'all')
-                    $query->where('packages.type', '=',  $type);
+                    $query->where('port_sharing_services.type',  $type);
             })
             ->when($request->general, function ($query, $general) {
                 $query->where(function ($query) use ($general) {

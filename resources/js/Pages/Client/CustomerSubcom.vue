@@ -104,7 +104,7 @@
             </div>
           </div>
           <p class="text-sm text-gray-600"><strong>Name:</strong> {{ row.name }}</p>
-          <p class="text-sm text-gray-600"><strong>Package:</strong> {{ row.package.name }}</p>
+          <p class="text-sm text-gray-600"><strong>Package:</strong> {{ row.bandwidth }}</p>
           <p class="text-sm text-gray-600"><strong>Township:</strong> {{ row.township.name }}</p>
           <p class="text-sm text-gray-600"><strong>Status:</strong> {{ row.status.name }}</p>
           <p class="text-sm text-gray-600"><strong>Order Date:</strong> {{ row.order_date }}</p>
@@ -137,8 +137,8 @@
                 <th @click="sortBy('name')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
                   Name <i :class="getSortIcon('name')" class="fas fa-sort ml-1"></i>
                 </th>
-                <th @click="sortBy('package')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
-                  Package <i :class="getSortIcon('package')" class="fas fa-sort ml-1"></i>
+                <th @click="sortBy('bandwidth')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
+                  Package <i :class="getSortIcon('bandwidth')" class="fas fa-sort ml-1"></i>
                 </th>
                 <th @click="sortBy('township')" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100">
                   Township <i :class="getSortIcon('township')" class="fas fa-sort ml-1"></i>
@@ -167,7 +167,7 @@
                 <td class="px-3 py-3 text-xs font-medium">{{ row.prefer_install_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.way_list_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.name }}</td>
-                <td class="px-3 py-3 text-xs font-medium">{{ row.package.name }}</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.bandwidth }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.township.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">
                   {{ 

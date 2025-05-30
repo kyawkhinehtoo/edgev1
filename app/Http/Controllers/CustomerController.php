@@ -17,11 +17,14 @@ use App\Models\SnPorts;
 use App\Models\DnPorts;
 use App\Models\CustomerHistory;
 use App\Models\FileUpload;
+use App\Models\InstallationService;
 use App\Models\Isp;
+use App\Models\MaintenanceService;
 use App\Models\OdbFiberCable;
 use App\Models\Partner;
 use App\Models\Pop;
 use App\Models\PopDevice;
+use App\Models\PortSharingService;
 use App\Models\PublicIpAddress;
 use App\Models\SnPort;
 use App\Models\SnSplitter;
@@ -191,6 +194,7 @@ class CustomerController extends Controller
                 return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
+    
                 if($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
                 }
@@ -381,6 +385,12 @@ class CustomerController extends Controller
         $projects = Project::get();
         $pops = Pop::get();
         $bundle_equiptments = BundleEquiptment::get();
+
+        $installationServices = InstallationService::where('type','new')->get();
+        $portSharingServices = PortSharingService::get();
+        $maintenanceServices = MaintenanceService::get();
+      
+
         $dn = DB::table('dn_ports')
             ->get();
      
@@ -419,6 +429,9 @@ class CustomerController extends Controller
                 'partners' => $partners,
                 'isps' => $isps,
                 'bundle_equiptments' => $bundle_equiptments,
+                'installationServices' => $installationServices,
+                'portSharingServices' => $portSharingServices,
+                'maintenanceServices' => $maintenanceServices,
             ]
         );
     }
@@ -434,57 +447,76 @@ class CustomerController extends Controller
             'address' => 'required',
             'latitude' => 'required|max:255',
             'longitude' => 'required|max:255',
-            'package' => 'required',
             'dob' => 'nullable|date',
             'status' => 'required',
             'order_date' => 'date',
             'township' => 'required',
             'installation_date' => 'nullable|date',
             'isp_ftth_id' => 'required|unique:customers,isp_ftth_id',
+            'installation_service_id' =>'required',
+            'maintenance_service_id' =>'required',
+            'bandwidth' =>'required|integer',
         ]);
-        
+       
         if ($user->user_type === 'internal') {
             $validator->addRules([
                 'isp_id' => 'required',
             ]);
         }
-        
+
+        // Run validation first to catch basic rule errors
         $validator->validate();
+
+        // Now check business logic condition
+        $bandwidth = (int) $request->bandwidth;
+        $selectedService = PortSharingService::where('max_speed', '>=', $bandwidth)
+            ->orderBy('max_speed', 'asc')
+            ->first();
+        $maintenanceService = MaintenanceService::find($request->maintenance_service_id);
+        if (!$selectedService) {
+            // Manually throw ValidationException with custom message
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'bandwidth' => 'Invalid bandwidth value, please check.',
+            ]);
+        }
+        if (!$maintenanceService) {
+            // Manually throw ValidationException with custom message
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'maintenance_service_id' => 'Invalid Maintenance value, please check.',
+            ]);
+        }
         $isp = null;
-      
-      
         if($user->user_type == 'isp') {
             $isp = Isp::find($user->isp_id);
         }else{
             $isp = Isp::find($request->isp_id['id']);
         }
-   
             //already exists
             if ($isp) {
-            
                 $max_c_id = $this->getmaxid();
                 $city_id = $request->township['city_id'];
-            
-         
                 $result = null;
                 foreach ($max_c_id as $value) {
                     if ((int)$value['id'] == (int)$city_id) {
                         $result = $value['value'];
                     }
                 }
+            //   $max_id = $max_c_id [$request->city_id];
+                $auto_ftth_id =$isp->short_code.$request->township['city_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type,0,2).$selectedService->short_code.$maintenanceService->sla_hours;
+                $auto_ftth_id = strtoupper($auto_ftth_id);
                 
-                    //   $max_id = $max_c_id [$request->city_id];
-                    $auto_ftth_id =$isp->short_code.$request->township['city_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($request->package['type'],0,2).$request->package['short_code'].$request->package['installation_timeline'];
-                   $auto_ftth_id = strtoupper($auto_ftth_id);
-                
+            }else{
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'isp_id' => 'Something missing value, please check.',
+                ]);
             }
-        
+          
+
         $customer = new Customer();
         $customer->name = $request->name;
         $customer->phone_1 = $request->phone_1;
         $customer->address = $request->address;
         $customer->location = $request->latitude. ','. $request->longitude;
-        $customer->package_id = $request->package['id'];
         $customer->isp_id = $isp->id;
         $customer->ftth_id = $auto_ftth_id;
         $customer->isp_ftth_id = $request->isp_ftth_id;
@@ -495,12 +527,11 @@ class CustomerController extends Controller
         $customer->created_by = Auth::user()->id;
         $customer->order_remark = $request->order_remark;
         $customer->deleted = 0;
-
+        $customer->bandwidth = $request->bandwidth;
+        $customer->installation_service_id = $request->installation_service_id;
+        $customer->maintenance_service_id = $request->maintenance_service_id;
+        $customer->port_sharing_service_id = $selectedService->id; 
         $customer->save();
-
-       
-       
-     
         $logData = [];
       //  $changes = $customer->getChanges();
       $changes = $customer->getAttributes();
@@ -608,13 +639,18 @@ class CustomerController extends Controller
                 return abort(403, 'Unauthorized access.');
             }
         }
-        $customer = Customer::with('township','partner','package','isp','snPort','snPort.snSplitter','snPort.snSplitter.snBox.dnSplitter.fiberCable')
+        $customer = Customer::with('township','partner','isp','snPort','snPort.snSplitter','snPort.snSplitter.snBox.dnSplitter.fiberCable','installationService','maintenanceService','portSharingService')
             ->where(function ($query) {
                 $query->where('deleted', 0)->orWhereNull('deleted');
             })->find($id);
         $snPort =  SnPort::with('SnSplitter','DnSplitter','pop','popDevice')->where('customer_id', $id)->first();
         $bundle_equiptments = BundleEquiptment::get();
-            
+          
+    
+        
+        $installationServices = InstallationService::where('type','new')->get();
+        $portSharingServices = PortSharingService::get();
+        $maintenanceServices = MaintenanceService::get();
         // if($user->user_type == 'subcon') {
         //     $subconCheckList = SubconChecklist::where('service_type','installation')->get();
         //     return Inertia::render('Client/SubcomCustomerView', [
@@ -663,7 +699,6 @@ class CustomerController extends Controller
         $partners = Partner::all();
         $pops = Pop::all();
         $popDevices = PopDevice::all();
-        $packages = Package::get();
         $projects = Project::get();
        
         $subcoms = Subcom::all();
@@ -683,7 +718,9 @@ class CustomerController extends Controller
             'Client/EditCustomer',
             [
                 'customer' => $customer,
-                'packages' => $packages,
+                'installationServices' => $installationServices,
+                'portSharingServices' => $portSharingServices,
+                'maintenanceServices' => $maintenanceServices,
                 'projects' => $projects,
                 'allStatus' => $allStatus,
                 'townships' => $townships,
@@ -723,12 +760,12 @@ class CustomerController extends Controller
             'address' => 'required',
             'latitude' => 'required|max:255',
             'longitude' => 'required|max:255',
-            'package' => 'required',
             'ftth_id' => 'required|max:255',
             'dob' => 'nullable|date',
             'order_date' => 'date',
             'status' => 'required',
             'installation_date' => 'nullable|date',
+            'bandwidth' => 'required|integer',
             // 'route_kmz_image' => 'nullable|image|max:10240',
             // 'drum_no_image' => 'nullable|image|max:10240',
             // 'start_meter_image' => 'nullable|image|max:10240',
@@ -768,14 +805,10 @@ class CustomerController extends Controller
                     $customer->$value = $request->status?json_decode($request->status)?->id:null;
                 if ($value == 'township_id')
                     $customer->$value = $request->township?json_decode($request->township)?->id:null;
-                if ($value == 'package_id')
-                    $customer->$value = $request->package?json_decode($request->package)?->id:null;
-           
                 if ($value == 'project_id') {
                     if (!empty($request->project))
                         $customer->$value =  $request->project?json_decode($request->project)?->id:null;
                 }
-                
                 if ($value == 'pop_id') {
                     if (isset($request->pop_id))
                         $customer->$value =  $request->pop_id?json_decode($request->pop_id)?->id:null;
@@ -784,7 +817,6 @@ class CustomerController extends Controller
                     if (isset($request->pop_device_id))
                         $customer->$value =  $request->pop_device_id?json_decode($request->pop_device_id)?->id:null;
                 }
-            
                 if ($value == 'gpon_ontid') {
                     if (isset($request->gpon_ontid))
                         $customer->$value =  $request->gpon_ontid?json_decode($request->gpon_ontid)?->name:null;
@@ -794,7 +826,6 @@ class CustomerController extends Controller
                     $customer->$value =  $request->partner_id?json_decode($request->partner_id)?->id:null;
                 }
                 if ($value == 'isp_id') {
-                 
                     if (isset($request->isp_id))
                     $customer->$value =  $request->isp_id?json_decode($request->isp_id)?->id:null;
                 }
@@ -809,6 +840,16 @@ class CustomerController extends Controller
                             else
                                 $customer->bundle .= $value->id;
                         }
+                    }
+                }
+                if($value == 'bandwidth') {
+                    if($request->bandwidth){
+                        $bandwidth = (int) $request->bandwidth;
+                        $selectedService = PortSharingService::where('max_speed', '>=', $bandwidth)
+                            ->orderBy('max_speed', 'asc')
+                            ->first();
+                        $customer->bandwidth = $bandwidth;
+                        $customer->port_sharing_service_id = $selectedService->id;
                     }
                 }
                 // if ($value == 'sn_id') {
@@ -833,7 +874,7 @@ class CustomerController extends Controller
                     $customer->$value =  $request->subcom?json_decode($request->subcom)?->id:null;       
                 }
                 if($value == 'subcom_assign_date'){
-                    if (!empty($request->subcom)){
+                    if (!empty($request->subcom) && !$oldCustomer->subcom_assign_date){
                         if(!$customer->subcom_assign_date){
                             $customer->$value = Carbon::now()->format('Y-m-d H:i:s');
                         }
@@ -1324,5 +1365,24 @@ class CustomerController extends Controller
         //     ->log('Customer updated: ' . $customer->ftth_id);
 
         return redirect()->back()->with('message', 'Customer updated successfully');
+    }
+    public function fixCustomerPackage(){
+        $customers = Customer::all();
+        $bandwidthOptions = [10, 20, 30, 35, 40, 50, 55, 60, 80, 100, 120, 150, 200];
+        
+        foreach ($customers as $customer) {
+            // if($customer->bandwidth == 0 || $customer->bandwidth == null){
+                $bandwidth = $bandwidthOptions[array_rand($bandwidthOptions)];
+                $portSharingServices = PortSharingService::where('max_speed','>=', $bandwidth)->orderByDesc('max_speed',)->first();
+                $maintenanceServices = MaintenanceService::all()->random();
+                dd($maintenanceServices);
+                $installationServices = InstallationService::all()->random();
+                $customer->bandwidth = $bandwidth;
+                $customer->port_sharing_service_id = $portSharingServices->id;
+
+            // }
+            $customer->package_id = 1;
+            $customer->update();
+        }
     }
 }

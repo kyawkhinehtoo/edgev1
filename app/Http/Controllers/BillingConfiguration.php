@@ -20,21 +20,24 @@ class BillingConfiguration extends Controller
     {
       
         $bill_config = new BillingConfig();
-        if(!empty($request->exclude_list)){
-            $bill_config->exclude_list = '';
-            foreach ($request->exclude_list as $key => $value) {
-                if($key !== array_key_last($request->exclude_list))
-                $bill_config->exclude_list .= $value['id'].',';
-                else
-                $bill_config->exclude_list .= $value['id'];
-            }
+        // if(!empty($request->exclude_list)){
+        //     $bill_config->exclude_list = '';
+        //     foreach ($request->exclude_list as $key => $value) {
+        //         if($key !== array_key_last($request->exclude_list))
+        //         $bill_config->exclude_list .= $value['id'].',';
+        //         else
+        //         $bill_config->exclude_list .= $value['id'];
+        //     }
             
-        }
-
-        $bill_config->mrc_day = $request->mrc_day;
-        $bill_config->prepaid_day = $request->prepaid_day;
-        $bill_config->mrc_month = $request->mrc_month;
-        $bill_config->prepaid_month = $request->prepaid_month;
+        // }
+        // max_suspension_month
+        // port_maintenance_fee
+        // $bill_config->mrc_day = $request->mrc_day;
+        // $bill_config->prepaid_day = $request->prepaid_day;
+        // $bill_config->mrc_month = $request->mrc_month;
+        // $bill_config->prepaid_month = $request->prepaid_month;
+        $bill_config->max_suspension_month = $request->max_suspension_month;
+        $bill_config->port_maintenance_fee = $request->port_maintenance_fee;
         $bill_config->save();
          return redirect()->back()->with('message', 'Config Created Successfully.');
     }
@@ -42,20 +45,22 @@ class BillingConfiguration extends Controller
     {
         if ($request->has('id')) {
             $bill_config =  BillingConfig::find($request->input('id'));
-            if(!empty($request->exclude_list)){
-                $bill_config->exclude_list = '';
-                foreach ($request->exclude_list as $key => $value) {
-                    if($key !== array_key_last($request->exclude_list))
-                    $bill_config->exclude_list .= $value['id'].',';
-                    else
-                    $bill_config->exclude_list .= $value['id'];
-                }
+            // if(!empty($request->exclude_list)){
+            //     $bill_config->exclude_list = '';
+            //     foreach ($request->exclude_list as $key => $value) {
+            //         if($key !== array_key_last($request->exclude_list))
+            //         $bill_config->exclude_list .= $value['id'].',';
+            //         else
+            //         $bill_config->exclude_list .= $value['id'];
+            //     }
                 
-            }
-            $bill_config->mrc_day = $request->mrc_day;
-            $bill_config->prepaid_day = $request->prepaid_day;
-            $bill_config->mrc_month = $request->mrc_month;
-            $bill_config->prepaid_month = $request->prepaid_month;
+            // }
+            // $bill_config->mrc_day = $request->mrc_day;
+            // $bill_config->prepaid_day = $request->prepaid_day;
+            // $bill_config->mrc_month = $request->mrc_month;
+            // $bill_config->prepaid_month = $request->prepaid_month;
+            $bill_config->max_suspension_month = $request->max_suspension_month;
+            $bill_config->port_maintenance_fee = $request->port_maintenance_fee;
             $bill_config->update();
             return redirect()->back()
                     ->with('message', 'Config Updated Successfully.');

@@ -33,7 +33,7 @@
           <div class="bg-white px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6">
             <dt class="text-sm font-medium text-gray-500">Applied Mbps</dt>
             <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
-              {{ customer_detail[0].package_name }} ({{ customer_detail[0].package_speed }} Mbps),MRC {{ customer_detail[0].package_price }} <span class="uppercase">{{ customer_detail[0].package_currency }}</span>, {{ customer_detail[0].package_contract_period }} Month
+              {{ customer_detail[0].bandwidth }}  Mbps
             </dd>            
           </div>
           <div class="bg-gray-50 px-2 py-2 sm:grid sm:grid-cols-4 sm:gap-4 sm:px-6" v-if=" customer_detail[0].sn_splitter_name">

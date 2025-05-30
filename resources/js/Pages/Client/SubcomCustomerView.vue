@@ -23,7 +23,7 @@
                     </ul>
                 </div>
                 <form @submit.prevent="submit">
-                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg sm:rounded-t-none p-6"
+                    <div class="bg-white  shadow-xl sm:rounded-lg sm:rounded-t-none p-6"
                         :class="[tab == 1 ? '' : 'hidden']">
 
 
@@ -75,14 +75,13 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Package</p>
-                                <p class="mt-1">{{ customer.package?.name }}, {{ customer.package?.speed }} Mbps</p>
+                                <p class="mt-1">{{ customer.bandwidth }} Mbps</p>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Installation Timeline</p>
                                 <p class="mt-1"><span
                                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">{{
-                                            customer.package?.installation_timeline }} {{ (customer.package) ? "Hours" : ""
-                                        }}</span></p>
+                                            customer.installation_service?.sla_hours }} Hours </span></p>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Prefer Install Date</p>

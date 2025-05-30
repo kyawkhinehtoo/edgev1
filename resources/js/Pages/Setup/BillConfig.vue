@@ -11,47 +11,30 @@
             <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div class="">
                 <div class="mb-4">
-                  <label for="mrc_day" class="block text-gray-700 text-sm font-bold mb-2">MRC :</label>
+                  <label for="max_suspension_month" class="block text-gray-700 text-sm font-bold mb-2">Max Suspension Allowed Month :</label>
                   <div class="mt-1 flex rounded-md shadow-sm">
-                    <input type="number" v-model="form.mrc_day" name="mrc_day" id="mrc_day"
-                      class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
-                      placeholder="Day" />
-                    <span
-                      class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                      Day </span>
-                    <input type="number" v-model="form.mrc_month" name="mrc_month" id="mrc_month"
+                    <input type="number" v-model="form.max_suspension_month" name="max_suspension_month" id="max_suspension_month"
                       class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
                       placeholder="Month" />
                     <span
                       class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
                       Month </span>
+                  
                   </div>
 
                 </div>
                 <div class="mb-4">
-                  <label for="prepaid_day" class="block text-gray-700 text-sm font-bold mb-2">Advance Payment :</label>
+                  <label for="prepaid_day" class="block text-gray-700 text-sm font-bold mb-2">Port Maintenance Fees Per Month :</label>
                   <div class="mt-1 flex rounded-md shadow-sm">
-                    <input type="number" v-model="form.prepaid_day" name="prepaid_day" id="prepaid_day"
-                      class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
-                      placeholder="Day" />
-                    <span
-                      class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                      Day </span>
-                    <input type="number" v-model="form.prepaid_month" name="prepaid_month" id="prepaid_month"
-                      class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
-                      placeholder="Month" />
-                    <span
-                      class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                      Month </span>
+                    <input type="number" v-model="form.port_maintenance_fee" name="port_maintenance_fee" id="port_maintenance_fee"
+                    class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300"
+                    placeholder="MMK" />
+                  <span
+                    class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                    MMK </span>
                   </div>
                 </div>
-                <div class="mb-24">
-                  <label for="exclude_list" class="block text-gray-700 text-sm font-bold mb-2">Excluded List:</label>
-                  <div class="mt-1 flex rounded-md shadow-sm">
-                    <multiselect deselect-label="Selected already" :options="customer_type" track-by="id" label="name"
-                      v-model="form.exclude_list" :allow-empty="true" :multiple="true" :taggable="true"> </multiselect>
-                  </div>
-                </div>
+                
               </div>
             </div>
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
@@ -99,11 +82,10 @@ export default {
   setup(props) {
     const form = reactive({
       id: null,
-      exclude_list: null,
-      mrc_day: null,
-      prepaid_day: null,
-      mrc_month: null,
-      prepaid_month: null,
+     
+      max_suspension_month: null,
+      port_maintenance_fee: null,
+     
     });
     const customer_type = [
       {
@@ -158,15 +140,9 @@ export default {
     function edit(data) {
       editMode.value = true;
       form.id = data.id;
-      form.exclude_list = data.exclude_list;
-      if (data.exclude_list) {
-        let exclude_list_array = data.exclude_list.split(",");
-        form.exclude_list = customer_type.filter((d) => exclude_list_array.includes(d.id));
-      }
-      form.mrc_day = data.mrc_day;
-      form.prepaid_day = data.prepaid_day;
-      form.mrc_month = data.mrc_month;
-      form.prepaid_month = data.prepaid_month;
+      form.max_suspension_month = data.max_suspension_month;
+      form.port_maintenance_fee = data.port_maintenance_fee;
+    
     }
 
     onMounted(() => {
