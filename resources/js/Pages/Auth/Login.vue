@@ -41,18 +41,25 @@ const submit = () => {
 
     <AuthenticationCard>
         <template #logo>
-            <span class="flex flex-col items-center align-middle uppercase text-gray-400">
+            <span class="flex flex-col align-middle uppercase text-gray-400 gap-4">
                 <span v-if="$page.props.login_type === 'internal'">
-                    <img v-if="$page.props.logo_small" :src="`/storage/${$page.props.logo_small}`" alt="Logo" class="w-16" />
+                    <img v-if="$page.props.logo_small" :src="`/storage/${$page.props.logo_small}`" alt="Logo" class="w-32" />
                   </span>
-                  <span v-else-if="$page.props.login_type === 'isp'">
-                    <img v-if="$page.props.isp?.logo" :src="`/storage/${$page.props.isp.logo}`" alt="Logo" class="w-16" />
+                  <span v-else-if="$page.props.login_type === 'isp'" class="flex items-center gap-4 ">
+                    <img v-if="$page.props.logo_small" :src="`/storage/${$page.props.logo_small}`" alt="Logo" class="w-20" />
+                    <img v-if="$page.props.isp?.logo" :src="`/storage/${$page.props.isp.logo}`" alt="Logo" class="w-20" />
                   </span>
-                  <span v-else-if="$page.props.login_type === 'partner'">
-                    <img v-if="$page.props.partner?.logo" :src="`/storage/${$page.props.partner.logo}`" alt="Logo" class="w-16" />
+                  <span v-else-if="$page.props.login_type === 'partner'" class="flex items-center gap-4">
+                    <img v-if="$page.props.logo_small" :src="`/storage/${$page.props.logo_small}`" alt="Logo" class="w-20" />
+                    <img v-if="$page.props.partner?.logo" :src="`/storage/${$page.props.partner.logo}`" alt="Logo" class="w-20" />
                   </span>
-               
-                <h2 class="mt-2 font-bold antialiased flex">Operation & Billing Support System</h2>
+                  
+                <h1 class="mt-2 font-bold antialiased flex text-gray-800 text-2xl">Welcome to EDGE OSS-BSS Portal</h1>
+                <p class="mt-1 text-sm text-gray-800 font-semibold">
+                    We're glad to have you here! This portal is your all-in-one platform for managing operations, billing, and support services efficiently. Whether you're tracking service requests, viewing account details, or monitoring system performance, EDGE is designed to simplify your workflow and empower your operations. 
+                    <br />Please log in to get started.
+
+                </p>
             </span>
         </template>
 
@@ -64,6 +71,10 @@ const submit = () => {
         </div>
 
         <form @submit.prevent="submit">
+            <div class="mb-4 text-center">
+                <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-100">EDGE OSS-BSS Portal</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Please sign in to your account</p>
+            </div>
             <div>
                 <InputLabel for="email" value="Email" />
                 <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" required autofocus

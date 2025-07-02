@@ -1,7 +1,7 @@
 <template>
   <app-layout>
     <template #header>
-      <h2 class="font-semibold text-xl text-white leading-tight">Bill Configuration</h2>
+      <h2 class="font-semibold text-xl text-white leading-tight">Suspense Configuration</h2>
     </template>
 
     <div class="py-2">

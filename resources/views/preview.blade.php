@@ -267,7 +267,7 @@
                         <td>No.</td>
                         <td>Description</td>
          
-                        <td class="right">Unit Price (MMK)</td>
+                       
                         <td>QTY</td>
                         <td class="right">Total (MMK)</td>
                     </tr>
@@ -283,7 +283,7 @@
                     <tr>
                         <td>{{ $index++ }}</td>
                         <td class="left"> {{$tempInvoice->category}} </td>
-                        <td class="right">{{number_format($tempInvoice->unit_price)}}</td>
+                        
                         <td>{{ $tempInvoice->total_customers }}</td>
                         <td class="right">{{number_format($tempInvoice->total_amount)}}</td>
                    
@@ -293,8 +293,8 @@
                     <tr>
                         <td>{{ $index++ }}</td>
                         <td class="left"> {{$isp->additional_description}} </td>
-                        <td class="right">{{$isp->additional_fees}}</td>
                         <td>1</td>
+                    
                         <td class="right">{{number_format($isp->additional_fees)}}</td>
                    
                     </tr>
@@ -303,27 +303,27 @@
            
                 <tfoot>
                     <tr>
-                        <td class="title" colspan="4">Sub Total</td>
+                        <td class="title" colspan="3">Sub Total</td>
                         <td class="text right">{{number_format($isp->sub_total) }}</td>
                     </tr>
                     @if($isp->discount_amount > 0)
                     <tr>
-                        <td class="title" colspan="4">Discount</td>
+                        <td class="title" colspan="3">Discount</td>
                         <td class="text right">{{number_format($isp->discount_amount, 2, '.')}}</td>
                     </tr>
                     @endif
                     @if($isp->tax_percent > 0)
                     <tr>
-                        <td class="title" colspan="4">Commercial Tax ({{$isp->tax_percent}})%</td>
+                        <td class="title" colspan="3">Commercial Tax ({{$isp->tax_percent}})%</td>
                         <td class="text right">{{number_format(($isp->tax_amount), 2, '.')}}</td>
                     </tr>
                     @endif
                     <tr>
-                        <td class="title" colspan="4">Grand Total</td>
+                        <td class="title" colspan="3">Grand Total</td>
                         <td class="text right">{{number_format(($isp->total_amount ), 2, '.')}}</td>
                     </tr>
                     <tr>
-                        <td class="thankyou" colspan="5">
+                        <td class="thankyou" colspan="4">
                             Thank you For Choosing Our Services.
                         </td>
                     </tr>

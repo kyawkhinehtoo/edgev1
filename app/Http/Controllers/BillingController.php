@@ -36,15 +36,18 @@ use App\Models\SmsGateway;
 use App\Jobs\PDFCreateJob;
 use App\Jobs\BillingSMSJob;
 use App\Jobs\ReminderSMSJob;
+use App\Models\BillingConfig;
+use App\Models\BundleEquiptment;
 use App\Models\InstallationService;
 use App\Models\InvoiceItem;
 use App\Models\Isp;
+use App\Models\MaintenanceService;
 use App\Models\PortSharingService;
 use App\Models\SystemSetting;
 use App\Models\TempBill;
 use App\Models\TempInvoice;
 use App\Models\TempInvoiceItem;
-
+use Carbon\Carbon;
 class BillingController extends Controller
 {
     use PdfTrait, MarkupTrait, SMSTrait;
@@ -125,13 +128,38 @@ class BillingController extends Controller
          
             foreach ($customers->groupBy('isp_id') as $ispId => $customerList) {
        
-                $totalMRC = 0;
-                $totalInstallation = 0;
-                $totalMRCCustomer = 0;
-                $totalNewCustomer = 0;
+            
+
+                $totalPortLeasingCustomer = 0;
+                $totalMaintenanceCustomer = 0;
+                $totalSuspensionCustomer = 0;
+                $totalInstallationCustomer = 0;
+                $totalRelocationCustomer = 0;
+                $totalMaterialCustomer = 0;
+
+                $totalPortLeasingAmount = 0;
+                $totalMaintenanceAmount = 0;
+                $totalSuspensionAmount = 0;
+                $totalInstallationAmount = 0;
+                $totalRelocationAmount = 0;
+                $totalMaterialAmount = 0;
+
                 $tempInvoice = TempInvoice::create([
                     'temp_bill_id' => $tempBill->id,
                     'isp_id' => $ispId,
+
+                    'total_port_leasing_customer'=> 0,
+                    'total_maintenance_customer' => 0,
+                    'total_suspension_customer' => 0,
+                    'total_installation_customer' => 0,
+                    'total_relocation_customer' => 0,
+                    'total_material_customer' => 0,
+                    'total_port_leasing_amount' => 0,
+                    'total_maintenance_amount' => 0,
+                    'total_suspension_amount' => 0,
+                    'total_relocation_amount' => 0,
+                    'total_material_amount' => 0,
+
                     'total_mrc_amount' => 0,
                     'total_installation_amount' => 0,
                     'total_mrc_customer' => 0,
@@ -141,26 +169,29 @@ class BillingController extends Controller
                 ]);
         
                 foreach ($customerList as $customer) {
+                    $customerAddress = $customer->currentAddress()->first();
                     $portLeasing = $this->getPriceForCustomerByIsp($customer->id);
-                    $package = Package::find($customer->package_id);
                     $mrc = $portLeasing['fee'];
                     $installationFee = InstallationService::find($customer->installation_service_id)->first()->fees;
                
                     // **New Installations** (Prorated MRC)
-                  //  if ($customer->installation_date && $customer->installation_date->format('Y-m') == $billingPeriod) {
                     if ($customer->service_activation_date && $customer->service_activation_date->format('Y-m') == $billingPeriod) {
-                        $totalNewCustomer++;
-
+               
+                        $totalInstallationCustomer++;
 
                         if ($customer->service_activation_date && $customer->service_activation_date->format('Y-m') == $billingPeriod) {
-                            $totalMRCCustomer++;
+                        
+                            $totalPortLeasingCustomer++;
                             $daysUsed = round($customer->service_activation_date->diffInDays($lastDayOfMonth) + 1);
                             $proratedMRC = ($mrc / $cal_days) * $daysUsed;
                             $proratedMRC = $proratedMRC?round($proratedMRC):0;
+
+
+                            
                             TempInvoiceItem::create([
                                 'temp_invoice_id' => $tempInvoice->id,
                                 'customer_id' => $customer->id,
-                                'type' => 'ProRatedRecurring',
+                                'type' => 'ProRatedPortLeasing',
                                 'start_date' => $customer->service_activation_date,
                                 'end_date' => $lastDayOfMonth,
                                 'quantity' => 1,
@@ -168,9 +199,32 @@ class BillingController extends Controller
                                 'total_amount' => $proratedMRC,
                                 'description' => "Prorated MRC for {$customer->name} ({$daysUsed} days)",
                             ]);
-                            $totalMRC += $proratedMRC;
+                        
+                            $totalPortLeasingAmount += $proratedMRC;
                         }
-                     
+                        if($customer->bundle){
+                            $bundleArray = explode(',', $customer->bundle);
+                            $bundleEquipments = BundleEquiptment::whereIn('id', $bundleArray)
+                                ->where('is_active', 1)
+                                ->get();
+                            $description = '';
+                            $totalPrice = 0;
+                            foreach ($bundleEquipments as $bundle) {
+                                 $description .= "{$bundle->name} : {$bundle->price} MMK, ";
+                                 
+                            }
+                            TempInvoiceItem::create([
+                                'temp_invoice_id' => $tempInvoice->id,
+                                'customer_id' => $customer->id,
+                                'type' => 'Materials',
+                                'quantity' => 1,
+                                'unit_price' => $bundleEquipments->sum('price'),
+                                'total_amount' => $bundleEquipments->sum('price'),
+                                'description' => $description,
+                            ]);
+                            $totalMaterialCustomer++;
+                            $totalMaterialAmount += $bundleEquipments->sum('price');
+                        }
             
                         // Installation Fee
                         TempInvoiceItem::create([
@@ -184,13 +238,14 @@ class BillingController extends Controller
                         ]);
             
                      
-                        $totalInstallation += $installationFee;
+                        
+                        $totalInstallationAmount += $installationFee;
                     }
                     // **Normal Monthly Recurring Charge (MRC)**
                     elseif ($customer->installation_date->format('Y-m') < $billingPeriod) {
-                        $totalMRCCustomer++;
+                        $totalPortLeasingCustomer++;
                         $isTerminated = $customer->service_termination_date && $customer->service_termination_date->format('Y-m') == $billingPeriod;
-                        
+                        $isSuspended = $customer->status->type == 'suspense';
                         // Prorated if terminated
                         if ($isTerminated) {
                             $daysUsed = round($customer->service_termination_date->diffInDays($firstDayOfMonth) + 1);
@@ -199,7 +254,7 @@ class BillingController extends Controller
                             TempInvoiceItem::create([
                                 'temp_invoice_id' => $tempInvoice->id,
                                 'customer_id' => $customer->id,
-                                'type' => 'ProRatedRecurring',
+                                'type' => 'ProRatedPortLeasing',
                                 'start_date' => $firstDayOfMonth,
                                 'end_date' => $customer->service_termination_date,
                                 'quantity' => 1,
@@ -208,35 +263,112 @@ class BillingController extends Controller
                                 'description' => "Prorated MRC for {$customer->name} ({$daysUsed} days)",
                             ]);
             
-                            $totalMRC += $proratedMRC;
-                        } else {
-                            // Full month charge
+                            $totalPortLeasingAmount += $proratedMRC;
+                        } else if($isSuspended) {
+                            $billConfig = BillingConfig::first();
+                            $portMaintenanceFees = $billConfig?->port_maintenance_fee?? 2000;
+                            // Suspended customers get no MRC charge
                             TempInvoiceItem::create([
                                 'temp_invoice_id' => $tempInvoice->id,
                                 'customer_id' => $customer->id,
-                                'type' => 'FullRecurring',
+                                'type' => 'Suspension',
+                                'start_date' => now()->startOfMonth(),
+                                'end_date' => now()->endOfMonth(),
+                                'quantity' => 1,
+                                'unit_price' => $portMaintenanceFees,
+                                'total_amount' => $portMaintenanceFees,
+                                'description' => "MRC for {$customer->name} due to suspension",
+                            ]);
+                            $totalSuspensionCustomer++;
+                            $totalSuspensionAmount += $portMaintenanceFees;
+                        }else {
+                            // Full month charge
+
+                            $maintenance = MaintenanceService::find($customer->maintenance_service_id);
+                           
+                            //Maintenance Services 
+                            TempInvoiceItem::create([
+                                'temp_invoice_id' => $tempInvoice->id,
+                                'customer_id' => $customer->id,
+                                'type' => 'Maintenance',
+                                'start_date' => now()->startOfMonth(),
+                                'end_date' => now()->endOfMonth(),
+                                'quantity' => 1,
+                                'unit_price' => $maintenance->fees,
+                                'total_amount' => $maintenance->fees,
+                                'description' => $maintenance->name." Maintenance Service fees for {$customer->name}",
+                            ]);
+
+                            //Port Leasing
+                            TempInvoiceItem::create([
+                                'temp_invoice_id' => $tempInvoice->id,
+                                'customer_id' => $customer->id,
+                                'type' => 'FullPortLeasing',
                                 'start_date' => now()->startOfMonth(),
                                 'end_date' => now()->endOfMonth(),
                                 'quantity' => 1,
                                 'unit_price' => $mrc,
                                 'total_amount' => $mrc,
-                                'description' => "MRC for {$customer->name}",
+                                'description' => "Port Leasing for {$customer->name}",
                             ]);
+
+                            //Relocation 
+                            if ( !empty($customerAddress->installation_date) and $customerAddress->type == 'relocated') {
+                                // Ensure installation_date is a Carbon instance before calling format()
+                                $relocationDate = Carbon::parse($customerAddress->installation_date);
+
+                                if($relocationDate->format('Y-m') == $billingPeriod){
+                                      // **Relocated Customers** (OTC for Relocation)
+                                    $relocationFee = InstallationService::find($customerAddress->installation_service_id)->first()->fees;
+                                
+                                    TempInvoiceItem::create([
+                                        'temp_invoice_id' => $tempInvoice->id,
+                                        'customer_id' => $customer->id,
+                                        'type' => 'Relocation',
+                                        'start_date' => $customerAddress->installation_date,
+                                        'quantity' => 1,
+                                        'unit_price' => $relocationFee,
+                                        'total_amount' => $relocationFee,
+                                        'description' => "Relocation OTC for {$customer->name}",
+                                    ]);
+                                    $totalRelocationCustomer++;
+                                    $totalRelocationAmount += $relocationFee;
+                                }
+                               
+                            }
+
+                            $totalMaintenanceCustomer++;
+                            $totalMaintenanceAmount += $maintenance->fees;
+                            $totalPortLeasingCustomer++;
+                            $totalPortLeasingAmount += $mrc;
             
-                            $totalMRC += $mrc;
+                          
                         }
-                    }
+                    } 
                 }
                  // Update total amounts in invoice
                  $tempInvoice->update([
                     'issue_date' => $validated['issue_date'],
                     'due_date' => $validated['due_date'],
-                    'total_mrc_amount' => $totalMRC,
-                    'total_installation_amount' => $totalInstallation,
-                    'total_mrc_customer' => $totalMRCCustomer,
-                    'total_new_customer' => $totalNewCustomer,
-                    'sub_total' => $totalMRC + $totalInstallation,
-                    'total_amount' => $totalMRC + $totalInstallation,
+                    
+                    'total_port_leasing_customer' => $totalPortLeasingCustomer,
+                    'total_maintenance_customer' => $totalMaintenanceCustomer,
+                    'total_suspension_customer' => $totalSuspensionCustomer,
+                    'total_installation_customer' => $totalInstallationCustomer,
+                    'total_relocation_customer' => $totalRelocationCustomer,
+                    'total_material_customer' => $totalMaterialCustomer,
+
+                    'total_port_leasing_amount' => $totalPortLeasingAmount,
+                    'total_maintenance_amount' => $totalMaintenanceAmount,
+                    'total_suspension_amount' => $totalSuspensionAmount,
+                    'total_installation_amount' => $totalInstallationAmount,
+                    'total_relocation_amount' => $totalRelocationAmount,
+                    'total_material_amount' => $totalMaterialAmount,
+
+
+
+                    'sub_total' => $totalPortLeasingAmount + $totalMaintenanceAmount + $totalSuspensionAmount + $totalInstallationAmount + $totalRelocationAmount + $totalMaterialAmount,
+                    'total_amount' => $totalPortLeasingAmount + $totalMaintenanceAmount + $totalSuspensionAmount + $totalInstallationAmount + $totalRelocationAmount + $totalMaterialAmount,
                 ]);
             }
            
@@ -349,28 +481,25 @@ class BillingController extends Controller
             ->paginate(10);
         $tempInvoices  = DB::table('temp_invoice_items AS tii')
             ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
-            ->join('packages AS p', 'c.package_id', '=', 'p.id')
+            ->join('port_sharing_services AS p', 'c.port_sharing_service_id', '=', 'p.id')
+            ->join('maintenance_services AS m', 'c.maintenance_service_id', '=', 'm.id')
+            ->join('installation_services AS i', 'c.installation_service_id', '=', 'i.id')
             ->selectRaw("
                 CASE 
-                    WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
-                    WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
-                    WHEN tii.type LIKE '%Installation%' THEN 
-                        CONCAT('New Installation for ', p.installation_timeline, ' hour')
+                    WHEN tii.type = 'FullPortLeasing' THEN CONCAT('MRC ', p.name)
+                    WHEN tii.type = 'ProRatedPortLeasing' THEN 'MRC ProRated'
+                    WHEN tii.type = 'NewInstallation' THEN CONCAT('New Installation for ', i.sla_hours, ' hour')
+                    WHEN tii.type = 'Materials' THEN 'Materials'
+                    WHEN tii.type = 'Maintenance' THEN 'Maintenance'
+                    WHEN tii.type = 'Suspension' THEN 'Suspension'
                     ELSE 'Other'
                 END AS category,
-                MIN(
-                    CASE 
-                     WHEN tii.type LIKE '%ProRated%' THEN 0
-                        WHEN tii.type LIKE '%Recurring%' THEN p.price
-                        WHEN tii.type LIKE '%Installation%' THEN p.otc 
-                        ELSE p.price 
-                    END
-                ) AS unit_price,
                 COUNT(*) AS total_customers,
                 SUM(tii.total_amount) AS total_amount
             ")
             ->where('tii.temp_invoice_id', $id)
             ->groupBy('category')
+            ->orderBy('category','DESC')
             ->get();
         $tempInvoiceItems->appends($request->all())->links();
         return Inertia::render('Client/TempInvoiceDetails', [
@@ -388,35 +517,74 @@ class BillingController extends Controller
         $invoiceItem = TempInvoiceItem::findOrFail($id);
         $invoiceItem->update($validated);
 
-        // Update invoice totals
         $invoice = $invoiceItem->tempInvoice;
-        $totalMRC = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->sum('total_amount');
-        $totalMRCCustomer = $invoice->tempInvoiceItems()->where('type', 'like', '%Recurring%')->count();
-        $totalInstallation = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->sum('total_amount');
-        $totalInstallationCustomer = $invoice->tempInvoiceItems()->where('type', 'NewInstallation')->count();
 
-       
+        // Recalculate all totals based on type
+        $totalPortLeasingAmount = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->whereIn('type', ['FullPortLeasing', 'ProRatedPortLeasing'])
+            ->sum('total_amount');
+        $totalPortLeasingCustomer = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->whereIn('type', ['FullPortLeasing', 'ProRatedPortLeasing'])
+            ->count();
 
-        // Calculate sub total (MRC + Installation + Additional Fees)
-        $subTotal = $totalMRC + $totalInstallation + ($invoice->additional_fees ?? 0);
+        $totalMaintenanceAmount = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'Maintenance')
+            ->sum('total_amount');
+        $totalMaintenanceCustomer = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'Maintenance')
+            ->count();
 
-        // Calculate discount amount from sub total
-        $discountAmount = $invoice->discount_amount;
+        $totalSuspensionAmount = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'Suspension')
+            ->sum('total_amount');
+        $totalSuspensionCustomer = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'Suspension')
+            ->count();
 
-        // Calculate gross total after discount
+        $totalInstallationAmount = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'NewInstallation')
+            ->sum('total_amount');
+        $totalInstallationCustomer = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'NewInstallation')
+            ->count();
+
+        $totalRelocationAmount = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'Relocation')
+            ->sum('total_amount');
+        $totalRelocationCustomer = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'Relocation')
+            ->count();
+
+        $totalMaterialAmount = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'Materials')
+            ->sum('total_amount');
+        $totalMaterialCustomer = TempInvoiceItem::where('temp_invoice_id', $invoice->id)
+            ->where('type', 'Materials')
+            ->count();
+
+        // Calculate sub total (sum of all types + additional fees)
+        $subTotal = $totalPortLeasingAmount + $totalMaintenanceAmount + $totalSuspensionAmount +
+            $totalInstallationAmount + $totalRelocationAmount + $totalMaterialAmount +
+            ($invoice->additional_fees ?? 0);
+
+        $discountAmount = $invoice->discount_amount ?? 0;
         $grossTotal = $subTotal - $discountAmount;
-
-        // Calculate tax amount based on discounted total
         $taxAmount = ($grossTotal * ($invoice->tax_percent ?? 0)) / 100;
-
-        // Calculate final total (gross + tax)
         $finalTotal = $grossTotal + $taxAmount;
 
         $invoice->update([
-            'total_mrc_amount' => $totalMRC,
-            'total_installation_amount' => $totalInstallation,
-            'total_mrc_customer' => $totalMRCCustomer,
-            'total_new_customer' => $totalInstallationCustomer,
+            'total_port_leasing_customer' => $totalPortLeasingCustomer,
+            'total_maintenance_customer' => $totalMaintenanceCustomer,
+            'total_suspension_customer' => $totalSuspensionCustomer,
+            'total_installation_customer' => $totalInstallationCustomer,
+            'total_relocation_customer' => $totalRelocationCustomer,
+            'total_material_customer' => $totalMaterialCustomer,
+            'total_port_leasing_amount' => $totalPortLeasingAmount,
+            'total_maintenance_amount' => $totalMaintenanceAmount,
+            'total_suspension_amount' => $totalSuspensionAmount,
+            'total_installation_amount' => $totalInstallationAmount,
+            'total_relocation_amount' => $totalRelocationAmount,
+            'total_material_amount' => $totalMaterialAmount,
             'sub_total' => $subTotal,
             'tax_amount' => $taxAmount,
             'total_amount' => $finalTotal
@@ -472,28 +640,26 @@ class BillingController extends Controller
         $isp = TempInvoice::with('isp','tempBill')->find($id);
         $tempInvoices  = DB::table('temp_invoice_items AS tii')
         ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
-        ->join('packages AS p', 'c.package_id', '=', 'p.id')
-        ->selectRaw("
-            CASE 
-                WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
-                WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
-                WHEN tii.type LIKE '%Installation%' THEN 
-                    CONCAT('New Installation for ', p.installation_timeline, ' hour')
-                ELSE 'Other'
-            END AS category,
-            MIN(
+            ->join('port_sharing_services AS p', 'c.port_sharing_service_id', '=', 'p.id')
+            ->join('maintenance_services AS m', 'c.maintenance_service_id', '=', 'm.id')
+            ->join('installation_services AS i', 'c.installation_service_id', '=', 'i.id')
+            ->selectRaw("
                 CASE 
-                    WHEN tii.type LIKE '%ProRated%' THEN 0
-                    WHEN tii.type LIKE '%Installation%' THEN p.otc 
-                    ELSE p.price 
-                END
-            ) AS unit_price,
-            COUNT(*) AS total_customers,
-            SUM(tii.total_amount) AS total_amount
-        ")
-        ->where('tii.temp_invoice_id', $id)
-        ->groupBy('category')
-        ->get();
+                    WHEN tii.type = 'FullPortLeasing' THEN CONCAT('MRC ', p.name)
+                    WHEN tii.type = 'ProRatedPortLeasing' THEN 'MRC ProRated'
+                    WHEN tii.type = 'NewInstallation' THEN CONCAT('New Installation for ', i.sla_hours, ' hour')
+                    WHEN tii.type = 'Materials' THEN 'Materials'
+                    WHEN tii.type = 'Maintenance' THEN 'Maintenance'
+                    WHEN tii.type = 'Suspension' THEN 'Suspension'
+                    ELSE 'Other'
+                END AS category,
+                COUNT(*) AS total_customers,
+                SUM(tii.total_amount) AS total_amount
+            ")
+            ->where('tii.temp_invoice_id', $id)
+            ->groupBy('category')
+            ->orderBy('category','DESC')
+            ->get();
 
         return view('preview', [
             'tempInvoices' => $tempInvoices,
@@ -612,10 +778,21 @@ class BillingController extends Controller
                     'isp_id' => $tempInvoice->isp_id,
                     'issue_date' => $tempInvoice->issue_date,
                     'due_date' => $tempInvoice->due_date,
-                    'total_mrc_amount' => $tempInvoice->total_mrc_amount,
-                    'total_installation_amount' => $tempInvoice->total_installation_amount,
-                    'total_mrc_customer' => $tempInvoice->total_mrc_customer,
-                    'total_new_customer' => $tempInvoice->total_new_customer,
+
+
+                    'total_port_leasing_customer' => $tempInvoice->total_port_leasing_customer,
+                    'total_maintenance_customer' => $tempInvoice->total_maintenance_customer,
+                    'total_suspension_customer' => $tempInvoice->total_suspension_customer,
+                    'total_installation_customer' => $tempInvoice->total_installation_customer,
+                    'total_relocation_customer' => $tempInvoice->total_relocation_customer,
+                    'total_material_customer' => $tempInvoice->total_material_customer,
+                    'total_port_leasing_amount' => $tempInvoice->total_port_leasing_amount,
+                    'total_maintenance_amount' => $tempInvoice->total_maintenance_amount,
+                    'total_suspension_amount' => $tempInvoice->total_suspension_amount,
+                    'total_relocation_amount' => $tempInvoice->total_relocation_amount,
+                    'total_material_amount' => $tempInvoice->total_material_amount,
+
+
                     'sub_total' => $tempInvoice->sub_total,
                     'tax_percent' => $tempInvoice->tax_percent,
                     'tax_amount' => $tempInvoice->tax_amount,
@@ -739,28 +916,25 @@ class BillingController extends Controller
             ->paginate(10);
         $invoices  = DB::table('invoice_items AS tii')
             ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
-            ->join('packages AS p', 'c.package_id', '=', 'p.id')
+            ->join('port_sharing_services AS p', 'c.port_sharing_service_id', '=', 'p.id')
+            ->join('maintenance_services AS m', 'c.maintenance_service_id', '=', 'm.id')
+            ->join('installation_services AS i', 'c.installation_service_id', '=', 'i.id')
             ->selectRaw("
                 CASE 
-                    WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
-                    WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
-                    WHEN tii.type LIKE '%Installation%' THEN 
-                        CONCAT('New Installation for ', p.installation_timeline, ' hour')
+                    WHEN tii.type = 'FullPortLeasing' THEN CONCAT('MRC ', p.name)
+                    WHEN tii.type = 'ProRatedPortLeasing' THEN 'MRC ProRated'
+                    WHEN tii.type = 'NewInstallation' THEN CONCAT('New Installation for ', i.sla_hours, ' hour')
+                    WHEN tii.type = 'Materials' THEN 'Materials'
+                    WHEN tii.type = 'Maintenance' THEN 'Maintenance'
+                    WHEN tii.type = 'Suspension' THEN 'Suspension'
                     ELSE 'Other'
                 END AS category,
-                MIN(
-                    CASE 
-                     WHEN tii.type LIKE '%ProRated%' THEN 0
-                        WHEN tii.type LIKE '%Recurring%' THEN p.price
-                        WHEN tii.type LIKE '%Installation%' THEN p.otc 
-                        ELSE p.price 
-                    END
-                ) AS unit_price,
                 COUNT(*) AS total_customers,
                 SUM(tii.total_amount) AS total_amount
             ")
             ->where('tii.invoice_id', $id)
             ->groupBy('category')
+            ->orderBy('category','DESC')
             ->get();
         $invoiceItems->appends($request->all())->links();
         return Inertia::render('Client/InvoiceDetails', [
@@ -778,46 +952,74 @@ class BillingController extends Controller
         $invoiceItem = InvoiceItem::findOrFail($id);
         $invoiceItem->update($validated);
 
-        // Update invoice totals
         $invoice = $invoiceItem->invoice;
-        // Recalculate invoice totals using InvoiceItem model directly
-        $totalMRC = InvoiceItem::where('invoice_id', $invoice->id)
-            ->where('type', 'like', '%Recurring%')
-            ->sum('total_amount');
 
-        $totalMRCCustomer = InvoiceItem::where('invoice_id', $invoice->id)
-            ->where('type', 'like', '%Recurring%')
+        // Recalculate all totals based on type
+        $totalPortLeasingAmount = InvoiceItem::where('invoice_id', $invoice->id)
+            ->whereIn('type', ['FullPortLeasing', 'ProRatedPortLeasing'])
+            ->sum('total_amount');
+        $totalPortLeasingCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->whereIn('type', ['FullPortLeasing', 'ProRatedPortLeasing'])
             ->count();
 
-        $totalInstallation = InvoiceItem::where('invoice_id', $invoice->id)
+        $totalMaintenanceAmount = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'Maintenance')
+            ->sum('total_amount');
+        $totalMaintenanceCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'Maintenance')
+            ->count();
+
+        $totalSuspensionAmount = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'Suspension')
+            ->sum('total_amount');
+        $totalSuspensionCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'Suspension')
+            ->count();
+
+        $totalInstallationAmount = InvoiceItem::where('invoice_id', $invoice->id)
             ->where('type', 'NewInstallation')
             ->sum('total_amount');
-
         $totalInstallationCustomer = InvoiceItem::where('invoice_id', $invoice->id)
             ->where('type', 'NewInstallation')
             ->count();
-       
 
-        // Calculate sub total (MRC + Installation + Additional Fees)
-        $subTotal = $totalMRC + $totalInstallation + ($invoice->additional_fees ?? 0);
+        $totalRelocationAmount = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'Relocation')
+            ->sum('total_amount');
+        $totalRelocationCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'Relocation')
+            ->count();
 
-        // Calculate discount amount from sub total
-        $discountAmount = $invoice->discount_amount;
+        $totalMaterialAmount = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'Materials')
+            ->sum('total_amount');
+        $totalMaterialCustomer = InvoiceItem::where('invoice_id', $invoice->id)
+            ->where('type', 'Materials')
+            ->count();
 
-        // Calculate gross total after discount
+        // Calculate sub total (sum of all types + additional fees)
+        $subTotal = $totalPortLeasingAmount + $totalMaintenanceAmount + $totalSuspensionAmount +
+            $totalInstallationAmount + $totalRelocationAmount + $totalMaterialAmount +
+            ($invoice->additional_fees ?? 0);
+
+        $discountAmount = $invoice->discount_amount ?? 0;
         $grossTotal = $subTotal - $discountAmount;
-
-        // Calculate tax amount based on discounted total
         $taxAmount = ($grossTotal * ($invoice->tax_percent ?? 0)) / 100;
-
-        // Calculate final total (gross + tax)
         $finalTotal = $grossTotal + $taxAmount;
 
         $invoice->update([
-            'total_mrc_amount' => $totalMRC,
-            'total_installation_amount' => $totalInstallation,
-            'total_mrc_customer' => $totalMRCCustomer,
-            'total_new_customer' => $totalInstallationCustomer,
+            'total_port_leasing_customer' => $totalPortLeasingCustomer,
+            'total_maintenance_customer' => $totalMaintenanceCustomer,
+            'total_suspension_customer' => $totalSuspensionCustomer,
+            'total_installation_customer' => $totalInstallationCustomer,
+            'total_relocation_customer' => $totalRelocationCustomer,
+            'total_material_customer' => $totalMaterialCustomer,
+            'total_port_leasing_amount' => $totalPortLeasingAmount,
+            'total_maintenance_amount' => $totalMaintenanceAmount,
+            'total_suspension_amount' => $totalSuspensionAmount,
+            'total_installation_amount' => $totalInstallationAmount,
+            'total_relocation_amount' => $totalRelocationAmount,
+            'total_material_amount' => $totalMaterialAmount,
             'sub_total' => $subTotal,
             'tax_amount' => $taxAmount,
             'total_amount' => $finalTotal
@@ -880,31 +1082,28 @@ class BillingController extends Controller
        
         $invoice = Invoice::with('isp','bill','receiptRecord')->find($request->id);
         $invoiceItems  = DB::table('invoice_items AS tii')
-        ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
-        ->join('packages AS p', 'c.package_id', '=', 'p.id')
-        ->selectRaw("
-            CASE 
-                WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
-                WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
-                WHEN tii.type LIKE '%Installation%' THEN 
-                    CONCAT('New Installation for ', p.installation_timeline, ' hour')
-                ELSE 'Other'
-            END AS category,
-            MIN(
+         ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
+            ->join('port_sharing_services AS p', 'c.port_sharing_service_id', '=', 'p.id')
+            ->join('maintenance_services AS m', 'c.maintenance_service_id', '=', 'm.id')
+            ->join('installation_services AS i', 'c.installation_service_id', '=', 'i.id')
+            ->selectRaw("
                 CASE 
-                    WHEN tii.type LIKE '%ProRated%' THEN 0
-                    WHEN tii.type LIKE '%Installation%' THEN p.otc 
-                    ELSE p.price 
-                END
-            ) AS unit_price,
-            COUNT(*) AS total_customers,
-            SUM(tii.total_amount) AS total_amount
-        ")
-        ->where('tii.invoice_id', $request->id)
-        ->orderBy('category')
-        ->groupBy('category')
-        ->get();
-      
+                    WHEN tii.type = 'FullPortLeasing' THEN CONCAT('MRC ', p.name)
+                    WHEN tii.type = 'ProRatedPortLeasing' THEN 'MRC ProRated'
+                    WHEN tii.type = 'NewInstallation' THEN CONCAT('New Installation for ', i.sla_hours, ' hour')
+                    WHEN tii.type = 'Materials' THEN 'Materials'
+                    WHEN tii.type = 'Maintenance' THEN 'Maintenance'
+                    WHEN tii.type = 'Suspension' THEN 'Suspension'
+                    ELSE 'Other'
+                END AS category,
+                COUNT(*) AS total_customers,
+                SUM(tii.total_amount) AS total_amount
+            ")
+            ->where('tii.invoice_id', $request->id)
+            ->groupBy('category')
+            ->orderBy('category','DESC')
+            ->get();
+       
         
         $options = [
             'format' => 'A4',

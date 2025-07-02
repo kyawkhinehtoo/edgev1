@@ -72,6 +72,23 @@
                   <p class="text-sm font-medium text-gray-500">Description</p>
                   <p class="mt-1">{{ isp.description }}</p>
                 </div>
+                <div class="col-span-2">
+                  <h4 class="text-md font-semibold text-gray-700 mt-6 mb-2">Billing Contact</h4>
+                  <div class="grid grid-cols-3 gap-4">
+                    <div>
+                      <p class="text-sm font-medium text-gray-500">Billing Name</p>
+                      <p class="mt-1">{{ isp.billing_name || 'N/A' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500">Billing Phone</p>
+                      <p class="mt-1">{{ isp.billing_phone || 'N/A' }}</p>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500">Billing Email</p>
+                      <p class="mt-1">{{ isp.billing_email || 'N/A' }}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

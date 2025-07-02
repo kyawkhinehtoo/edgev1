@@ -10,7 +10,7 @@
     <!-- Sidebar Navigation -->
     <nav :class="[
       'sm:h-screen overflow-y-auto sm:fixed sm:top-0 sm:left-0 transition-all duration-300 md:overflow-y-auto md:overflow-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-200',
-      isCollapsed ? 'sm:w-20 z-10' : 'sm:w-64',
+      isCollapsed ? 'sm:w-20 z-20' : 'sm:w-64',
       'dark:bg-gray-900 p-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-200'
     ]">
       <div class="w-full flex justify-between items-center shadow-none shadow-gray-300 shadow-left">
@@ -202,21 +202,40 @@ export default {
             { name: "Township Setup", route: "township.index", icon: "fas fa-city mr-2" },
             { name: "Zone Setup", route: "zone.index", icon: "fas fa-handshake mr-2" },
             { name: "Project Setup", route: "project.index", icon: "fas fa-handshake mr-2" },
-            { name: "Bundle Setup", route: "equiptment.index", icon: "fas fa-gamepad mr-2" },
+       
 
            
-            
-            { name: "SLA Setup", route: "sla.index", icon: "fas fa-percentage mr-2" },
-            { name: "Package Setup", route: "package.index", icon: "fas fa-cube mr-2" },
-          
+   
+
             { name: "Customer Status", route: "status.index", icon: "fas fa-user-tag mr-2" },
             { name: "Template", route: "template.index", icon: "fas fa-envelope mr-2" },
             { name: "Announcement", route: "announcement.list", icon: "fas fa-bullhorn mr-2" },
             { name: "SMS Gateway", route: "smsgateway.index", icon: "fas fa-sms mr-2" },
             // { name: "Radius Config", route: "radiusconfig.index", icon: "fas fa-sms mr-2" },
-            { name: "Billing Config", route: "billconfig.index", icon: "fas fa-sms mr-2" },
+           
           
             { name: "System Setting", route: "setting.index", icon: "fas fa-screwdriver-wrench mr-2" },
+          ],
+        },
+         {
+          name: "product_catalog",
+          label: "Product Catalog",
+          icon:"fas fa-money-check-dollar",
+          isOpen: false, // Tracks if the panel is open
+          links: [
+            
+            { name: "Material Setup", route: "equiptment.index", icon: "fas fa-warehouse mr-2" },
+
+           
+           
+            { name: "Port Sharing Setup", route: "port-sharing-service.index", icon: "fas fa-cube mr-2" },
+            { name: "Maintenance Setup", route: "maintenance-service.index", icon: "fas fa-cube mr-2" },
+            { name: "Installation Setup", route: "installation-service.index", icon: "fas fa-cube mr-2" },
+            { name: "Discount Setup", route: "discount-setup.index", icon: "fas fa-percentage mr-2" },
+
+          
+            { name: "Suspense Config", route: "billconfig.index", icon: "fas fa-cube mr-2" },
+          
           ],
         },
         {
@@ -327,6 +346,8 @@ export default {
             return this.$page.props?.role?.customer_panel;
           case 'odn':
             return this.$page.props?.role?.dn_panel;
+          case 'product_catalog':
+            return this.$page.props?.role?.product_catalog;
           case 'billing':
             return this.$page.props?.role?.billing_panel;
           case 'report':

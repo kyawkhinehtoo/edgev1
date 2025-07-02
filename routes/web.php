@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\IncidentAlertController;
 use App\Http\Controllers\IncidentController;
@@ -60,6 +61,11 @@ use App\Http\Controllers\SnBoxController;
 use App\Http\Controllers\SnSplitterController;
 use App\Http\Controllers\SubconChecklistController;
 use App\Http\Controllers\SubRootCauseController;
+use App\Http\Controllers\DiscountSetupController;
+use App\Http\Controllers\SmtpSettingController;
+
+use App\Services\DynamicMailService;
+use App\Mail\MyTestMail;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -123,6 +129,14 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::post('/installation-service', [InstallationServiceController::class, 'store'])->name('installation-service.store');
 	Route::put('/installation-service/{id}', [InstallationServiceController::class, 'update'])->name('installation-service.update');
 	Route::delete('/installation-service/{id}', [InstallationServiceController::class, 'destroy'])->name('installation-service.destroy');
+
+	Route::resource('discount-setup',DiscountSetupController::class);
+	// Route::get('/discount-setup', [DiscountSetupController::class, 'index'])->name('discount-setup.index');
+	// Route::post('/discount-setup', [DiscountSetupController::class, 'store'])->name('discount-setup.store');
+	// Route::put('/discount-setup/{id}', [DiscountSetupController::class, 'update'])->name('discount-setup.update');
+	// Route::delete('/discount-setup/{id}', [DiscountSetupController::class, 'destroy'])->name('discount-setup.destroy');
+	Route::get('/migrate-adresses', [CustomerController::class, 'migrateAdresses']);
+
 });
 
 
@@ -298,7 +312,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::get('/testCustomer',[CustomerController::class,'preg_test']);
 	//ServiceRequest
 	Route::resource('/servicerequest',ServiceRequestController::class);
-
+	Route::post('/assign-subcon/{id}',[ServiceRequestController::class,'assign']);
 	//Reports
 
 	Route::resource('/dailyreceipt',DailyReceiptController::class);
@@ -367,11 +381,16 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 
 	Route::get('/getDnSplitterByOLT/{id}', [PortController::class, 'getDnSplitterByOLT']);
 	Route::get('/getAvailablePortBySplitterId/{id}', [PortController::class, 'getAvailablePortBySplitterId']);
+
+	Route::resource('smtp-settings', SmtpSettingController::class);
+	Route::resource('activities', ActivityController::class);
+
+	Route::get('/send-dynamic-email', function (DynamicMailService $mailService) {
+    $data = ['name' => 'Kyaw Khine Htoo'];
+    $mailService->send('kkhmailbox@gmail.com', new MyTestMail($data));
+    return 'Sent!';
 });
-// Replace this line:
-
-
-// With this:
+});
 
 
 

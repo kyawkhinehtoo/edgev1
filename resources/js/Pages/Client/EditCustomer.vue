@@ -12,7 +12,7 @@
                 <ul id="tabs" class="flex">
                   <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     :class="[tab == 1 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
-                      @click="tabClick(1)" preserve-state>Genaral</a></li>
+                      @click="tabClick(1)" preserve-state>General</a></li>
                   <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     :class="[tab == 7 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']" v-if="user.role?.installation_supervisor"><a href="#"
                       @click="tabClick(7)" preserve-state>Installation</a></li>
@@ -65,7 +65,8 @@
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="townships.length !== 0">
                           <multiselect deselect-label="Selected already" :options="townships" track-by="id" label="name"
                             v-model="form.township" placeholder="Select Township" :allow-empty="false"
-                            :disabled="checkPerm('township_id')" required>
+                            @update:modelValue="form.township_id = $event?.id"
+                             required>
                           </multiselect>
                         </div>
                         <p v-show="$page.props.errors.township_id" class="mt-2 text-sm text-red-500">{{
@@ -99,7 +100,7 @@
                           </span>
                           <input type="text" v-model="form.latitude" name="latitude" id="latitude"
                             class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            v-on:keypress="isNumber(event)" :disabled="checkPerm('location')" />
+                            v-on:keypress="isNumber(event)" />
                         </div>
                         <p v-show="$page.props.errors.latitude" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.latitude }}</p>
@@ -113,7 +114,7 @@
                           </span>
                           <input type="text" v-model="form.longitude" name="longitude" id="longitude"
                             class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            v-on:keypress="isNumber(event)" :disabled="checkPerm('location')" />
+                            v-on:keypress="isNumber(event)" />
                         </div>
                         <p v-show="$page.props.errors.longitude" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.longitude }}</p>
@@ -130,7 +131,7 @@
                           </span>
                           <textarea v-model="form.address" name="address" id="address"
                             class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            required :disabled="checkPerm('address')" />
+                            required  />
                         </div>
                         <p v-show="$page.props.errors.address" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.address }}</p>
@@ -195,7 +196,7 @@
                           </span>
                           <input v-model="form.prefer_install_date" type="date" name="prefer_install_date"
                             id="prefer_install_date"
-                            :min="new Date().toISOString().split('T')[0]"
+                            
                             class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="checkPerm('prefer_install_date')" />
                         </div>
@@ -232,6 +233,24 @@
                           $page.props.errors.bandwidth }}</p>
                       </div>
                       <div class="col-span-1 sm:col-span-1">
+                    <label for="service_type" class="block text-sm font-medium text-gray-700"><span
+                        class="text-red-500">*</span>
+                      Service Type </label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                      <select v-model="form.service_type" name="service_type" id="service_type"
+                        class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                        :disabled="checkPerm('service_type')">
+                        <option value="FTTH">FTTH (Default)</option>
+                        <option value="DIA">DIA</option>
+                        <option value="IPLC">IPLC</option>
+                        <option value="DPLC">DPLC</option>
+                      </select>
+                    </div>
+                    <p v-show="$page.props.errors.service_type" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.service_type }}</p>
+                  </div>
+                     <template v-if="form.service_type == 'FTTH'">
+                      <div class="col-span-1 sm:col-span-1">
                         <label for="installation_service_id" class="block text-sm font-medium text-gray-700"><span
                             class="text-red-500">*</span>
                           Installation </label>
@@ -245,6 +264,19 @@
                         <p v-show="$page.props.errors.installation_service_id" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.installation_service_id }}</p>
                       </div>
+                        <div class="col-span-1 md:col-span-2">
+                        <label for="bundle" class="block text-sm font-medium text-gray-700">
+                          Additional Materials Request (Leave blank for own materials)
+                        </label>
+                        <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
+                          <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
+                            label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
+                            :multiple="true" :taggable="false"></multiselect>
+                        </div>
+                        <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.bundles }}</p>
+                      </div>
+                   </template>
                       <div class="col-span-1 sm:col-span-2">
                         <label for="package" class="block text-sm font-medium text-gray-700"><span
                             class="text-red-500">*</span>
@@ -259,18 +291,7 @@
                         <p v-show="$page.props.errors.maintenance_service_id" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.maintenance_service_id }}</p>
                       </div>
-                      <div class="col-span-1 md:col-span-2">
-                        <label for="bundle" class="block text-sm font-medium text-gray-700">
-                          Additional Materials Request (Leave blank for own materials)
-                        </label>
-                        <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
-                          <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
-                            label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
-                            :multiple="true" :taggable="false"></multiselect>
-                        </div>
-                        <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
-                          $page.props.errors.bundles }}</p>
-                      </div>
+                    
                      
                     
                      
@@ -329,11 +350,11 @@
                         <div class="col-span-1 sm:col-span-1">
                           <label for="isp" class="block text-sm font-medium text-gray-700"> Customer ID </label>
                           <span
-                            class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                            class="z-10 mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
                             <i class="fas fa-id-badge"></i>
                           </span>
                           <input v-model="form.ftth_id" type="text" name="ftth_id" id="ftth_id"
-                            class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            class="mt-1 pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             required :disabled="checkPerm('ftth_id')" />
                           <p v-show="$page.props.errors.ftth_id" class="mt-2 text-sm text-red-500">{{
                             $page.props.errors.ftth_id
@@ -668,7 +689,7 @@
                       Service Order Date - {{ form.order_date }}<br />
                       Customer Name – {{ form.name }}<br />
                       Contact Number – {{ form.phone_1 }} <br />
-                      Township – {{ form.township['name'] }}<br />
+                      Township – {{ form.township?.name }}<br />
                       Fully Address – {{ form.address }}<br />
                       Location – {{ form.latitude }},{{ form.longitude }} <br />
                       Applied Mbps – {{ form.bandwidth }} Mbps<br />
@@ -857,8 +878,8 @@ export default {
     const gponOnuIdOptions = ref(
       Array.from({ length: 127 }, (v, i) => ({ id: i, name: `OnuID${i}` }))
     );
-    if (props.customer.location) {
-      lat_long = props.customer.location.split(",", 2);
+    if (props.customer.current_address?.location) {
+      lat_long = props.customer.current_address.location.split(",", 2);
     }
 
     let tab = ref(1);
@@ -875,7 +896,7 @@ export default {
       id: props.customer.id,
       name: props.customer.name,
       phone_1: props.customer.phone_1,
-      address: props.customer.address,
+      address: props.customer.current_address?.address,
       latitude: (lat_long[0]) ? lat_long[0] : '',
       longitude: (lat_long[1]) ? lat_long[1] : '',
       order_date: props.customer.order_date,
@@ -884,7 +905,8 @@ export default {
       service_activation_date: props.customer.service_activation_date,
       isp_ftth_id: props.customer.isp_ftth_id,
       ftth_id: props.customer.ftth_id,
-      township: props.customer.township,
+      township: props.customer.current_address?.township,
+      township_id: props.customer.current_address?.township_id,
       installation_service_id : props.customer.installation_service_id,
       maintenance_service_id : props.customer.maintenance_service_id,
       installation_service: props.customer.installation_service,
@@ -919,6 +941,7 @@ export default {
       start_meter_image: props.customer.start_meter_image,
       end_meter_txt: props.customer.end_meter_txt,
       end_meter_image: props.customer.end_meter_image,
+      service_type: props.customer.service_type,
       bundles : "",
     });
     const form2 = useForm({

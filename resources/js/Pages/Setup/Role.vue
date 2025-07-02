@@ -147,6 +147,19 @@
                               System Setting
                               </label>
                             
+                              <label class="inline-flex ml-2 text-sm">
+                                <input
+                                  class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                  type="checkbox" v-model="form.product_catalog" />
+                              Product Catalog
+                              </label>
+                              <label class="inline-flex ml-2 text-sm">
+                                <input
+                                  class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                  type="checkbox" v-model="form.smtp_setting" />
+                              SMTP Setting
+                              </label>
+                            
 
                             </div>
                           </fieldset>
@@ -425,6 +438,7 @@ export default {
       dn_panel:null,
       limit_region:null,
       installation_supervisor:null,
+      product_catalog:null,
       townships:[],
     });
     const search = ref("");
@@ -465,6 +479,8 @@ export default {
       form.limit_region = null;
       form.dn_panel = null;
       form.installation_supervisor = null;
+      form.product_catalog = null;
+      form.smtp_setting = null;
       form.townships = [];
     }
     function submit() {
@@ -539,6 +555,8 @@ export default {
       form.dn_panel = (data.dn_panel)? true : false;
       form.limit_region = (data.limit_region)? true : false;
       form.installation_supervisor = (data.installation_supervisor)? true : false;
+      form.product_catalog = (data.product_catalog)? true : false;
+      form.smtp_setting = (data.smtp_setting)? true : false;
       form.customer_status = data.customer_status;
       form.townships = data.townships || [];
       editMode.value = true;

@@ -45,8 +45,10 @@ class EquiptmentController extends Controller
     {
 
         Validator::make($request->all(), [
-            'name' => ['required'],
-            'detail' => ['required'],
+            'name' => 'required',
+            'detail' => 'required',
+            'price' => 'required|numeric',
+            'is_active' => 'required|boolean',
         ])->validate();
 
         BundleEquiptment::create($request->all());
@@ -79,8 +81,10 @@ class EquiptmentController extends Controller
     public function update(Request $request, $id)
     {
         Validator::make($request->all(), [
-            'name' => ['required'],
-            'detail' => ['required'],
+            'name' => 'required',
+            'detail' => 'required',
+            'price' => 'required|numeric',
+            'is_active' => 'required|boolean',
         ])->validate();
 
         if ($request->has('id')) {

@@ -31,13 +31,10 @@ class Customer extends Model
         'isp_ftth_id',
         'name',
         'phone_1',
-        'address',
-        'location',
         'order_date',
         'installation_date',
         'prefer_install_date',
         'service_activation_date',
-        'township_id',
         'package_id',
         'status_id',
         'subcom_id',
@@ -56,6 +53,7 @@ class Customer extends Model
         'installation_service_id',
         'port_sharing_service_id',
         'maintenance_service_id',
+        'service_type',
         'installation_reappointment_date',
         'subcom_assign_date',
         'way_list_date',
@@ -68,8 +66,6 @@ class Customer extends Model
         'ftth_id' => 'string',
         'name' => 'string',
         'phone_1' => 'string',
-        'address' => 'string',
-        'location' => 'string',
         'created_at' => 'timestamp',
         'updated_at' => 'timestamp',
         'order_date' => 'datetime:Y-m-d',
@@ -115,10 +111,7 @@ class Customer extends Model
     // {
     //     return $this->hasOne(Township::class);
     // }
-    public function township()
-    {
-        return $this->belongsTo(Township::class);
-    }
+    
     public function package()
     {
         return $this->belongsTo(Package::class);
@@ -224,5 +217,14 @@ class Customer extends Model
     public function maintenanceService()
     {
         return $this->belongsTo(MaintenanceService::class);
+    }
+     public function addresses()
+    {
+        return $this->hasMany(CustomerAddress::class);
+    }
+
+    public function currentAddress()
+    {
+        return $this->hasOne(CustomerAddress::class)->where('is_current', true);
     }
 }

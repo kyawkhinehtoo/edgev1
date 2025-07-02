@@ -59,20 +59,21 @@ class IncidentTaskController extends Controller
             $subcons = Subcom::where('id',$user->subcom_id)->get(); 
         }
         $user = User::find(Auth::id());
-        $tasks = DB::table('tasks as t')
-            ->join('incidents as i', 'i.id', 't.incident_id')
+        $tasks = Task::join('incidents as i', 'i.id', 'tasks.incident_id')
             ->join('customers as c', 'c.id', 'i.customer_id')
             ->join('users as u1', 'u1.id', 'i.incharge_id')
             ->when($request->keyword, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('c.ftth_id', 'LIKE', '%' . $search . '%')
                         ->orWhere('i.description', 'LIKE', '%' . $search . '%')
-                        ->orWhere('t.description', 'LIKE', '%' . $search . '%');
+                        ->orWhere('tasks.description', 'LIKE', '%' . $search . '%');
                 });
             })
             ->when($request->task, function ($query, $task) use ($id) {
-                if ($task == 'my')
+                if ($task !== 'all')
                     $query->where('assigned', $id);
+            }, function($query) use ($id){
+                 $query->where('assigned', $id);
             })
             ->when($user->user_type=='subcon', function ($query) use ($id){
                 $query->where('assigned', $id);
@@ -80,12 +81,12 @@ class IncidentTaskController extends Controller
             ->whereIn('i.status',[1,2,3,5])
             ->when($request->status, function ($query, $status) {
                 if ($status == 1 || $status == 2 || $status == 3)
-                    $query->where('t.status', '=', $status);
+                    $query->where('tasks.status', '=', $status);
             }, function ($query) {
-                $query->where('t.status', '=', 1);
+                $query->where('tasks.status', '=', 1);
             })
             ->select(
-                't.*',
+                'tasks.*',
                 'u1.name as incharge',
                 'i.code',
                 'c.ftth_id',
@@ -96,7 +97,7 @@ class IncidentTaskController extends Controller
                 'i.date',
                 'i.time',
             )
-            ->orderBy('t.id', 'DESC')
+            ->orderBy('tasks.id', 'DESC')
             ->paginate(10);
 
         $tasks->appends($request->all())->links();
@@ -127,6 +128,7 @@ class IncidentTaskController extends Controller
             'comment' => ['required_if:status,2,3', 'nullable', 'string'],
             'root_causes_id' => ['required_if:status,3', 'nullable'],
             'sub_root_causes_id' => ['required_if:status,3', 'nullable'],
+            'complete_date' => ['required_if:status,2', 'nullable'],
         ],
         [
             'comment.required_if' => 'Please write comment before closing the task',
@@ -144,7 +146,8 @@ class IncidentTaskController extends Controller
                 'status' => $task->status,
                 'comment' => $task->comment,
                 'root_causes_id' => $task->root_causes_id,
-                'sub_root_causes_id' => $task->sub_root_causes_id
+                'sub_root_causes_id' => $task->sub_root_causes_id,
+                'complete_date' => $task->complete_date
             ];
           
             $task->incident_id = $request->incident_id;
@@ -155,6 +158,7 @@ class IncidentTaskController extends Controller
             $task->comment = $request->comment;
             $task->root_causes_id = $request->root_causes_id;
             $task->sub_root_causes_id = $request->sub_root_causes_id;
+            $task->complete_date = $request->complete_date;
             $task->updated_at = NOW();
             $task->update();
 
@@ -166,7 +170,8 @@ class IncidentTaskController extends Controller
                 'status' => $request->status,
                 'comment' => $request->comment,
                 'root_causes_id' => $request->root_causes_id,
-                'sub_root_causes_id' => $request->sub_root_causes_id
+                'sub_root_causes_id' => $request->sub_root_causes_id,
+                'complete_date' => $request->complete_date
             ];
             
             $hasChanges = false;
@@ -187,7 +192,8 @@ class IncidentTaskController extends Controller
                         'description' => $task->description,
                         'comment' => $task->comment,
                         'root_causes_id' => $task->root_causes_id,
-                        'sub_root_causes_id' => $task->sub_root_causes_id
+                        'sub_root_causes_id' => $task->sub_root_causes_id,
+                        'complete_date' => $task->complete_date,
                     ]);
                 }
             $data = array();

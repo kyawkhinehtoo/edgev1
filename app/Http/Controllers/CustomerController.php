@@ -7,6 +7,7 @@ use App\Models\City;
 use App\Models\CoreAssignment;
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use App\Models\CustomerAddress;
 use App\Models\Package;
 use App\Models\Project;
 use App\Models\User;
@@ -184,14 +185,19 @@ class CustomerController extends Controller
             ->groupBy('speed', 'type')
             ->orderBy('speed', 'ASC')->get();
          //dd($request);
-        $customers =  Customer::with('package','township','isp','status')
-            ->leftJoin('sn_ports', 'sn_ports.customer_id', '=', 'customers.id')
+        $customers =  Customer::with('package','currentAddress.township','isp','status')
+            ->leftjoin('sn_ports', 'customers.id', '=', 'sn_ports.customer_id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
             })
+            // ->when($user->role?->limit_region, function ($query) use ($user) {
+            //     return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            // })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                $query->whereHas('currentAddress', function ($q) use ($user) {
+                    $q->whereIn('township_id', $user->role?->townships->pluck('id'));
+                });
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
     
@@ -265,9 +271,13 @@ class CustomerController extends Controller
             })
             ->when($request->township, function ($query, $township) use ($all_township) {
                 if ($township == 'empty') {
-                    $query->whereNotIn('customers.township_id', $all_township);
+                    $query->whereDoesntHave('currentAddress', function ($q) use ($all_township) {
+                        $q->whereIn('township_id', $all_township);
+                    });
                 } else {
-                    $query->where('customers.township_id', '=', $township);
+                    $query->whereHas('currentAddress', function ($q) use ($township) {
+                        $q->where('township_id', $township);
+                    });
                 }
             })
             ->when($request->status, function ($query, $status) {
@@ -290,11 +300,6 @@ class CustomerController extends Controller
             ->when($request->installation, function ($query, $installation) {
                 $query->whereBetween('customers.installation_date', $installation);
             })
-
-            // ->when($request->sh_vlan, function ($query, $vlan) {
-            //     $query->where('customers.vlan', $vlan);
-            // })
-
             ->when($request->sh_onu_serial, function ($query, $sh_onu_serial) {
                 $query->where('customers.onu_serial', $sh_onu_serial);
             })
@@ -340,9 +345,10 @@ class CustomerController extends Controller
                 }
             }, function ($query) {
                 // Default sorting if no sort parameter is provided
-                $query->orderBy('customers.ftth_id', 'desc');
+                $query->orderBy('customers.id', 'desc');
             })
             ->select('customers.*')
+        
             ->paginate(10);
             $dynamicRanderPage = "Client/Customer";
             if($user->user_type == 'subcon') {
@@ -453,8 +459,9 @@ class CustomerController extends Controller
             'township' => 'required',
             'installation_date' => 'nullable|date',
             'isp_ftth_id' => 'required|unique:customers,isp_ftth_id',
-            'installation_service_id' =>'required',
-            'maintenance_service_id' =>'required',
+            'installation_service_id' => 'required_if:service_type,FTTH',
+            'maintenance_service_id' => 'required',
+            'service_type' =>'required',
             'bandwidth' =>'required|integer',
         ]);
        
@@ -470,21 +477,26 @@ class CustomerController extends Controller
         // Now check business logic condition
         $bandwidth = (int) $request->bandwidth;
         $selectedService = PortSharingService::where('max_speed', '>=', $bandwidth)
+            ->where('type', $request->service_type)
             ->orderBy('max_speed', 'asc')
             ->first();
-        $maintenanceService = MaintenanceService::find($request->maintenance_service_id);
+        
         if (!$selectedService) {
             // Manually throw ValidationException with custom message
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'bandwidth' => 'Invalid bandwidth value, please check.',
             ]);
         }
+       
+        $maintenanceService = MaintenanceService::find($request->maintenance_service_id);
         if (!$maintenanceService) {
             // Manually throw ValidationException with custom message
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'maintenance_service_id' => 'Invalid Maintenance value, please check.',
             ]);
         }
+        
+        
         $isp = null;
         if($user->user_type == 'isp') {
             $isp = Isp::find($user->isp_id);
@@ -512,26 +524,48 @@ class CustomerController extends Controller
             }
           
 
-        $customer = new Customer();
-        $customer->name = $request->name;
-        $customer->phone_1 = $request->phone_1;
-        $customer->address = $request->address;
-        $customer->location = $request->latitude. ','. $request->longitude;
-        $customer->isp_id = $isp->id;
-        $customer->ftth_id = $auto_ftth_id;
-        $customer->isp_ftth_id = $request->isp_ftth_id;
-        $customer->status_id = $request->status['id'];
-        $customer->township_id = $request->township['id'];  
-        $customer->order_date = $request->order_date;
-        $customer->prefer_install_date = $request->prefer_install_date;
-        $customer->created_by = Auth::user()->id;
-        $customer->order_remark = $request->order_remark;
-        $customer->deleted = 0;
-        $customer->bandwidth = $request->bandwidth;
-        $customer->installation_service_id = $request->installation_service_id;
-        $customer->maintenance_service_id = $request->maintenance_service_id;
-        $customer->port_sharing_service_id = $selectedService->id; 
-        $customer->save();
+        DB::beginTransaction();
+        try {
+            $customer = new Customer();
+            $customer->name = $request->name;
+            $customer->phone_1 = $request->phone_1;
+
+            $customer->isp_id = $isp ? $isp->id : null;
+            $customer->ftth_id = $auto_ftth_id ?? '';
+            $customer->isp_ftth_id = $request->isp_ftth_id ?? '';
+            $customer->status_id = isset($request->status['id']) ? $request->status['id'] : null;
+
+            $customer->order_date = $request->order_date ?? null;
+            $customer->prefer_install_date = $request->prefer_install_date ?? null;
+            $customer->created_by = Auth::user()->id;
+            $customer->service_type = $request->service_type ?? '';
+            $customer->port_sharing_service_id = $selectedService ? $selectedService->id : null;
+            if ($request->service_type == 'ftth') {
+            $customer->installation_service_id = $request->installation_service_id ?? null;
+            }
+            $customer->maintenance_service_id = $request->maintenance_service_id ?? null;
+            $customer->order_remark = $request->order_remark ?? '';
+            $customer->deleted = 0;
+            $customer->bandwidth = $request->bandwidth ?? 0;
+
+            $customer->save();
+
+            $customerAddress = new CustomerAddress();
+            $customerAddress->customer_id = $customer->id;
+            $customerAddress->address = $request->address ?? '';
+            $customerAddress->location = ($request->latitude ?? '') . ',' . ($request->longitude ?? '');
+            $customerAddress->township_id = isset($request->township['id']) ? $request->township['id'] : null;
+            $customerAddress->type = 'new_installation';
+            $customerAddress->is_current = 1;
+            $customerAddress->save();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+
+
         $logData = [];
       //  $changes = $customer->getChanges();
       $changes = $customer->getAttributes();
@@ -553,6 +587,14 @@ class CustomerController extends Controller
             ->performedOn($customer)
             ->withProperties(['changes' => $logData])  // Log the changes with from-to values
             ->log('Customer Created: ' . $customer->ftth_id);
+        $logData = [];
+        $changes = $customerAddress->getAttributes();
+        
+        activity()
+            ->causedBy(User::find(Auth::id()))
+            ->performedOn($customerAddress)
+            ->withProperties(['changes' => $logData])  // Log the changes with from-to values
+            ->log('Customer Address Created: ' . $customer->ftth_id);
         return redirect()->route('customer.index')->with('message', 'Customer Created Successfully.');
     }
 
@@ -639,7 +681,7 @@ class CustomerController extends Controller
                 return abort(403, 'Unauthorized access.');
             }
         }
-        $customer = Customer::with('township','partner','isp','snPort','snPort.snSplitter','snPort.snSplitter.snBox.dnSplitter.fiberCable','installationService','maintenanceService','portSharingService')
+        $customer = Customer::with('currentAddress.township','partner','isp','snPort','snPort.snSplitter','snPort.snSplitter.snBox.dnSplitter.fiberCable','installationService','maintenanceService','portSharingService')
             ->where(function ($query) {
                 $query->where('deleted', 0)->orWhereNull('deleted');
             })->find($id);
@@ -766,6 +808,7 @@ class CustomerController extends Controller
             'status' => 'required',
             'installation_date' => 'nullable|date',
             'bandwidth' => 'required|integer',
+             'service_type' =>'required',
             // 'route_kmz_image' => 'nullable|image|max:10240',
             // 'drum_no_image' => 'nullable|image|max:10240',
             // 'start_meter_image' => 'nullable|image|max:10240',
@@ -794,17 +837,17 @@ class CustomerController extends Controller
         if ($request->has('id') && !$user?->roles?->read_customer && $userPerms ){
             $customer = Customer::find($request->input('id'));
             $oldCustomer = clone $customer;
+           
+
 
             foreach ($userPerms as $key => $value) {
                 if ($value != 'id' && $value!= 'created_at' && $value!= 'updated_at' && $value!= 'deleted')
                     $customer->$value = $request->$value;
 
-                if ($value == 'location')
-                    $customer->$value = $request->latitude . ',' . $request->longitude;
+             
                 if ($value == 'status_id') 
                     $customer->$value = $request->status?json_decode($request->status)?->id:null;
-                if ($value == 'township_id')
-                    $customer->$value = $request->township?json_decode($request->township)?->id:null;
+               
                 if ($value == 'project_id') {
                     if (!empty($request->project))
                         $customer->$value =  $request->project?json_decode($request->project)?->id:null;
@@ -880,8 +923,8 @@ class CustomerController extends Controller
                         }
                     }
                 }
-             
-                    // check snPort table, if sn_id exists, then update the status to active
+                    
+                // check snPort table, if sn_id exists, then update the status to active
                     if(!empty($request->sn_id)){
                         $snId = json_decode($request->sn_id)->id;
                         $snPort = SnPort::where('customer_id', $customer->id)
@@ -959,6 +1002,18 @@ class CustomerController extends Controller
                 
                 
             }
+            
+            $customerAddress = CustomerAddress::firstOrNew([
+                'customer_id' => $customer->id,
+                'is_current' => 1
+            ]);
+            $customerAddress->township_id = isset($request->township_id) ? $request->township_id : null;
+            $customerAddress->location = ($request->latitude ?? '') . ',' . ($request->longitude ?? '');
+            $customerAddress->address = $request->address ?? '';
+            $customerAddress->type = $customerAddress->type??'new_installation';
+            $customerAddress->is_current = 1;
+            $customerAddress->save();
+
             $original = $customer->getOriginal();  // Get the original values before update
             $customer->update();                   // Perform the update
             $changes = $customer->getChanges();    // Get the updated values after the update
@@ -1385,4 +1440,28 @@ class CustomerController extends Controller
             $customer->update();
         }
     }
+    public function migrateAdresses()
+    {
+        $customers = Customer::all();
+
+        foreach ($customers as $customer) {
+            // Check if address already exists for this customer
+            $exists = CustomerAddress::where('customer_id', $customer->id)
+                ->where('address', $customer->address)
+                ->exists();
+
+            if (!$exists) {
+                CustomerAddress::create([
+                    'customer_id' => $customer->id,
+                    'address' => $customer->address,
+                    'township_id' => $customer->township_id,
+                    'location' => $customer->location,
+                    'is_current' => true,
+                ]);
+            }
+        }
+
+        return response()->json(['message' => 'Addresses migrated successfully.']);
+    }
+
 }

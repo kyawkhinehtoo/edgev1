@@ -68,11 +68,14 @@ class Township extends Model
     // {
     //     return $this->belongsTo(Customer::class);
     // }
-    public function customer()
+    // public function customer()
+    // {
+    //     return $this->hasOne(Customer::class);
+    // }
+    public function addresses()
     {
-        return $this->hasOne(Customer::class);
+        return $this->hasMany(CustomerAddress::class);
     }
-
     public function zones(): BelongsToMany
     {
         return $this->belongsToMany(Zone::class, 'township_zone')

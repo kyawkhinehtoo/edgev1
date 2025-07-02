@@ -40,7 +40,11 @@ class TempBillingItemExport implements FromQuery, WithMapping,WithHeadings,WithC
         $request = $this->request;
 
         $billings = TempInvoiceItem::query()
-        ->with(['tempInvoice','customer','tempInvoice.isp','customer.package','tempInvoice.tempBill'])
+        ->with(['tempInvoice','customer','tempInvoice.isp',
+        'customer.installationService',
+        'customer.portSharingService',
+        'customer.maintenanceService',
+        'tempInvoice.tempBill'])
         ->where('temp_invoice_id',$request->id);
        // dd($billings->toSQL());
         return $billings;
@@ -58,12 +62,18 @@ class TempBillingItemExport implements FromQuery, WithMapping,WithHeadings,WithC
             'Start Date',
             'End Date',
             'ISP Name',
+            'Unique ID',
             'FTTH ID',
             'Customer Name',
-            'Package Name',
-            'Package MRC Price',
-            'Package OTC Price',
-            'Package Installation Timeline',
+            'Bandwidth',
+            'Customer Status',
+            'Installation Date',
+            'Service Activation Date',
+            
+            'Port Leasing Package',
+            'Installation Package',
+            'Maintenance Package',
+            
             'Invoice Type',
             'Unit Price',
             'Total Amount',
@@ -79,10 +89,11 @@ class TempBillingItemExport implements FromQuery, WithMapping,WithHeadings,WithC
             'E' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
             'G' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
             'H' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
-            'M' => StyleNumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
-            'N' => StyleNumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
-            'Q' => StyleNumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
-            'R' => StyleNumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
+            'O' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
+            'P' => StyleNumberFormat::FORMAT_DATE_DDMMYYYY,
+            
+            'U' => StyleNumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
+            'V' => StyleNumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1,
         ];
     }
     public function map($billing): array
@@ -98,12 +109,19 @@ class TempBillingItemExport implements FromQuery, WithMapping,WithHeadings,WithC
             $billing->start_date, //Start Date',
             $billing->end_date, //End Date',
             $billing->tempInvoice->isp->name, //ISP Name',
+            $billing->customer->isp_ftth_id, //Unique ID',
             $billing->customer->ftth_id, //FTTH ID',
             $billing->customer->name, //Customer Name',
-            $billing->customer->package->name, //Package Name',
-            $billing->customer->package->price, //Package MRC Price
-            $billing->customer->package->otc, //Package OTC Price
-            $billing->customer->package->installation_timeline, //Package Installation Timeline
+            $billing->customer->bandwidth, //Bandwidth
+            $billing->customer->status->name, //Customer Status',
+            $billing->customer->installation_date, //Installation Date',
+            $billing->customer->service_activation_date, //Service Activation Date',
+
+            $billing->customer->portSharingService->name ?? 'N/A', //Port Leasing Package',
+            $billing->customer->installationService->name ?? 'N/A', //Installation Package',    
+            $billing->customer->maintenanceService->name ?? 'N/A', //Maintenance Package',
+
+
             $billing->type, //Invoice Type',
             $billing->unit_price, //Unit Price',
             $billing->total_amount, //Total Amount',

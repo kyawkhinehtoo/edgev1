@@ -259,7 +259,7 @@
                     <tr>
                         <td>No.</td>
                         <td>Description</td>
-                        <td>Unit Price (MMK)</td>
+                      
                         <td>QTY</td>
                         <td>Total (MMK)</td>
                     </tr>
@@ -273,7 +273,7 @@
                         <tr>
                             <td>{{ $index++ }}</td>
                             <td class="left"> {{$invoiceItem->category}} </td>
-                            <td style="text-align: right;">{{ number_format($invoiceItem->unit_price) }}</td>
+                     
                             <td >{{ $invoiceItem->total_customers }}</td>
                             <td style="text-align: right;">{{ number_format($invoiceItem->total_amount) }}</td>
                         </tr>
@@ -283,7 +283,7 @@
                     <tr>
                         <td>{{ $index++ }}</td>
                         <td class="left"> {{$invoice->additional_description}} </td>
-                        <td  style="text-align: right;">{{$invoice->additional_fees}}</td>
+                      
                         <td>1</td>
                         <td  style="text-align: right;">{{number_format($invoice->additional_fees)}}</td>
                    
@@ -293,23 +293,23 @@
            
                 <tfoot>
                     <tr>
-                        <td class="title" colspan="4">Sub Total</td>
+                        <td class="title" colspan="3">Sub Total</td>
                         <td class="text right">{{ number_format($invoice->sub_total) }}</td>
                     </tr>
                     @if($invoice->discount_amount > 0)
                     <tr>
-                        <td class="title" colspan="4">Discount</td>
+                        <td class="title" colspan="3">Discount</td>
                         <td class="text right">{{ number_format($invoice->discount_amount, 2, '.') }}</td>
                     </tr>
                     @endif
                     @if($invoice->tax_percent > 0)
                     <tr>
-                        <td class="title" colspan="4">Commercial Tax ({{$invoice->tax_percent}})%</td>
+                        <td class="title" colspan="3">Commercial Tax ({{$invoice->tax_percent}})%</td>
                         <td class="text right">{{ number_format(($invoice->tax_amount), 2, '.') }}</td>
                     </tr>
                     @endif
                     <tr>
-                        <td class="title" colspan="4">Grand Total</td>
+                        <td class="title" colspan="3">Grand Total</td>
                         <td class="text right">{{ number_format(($invoice->total_amount), 2, '.') }}</td>
                     </tr>
                 </tfoot>

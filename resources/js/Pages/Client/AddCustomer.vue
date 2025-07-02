@@ -193,7 +193,26 @@
                     <p v-show="$page.props.errors.bandwidth" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.bandwidth }}</p>
                   </div>
+               
                   <div class="col-span-1 sm:col-span-1">
+                    <label for="service_type" class="block text-sm font-medium text-gray-700"><span
+                        class="text-red-500">*</span>
+                      Service Type </label>
+                    <div class="mt-1 flex rounded-md shadow-sm">
+                      <select v-model="form.service_type" name="service_type" id="service_type"
+                        class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                        :disabled="checkPerm('service_type')">
+                        <option value="FTTH">FTTH (Default)</option>
+                        <option value="DIA">DIA</option>
+                        <option value="IPLC">IPLC</option>
+                        <option value="DPLC">DPLC</option>
+                      </select>
+                    </div>
+                    <p v-show="$page.props.errors.service_type" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.service_type }}</p>
+                  </div>
+                  <template v-if="form.service_type=='FTTH'"> 
+                     <div class="col-span-1 sm:col-span-2">
                     <label for="installation_service_id" class="block text-sm font-medium text-gray-700"><span
                         class="text-red-500">*</span>
                       Installation </label>
@@ -207,6 +226,20 @@
                     <p v-show="$page.props.errors.installation_service_id" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.installation_service_id }}</p>
                   </div>
+                 
+                  <div class="col-span-1 md:col-span-2">
+                    <label for="bundle" class="block text-sm font-medium text-gray-700">
+                      Additional Materials Request (Leave blank for own materials)
+                    </label>
+                    <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
+                      <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
+                        label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
+                        :multiple="true" :taggable="false"></multiselect>
+                    </div>
+                    <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.bundles }}</p>
+                  </div>
+                  </template>
                   <div class="col-span-1 sm:col-span-2">
                     <label for="package" class="block text-sm font-medium text-gray-700"><span
                         class="text-red-500">*</span>
@@ -220,18 +253,6 @@
                     </div>
                     <p v-show="$page.props.errors.maintenance_service_id" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.maintenance_service_id }}</p>
-                  </div>
-                  <div class="col-span-1 md:col-span-2">
-                    <label for="bundle" class="block text-sm font-medium text-gray-700">
-                      Additional Materials Request (Leave blank for own materials)
-                    </label>
-                    <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
-                      <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
-                        label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
-                        :multiple="true" :taggable="false"></multiselect>
-                    </div>
-                    <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
-                      $page.props.errors.bundles }}</p>
                   </div>
                  
                
@@ -346,6 +367,7 @@ export default {
       maintenance_service_id: "",
       bandwidth: "",
       bundles: "",
+      service_type: "FTTH",
     });
 
     function resetForm() {

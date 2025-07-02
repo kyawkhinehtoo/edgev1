@@ -344,6 +344,7 @@
                             required @change="form.topic = null" :disabled="!write_permission">
                             <option value="default">Please Choose Ticket Type</option>
                             <option value="service_complaint">Service Complaint</option>
+                            <option value="relocation">Relocation Request</option>
 
                             <option value="plan_change">Plan Change</option>
                             <option value="suspension">Suspension</option>
@@ -655,6 +656,25 @@
                           $page.props.errors.start_date }}</p>
                       </div>
                       <!-- relocation end date -->
+                      <!-- relocation service -->
+                      <div class="py-2 col-span-1 sm:col-span-1" v-if="form.type == 'relocation'">
+                        <div class="mt-1 flex">
+                          <label for="new_address" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Relocation Service : </label>
+                        </div>
+                      </div>
+                      <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'relocation'">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                          <multiselect deselect-label="Selected already" :options="relocationServices" track-by="id"
+                            label="name" v-model="form.relocation_service" :allow-empty="false"
+                          
+                            @update:modelValue="form.relocation_service_id = $event?.id"
+                            :disabled="!write_permission"></multiselect>
+                        </div>
+                        <p v-if="$page.props.errors.relocation_service_id" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.relocation_service_id }}</p>
+                      </div>
+                      <!-- relocation service -->
+
                       <!-- plan change -->
                       <div class="py-2 col-span-1 sm:col-span-1" v-if="form.type == 'plan_change'">
                         <div class="mt-1 flex">
@@ -712,9 +732,9 @@
                       <!-- end of detail -->
                       <template v-if="editMode && form.status == 3">
                         <!--  RCA -->
-                          <div class="col-span-5">
-                            <hr />
-                          </div>
+                        <div class="col-span-5">
+                          <hr />
+                        </div>
                         <div class="py-2 col-span-1 sm:col-span-1">
                           <div class="mt-1 flex">
                             <label for="rca" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> RCA :
@@ -883,7 +903,8 @@ export default {
     subcons: Object,
     rootCause: Object,
     subRootCause: Object,
-    pendingRootCause:Object,
+    pendingRootCause: Object,
+    relocationServices: Object,
   },
   setup(props) {
     const search = ref("");
@@ -945,6 +966,8 @@ export default {
       root_cause_id: null,
       sub_root_cause_id: null,
       rca_notes: null,
+      relocation_service: null,
+      relocation_service_id: null,
     });
 
     let tab = ref(true);
@@ -1024,6 +1047,9 @@ export default {
       form.root_cause_id = data.root_cause_id;
       form.sub_root_cause_id = data.sub_root_cause_id;
       form.rca_notes = data.rca_notes;
+      form.relocation_service = data.relocation_service_id? props.relocationServices.find(d => d.id == data.relocation_service_id) : null;
+      
+      form.relocation_service_id = data.relocation_service_id;
       openModal();
     }
     function clearform() {
@@ -1056,6 +1082,8 @@ export default {
       form.rca_notes = "";
       form.root_cause_id = null;
       form.sub_root_cause_id = null;
+      form.relocation_service = "";
+      form.relocation_service_id = null;
     }
 
     function getStatus(data) {
@@ -1235,14 +1263,14 @@ export default {
     });
 
     function getSubRCA(data) {
-   
+
       subRCA.value = [];
 
       let RCA = props.rootCause.filter((d) => d.id == data.id);
       subRCA.value = RCA[0]?.sub_root_causes;
-      if(form.sub_root_cause_id){
+      if (form.sub_root_cause_id) {
         form.sub_rca = subRCA.value.filter((d) => d.id == form.sub_root_cause_id)[0];
-        if(!form.sub_rca){
+        if (!form.sub_rca) {
           form.sub_root_cause_id = null;
         }
       }

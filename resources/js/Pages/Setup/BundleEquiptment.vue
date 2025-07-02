@@ -1,7 +1,7 @@
 <template>
   <app-layout>
     <template #header>
-      <h2 class="font-semibold text-xl text-white leading-tight">Bundle Device Setup</h2>
+      <h2 class="font-semibold text-xl text-white leading-tight">Material Device Setup</h2>
     </template>
 
     <div class="py-12">
@@ -30,7 +30,10 @@
               <tr>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">No.</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -38,7 +41,10 @@
               <tr v-for="(row, index) in equiptments.data" :key="row.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ index + 1 }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ row.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap uppercase">{{ row.type }}</td>
                 <td class="px-6 py-4">{{ row.detail }}</td>
+                <td class="px-6 py-4">{{ row.price }} MMK</td>
+                <td class="px-6 py-4">{{ row.is_active?'Active':'Disabled' }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <a href="#" @click="edit(row)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
                   <a href="#" @click="deleteRow(row)" class="text-red-600 hover:text-red-900">Delete</a>
@@ -70,6 +76,49 @@
 
                       </div>
                       <div class="mb-4">
+                        <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Equiptment Usage:</label>
+                        <div class="flex space-x-4">
+                          <label class="inline-flex items-center">
+                          <input
+                            type="radio"
+                            class="form-radio"
+                            value="ftth"
+                            v-model="form.type"
+                          >
+                          <span class="ml-2">FTTH</span>
+                          </label>
+                          <label class="inline-flex items-center">
+                          <input
+                            type="radio"
+                            class="form-radio"
+                            value="dia"
+                            v-model="form.type"
+                          >
+                          <span class="ml-2">DIA</span>
+                          </label>
+                          <label class="inline-flex items-center">
+                          <input
+                            type="radio"
+                            class="form-radio"
+                            value="iplc"
+                            v-model="form.type"
+                          >
+                          <span class="ml-2">IPLC</span>
+                          </label>
+                          <label class="inline-flex items-center">
+                          <input
+                            type="radio"
+                            class="form-radio"
+                            value="dplc"
+                            v-model="form.type"
+                          >
+                          <span class="ml-2">DPLC</span>
+                          </label>
+                        </div>
+                        <div v-if="$page.props.errors.name" class="text-red-500">{{ $page.props.errors.name[0] }}</div>
+
+                      </div>
+                      <div class="mb-4">
                         <label for="detail" class="block text-gray-700 text-sm font-bold mb-2">Equiptment
                           Detail:</label>
                         <textarea
@@ -79,12 +128,38 @@
                         </div>
 
                       </div>
+                      <div class="mb-4">
+                        <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Price :</label>
+                        <div class=" flex rounded-md shadow-sm">
+                        <input type="number"
+                          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-l-md"
+                          id="name" placeholder="Enter Price" v-model="form.price">
+                         <span class="mt-1 inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm uppercase">
+                                  MMK </span>
+                          </div>
+                        <div v-if="$page.props.errors.price" class="text-red-500">{{ $page.props.errors.price[0] }}</div>
+
+                      </div>
+                      <div class="mb-4">
+                        <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Is Active :</label>
+                        <input
+                          type="checkbox"
+                          id="is_active"
+                          v-model="form.is_active"
+                          class="mr-2 leading-tight rounded-sm"
+                        >
+                        <label for="is_active" class="text-gray-700 text-sm font-bold">
+                          Active
+                        </label>
+                        <div v-if="$page.props.errors.price" class="text-red-500">{{ $page.props.errors.price[0] }}</div>
+
+                      </div>
                     </div>
                   </div>
                   <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                     <span class="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
                       <button wire:click.prevent="submit" type="submit"
-                        class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
+                        class="inline-flex items-center r px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
                         v-show="!editMode">
                         Save
                       </button>
@@ -145,6 +220,9 @@ export default {
     function resetForm() {
       form.name = null
       form.detail = null
+      form.type = 'ftth'
+      form.price = null
+      form.is_active = true
     }
     function submit() {
       if (!editMode.value) {
@@ -195,7 +273,10 @@ export default {
     function edit(data) {
       form.id = data.id
       form.name = data.name
+      form.type = data.type
       form.detail = data.detail
+      form.price = data.price
+      form.is_active = data.is_active ? true : false
       editMode.value = true
       openModal()
     }

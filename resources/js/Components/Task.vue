@@ -16,37 +16,40 @@
     <h2 class="text-center text-gray-600 text-sm font-semibold mt-2">Loading...</h2>
   </div>
   <div v-if="task_list && !edit">
-    <table class="min-w-full divide-y divide-gray-200 table-auto">
-      <thead class="bg-gray-50 w-full flex flex-col">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50 text-xs">
         <tr>
           <th scope="col"
-            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12 ">No. </th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-3/5">
+            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">No. </th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
             Instruction</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/4">
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
             Assigned</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
             Target</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+            Complete At</th>
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
             Status</th>
-          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">
+          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
             Action</th>
         </tr>
       </thead>
       <tbody
-        class="bg-white divide-y divide-gray-200 text-sm max-h-64  w-full overflow-auto  scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white  flex flex-col justify-between text-left">
-        <tr v-for="(row, index) in task_list" v-bind:key="row.id" class="flex">
-          <td class="px-6 py-3 whitespace-nowrap w-1/12">{{ index + 1 }}</td>
-          <td class="px-6 py-3 whitespace-nowrap w-3/5">{{ (row.description.length > 50) ? row.description.substring(0,
+        class="bg-white  text-sm scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white  text-left">
+        <tr v-for="(row, index) in task_list" v-bind:key="row.id">
+          <td class="px-6 py-3 whitespace-nowrap">{{ index + 1 }}</td>
+          <td class="px-6 py-3 whitespace-nowrap">{{ (row.description.length > 50) ? row.description.substring(0,
             50)
             + ' ...' : row.description }} </td>
-          <td class="px-6 py-3 whitespace-nowrap w-1/4 ">{{ getName(row.assigned) }}</td>
-          <td class="px-6 py-3 whitespace-nowrap w-1/6 ">{{ row.target }}</td>
-          <td class="px-6 py-3 whitespace-nowrap w-1/12">{{ getStatus(row.status) }}</td>
-          <td class="px-6 py-3 whitespace-nowrap w-1/12 " v-if="write_permission == 1"><a href="#"
+          <td class="px-6 py-3 whitespace-nowrap">{{ getName(row.assigned) }}</td>
+          <td class="px-6 py-3 whitespace-nowrap">{{ row.target }}</td>
+          <td class="px-6 py-3 whitespace-nowrap">{{ row.complete_date??"N/A" }}</td>
+          <td class="px-6 py-3 whitespace-nowrap">{{ getStatus(row.status) }}</td>
+          <td class="px-6 py-3 whitespace-nowrap" v-if="write_permission == 1"><a href="#"
               @click="editTask(row)" class="text-blue-600"><i class="fa fa-edit"></i></a> <span v-if="task_write"> | <a
                 href="#" @click="deleteTask(row)" class="text-red-600"><i class="fa fa-trash"></i></a> </span></td>
-          <td class="px-6 py-3 whitespace-nowrap w-1/12 " v-else><a href="#" @click="editTask(row)"
+          <td class="px-6 py-3 whitespace-nowrap" v-else><a href="#" @click="editTask(row)"
               class="text-blue-600"><i class="fa fa-eye"></i></a> </td>
         </tr>
       </tbody>
@@ -125,6 +128,21 @@
         </div>
         <p v-if="$page.props.errors.status" class="mt-2 text-sm text-red-500">{{ $page.props.errors.status }}</p>
       </div>
+      <template v-if="form.status == 2">
+        <div class="py-2 col-span-1 sm:col-span-1">
+          <div class="flex">
+            <label for="complete_date" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Complete Date : </label>
+          </div>
+        </div>
+        <div class="py-2 col-span-3 sm:col-span-3">
+          <div class="flex rounded-md shadow-sm">
+            <input type="date" v-model="form.complete_date" name="complete_date" id="complete_date"
+              class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
+          </div>
+          <p v-if="$page.props.errors.complete_date" class="mt-2 text-sm text-red-500">{{ $page.props.errors.complete_date }}
+          </p>
+        </div>
+        </template>
       <template v-if="form.status == 3">
         <div class="py-2 col-span-1 sm:col-span-1">
           <div class="flex">
@@ -214,6 +232,7 @@ export default {
       sub_root_causes: null,
       root_causes_id: null,
       sub_root_causes_id: null,
+      complete_date: null,
     });
     function newTask() {
       edit.value = true;
@@ -231,6 +250,7 @@ export default {
       form.sub_root_causes = null;
       form.root_causes_id = null;
       form.sub_root_causes_id = null;
+      form.complete_date = null;
     }
     function editTask(data) {
       console.log(data);
@@ -245,6 +265,7 @@ export default {
       form.sub_root_causes ='';
       form.root_causes_id = data.root_causes_id;
       form.sub_root_causes_id = data.sub_root_causes_id;
+      form.complete_date = data.complete_date;
 
       editMode.value = true;
       edit.value = true;

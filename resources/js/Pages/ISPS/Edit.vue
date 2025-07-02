@@ -40,7 +40,7 @@
               <div class="grid grid-cols-2 gap-6">
                 <!-- Existing form fields -->
                 <div>
-                  <label for="domain" class="block text-sm font-medium text-gray-700">Domain</label>
+                  <label for="domain" class="block text-sm font-medium text-gray-700">Domain <span class="text-red-600 font-bold text-lg">*</span></label>
                   <input type="text" id="domain" v-model="form.domain" 
                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                   <div v-if="form.errors.domain" class="text-red-500 text-sm mt-1">{{ form.errors.domain }}</div>
@@ -49,7 +49,7 @@
             
     
                 <div class="mb-4">
-                  <label for="logo" class="block text-sm font-medium text-gray-700">Logo</label>
+                  <label for="logo" class="block text-sm font-medium text-gray-700">Logo <span class="text-red-600 font-bold text-lg">*</span></label>
                   <div v-if="isp.logo" class="mt-2 mb-2">
                     <img :src="'/storage/' + isp.logo" :alt="isp.name + ' Logo'" class="h-20 w-auto">
                   </div>
@@ -58,46 +58,53 @@
                   <div v-if="form.errors.logo" class="text-red-500 text-sm mt-1">{{ form.errors.logo }}</div>
                 </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700">Name</label>
+                    <label class="block text-sm font-medium text-gray-700">Name <span class="text-red-600 font-bold text-lg">*</span></label>
                     <input type="text" v-model="form.name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <div v-if="form.errors.name" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700">Short Code</label>
+                    <label class="block text-sm font-medium text-gray-700">Short Code <span class="text-red-600 font-bold text-lg">*</span></label>
                     <input type="text" v-model="form.short_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <div v-if="form.errors.short_code" class="text-red-500 text-xs mt-1">{{ form.errors.name }}</div>
                   </div>
                
     
                   <div>
-                    <label class="block text-sm font-medium text-gray-700">Contact Person</label>
+                    <label class="block text-sm font-medium text-gray-700">Contact Person <span class="text-red-600 font-bold text-lg">*</span></label>
                     <input type="text" v-model="form.contact_person" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <div v-if="form.errors.contact_person" class="text-red-500 text-xs mt-1">{{ form.errors.contact_person }}</div>
                   </div>
     
                   <div>
-                    <label class="block text-sm font-medium text-gray-700">Phone</label>
+                    <label class="block text-sm font-medium text-gray-700">Phone <span class="text-red-600 font-bold text-lg">*</span></label>
                     <input type="text" v-model="form.phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <div v-if="form.errors.phone" class="text-red-500 text-xs mt-1">{{ form.errors.phone }}</div>
                   </div>
-    
                   <div>
-                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <label class="block text-sm font-medium text-gray-700">Email <span class="text-red-600 font-bold text-lg">*</span></label>
                     <input type="email" v-model="form.email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <div v-if="form.errors.email" class="text-red-500 text-xs mt-1">{{ form.errors.email }}</div>
                   </div>
-    
+
+
                   <div>
-                    <label class="block text-sm font-medium text-gray-700">Service Type</label>
-                    <input type="text" v-model="form.service_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <div v-if="form.errors.service_type" class="text-red-500 text-xs mt-1">{{ form.errors.service_type }}</div>
+                    <label class="block text-sm font-medium text-gray-700">Billing Contact Name <span class="text-red-600 font-bold text-lg">*</span></label>
+                    <input type="text" v-model="form.billing_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <div v-if="form.errors.billing_name" class="text-red-500 text-xs mt-1">{{ form.errors.billing_name }}</div>
                   </div>
-    
                   <div>
-                    <label class="block text-sm font-medium text-gray-700">Bandwidth Capacity</label>
-                    <input type="text" v-model="form.bandwidth_capacity" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <div v-if="form.errors.bandwidth_capacity" class="text-red-500 text-xs mt-1">{{ form.errors.bandwidth_capacity }}</div>
+                    <label class="block text-sm font-medium text-gray-700">Billing Contact Phone <span class="text-red-600 font-bold text-lg">*</span></label>
+                    <input type="text" v-model="form.billing_phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <div v-if="form.errors.billing_phone" class="text-red-500 text-xs mt-1">{{ form.errors.billing_phone }}</div>
                   </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Billing Contact Email <span class="text-red-600 font-bold text-lg">*</span></label>
+                    <input type="email" v-model="form.billing_email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <div v-if="form.errors.billing_email" class="text-red-500 text-xs mt-1">{{ form.errors.billing_email }}</div>
+                  </div>
+                  
+    
+                 
     
                   <div>
                     <label class="block text-sm font-medium text-gray-700">Website</label>
@@ -106,7 +113,7 @@
                   </div>
     
                   <div>
-                    <label class="block text-sm font-medium text-gray-700">Address</label>
+                    <label class="block text-sm font-medium text-gray-700">Address <span class="text-red-600 font-bold text-lg">*</span></label>
                     <textarea v-model="form.address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
                     <div v-if="form.errors.address" class="text-red-500 text-xs mt-1">{{ form.errors.address }}</div>
                   </div>
@@ -204,6 +211,9 @@ export default {
       logo: null,
       permissions: props.isp.permissions || [],
       customer_status: props.isp.customer_status ? props.isp.customer_status : null,
+      billing_name: props.isp.billing_name || '',
+      billing_phone: props.isp.billing_phone || '',
+      billing_email: props.isp.billing_email || '',
     })
 
     const availablePermissions = computed(() => {

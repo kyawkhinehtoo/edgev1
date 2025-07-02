@@ -76,6 +76,8 @@ class RoleController extends Controller
             'limit_region' => 'nullable|boolean',
             'dn_panel' => 'nullable|boolean',
             'installation_supervisor' => 'nullable|boolean',
+            'product_catalog' => 'nullable|boolean',
+            'smtp_setting' => 'nullable|boolean',
             'townships' => 'nullable|array',
         ]);
 
@@ -121,6 +123,8 @@ class RoleController extends Controller
             'customer_status' => 'nullable|array',
             'dn_panel' => 'nullable|boolean',
             'installation_supervisor' => 'nullable|boolean',
+            'product_catalog' => 'nullable|boolean',
+            'smtp_setting' => 'nullable|boolean',
             'townships' => 'nullable|array',
         ]);
 

@@ -107,7 +107,7 @@
           <p class="text-sm text-gray-600"><strong>CID:</strong> {{ row.isp_ftth_id }}</p>
           <p class="text-sm text-gray-600"><strong>Name:</strong> {{ row.name }}</p>
           <p class="text-sm text-gray-600"><strong>Package:</strong> {{ row.bandwidth }} Mbps</p>
-          <p class="text-sm text-gray-600"><strong>Township:</strong> {{ row.township.name }}</p>
+          <p class="text-sm text-gray-600"><strong>Township:</strong> {{ row.current_address?.township.name }}</p>
           <p class="text-sm text-gray-600"><strong>Status:</strong> {{ row.status.name }}</p>
           <p class="text-sm text-gray-600"><strong>Order Date:</strong> {{ row.order_date }}</p>
           <p class="text-sm text-gray-600"><strong>Prefer Install Date:</strong> {{ row.prefer_install_date }}</p>
@@ -145,7 +145,7 @@
                 <td class="px-3 py-3 text-xs font-medium">{{ row.prefer_install_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.bandwidth }} Mbps</td>
-                <td class="px-3 py-3 text-xs font-medium">{{ row.township.name }}</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.current_address?.township.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.status.name }}</td>
                 <td class="px-3 py-3 text-right">
                   <Link :href="route('customer.edit', row?.id)" method="get" as="button" class="text-indigo-400 hover:text-indigo-600 mr-2">

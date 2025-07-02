@@ -32,26 +32,21 @@
                     ISP
                   </th>
                   <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    MRC Customers
+                    Total Port Leasing
                   </th>
                   <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    MRC Amount
+                    Total Maintenance 
                   </th>
                   <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    New Customers
+                    Total Installation
                   </th>
                   <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Installation Amount
+                    Total Material Usage
                   </th>
                   <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Sub Total
+                     Total Suspension
                   </th>
-                  <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tax (%)
-                  </th>
-                  <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Discount
-                  </th>
+                 
                   <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total Amount
                   </th>
@@ -66,26 +61,37 @@
                   <td class="px-3 py-4 whitespace-nowrap">{{ invoice.isp?.name }}</td>
                   <td class="px-3 py-4 whitespace-nowrap text-center">
                     <span class="px-2 py-1 text-sm font-bold rounded-full bg-blue-100 text-blue-800">
-                      {{ invoice.total_mrc_customer }}
+                      {{ invoice.total_port_leasing_customer }}
                     </span>
                   </td>
-                  <td class="px-3 py-4 whitespace-nowrap text-right">${{ formatNumber(invoice.total_mrc_amount) }}</td>
+                  <td class="px-3 py-4 whitespace-nowrap text-right">
+                     <span class="px-2 py-1 text-sm font-bold rounded-full bg-blue-100 text-blue-800">
+                      {{ invoice.total_maintenance_customer }}
+                    </span>
+                  </td>
                   <td class="px-3 py-4 whitespace-nowrap text-center">
                     <span class="px-2 py-1 text-sm font-bold rounded-full bg-green-100 text-green-800">
-                      {{ invoice.total_new_customer }}
+                      {{ invoice.total_installation_customer }}
                     </span>
                   </td>
-                  <td class="px-3 py-4 whitespace-nowrap text-right">${{ formatNumber(invoice.total_installation_amount) }}</td>
-                  <td class="px-3 py-4 whitespace-nowrap text-right">${{ formatNumber(invoice.sub_total) }}</td>
-                  <td class="px-3 py-4 whitespace-nowrap text-right">{{ invoice.tax_percent }}%</td>
-                  <td class="px-3 py-4 whitespace-nowrap text-right">${{ formatNumber(invoice.discount_amount) }}</td>
+                  <td class="px-3 py-4 whitespace-nowrap text-right">
+                    <span class="px-2 py-1 text-sm font-bold rounded-full bg-green-100 text-green-800">
+                      {{ invoice.total_material_customer }}
+                    </span>
+                  </td>
+                  <td class="px-3 py-4 whitespace-nowrap text-right">
+                     <span class="px-2 py-1 text-sm font-bold rounded-full bg-green-100 text-green-800">
+                      {{ invoice.total_suspension_customer }}
+                    </span>
+                  </td>
+                 
                   <td class="px-3 py-4 whitespace-nowrap text-right font-medium">${{ formatNumber(invoice.total_amount) }}</td>
                   <td class="px-3 py-4 whitespace-nowrap text-center space-x-2">
                     <Link 
                       :href="route('tempInvoice.details', invoice.id)"
                       class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
-                      View
+                      Details
                     </Link>
                     <button
                       @click="openEditModal(invoice)"

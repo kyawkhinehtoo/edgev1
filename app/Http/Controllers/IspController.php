@@ -77,6 +77,9 @@ class IspController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'permissions' => 'nullable|array',
             'customer_status' => 'nullable|array',
+            'billing_name' => 'nullable|string|max:255',
+            'billing_email' => 'nullable|email|max:255',
+            'billing_phone' => 'nullable|string|max:20',    
         ]);
 
         // Handle logo upload
@@ -138,6 +141,9 @@ class IspController extends Controller
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'permissions' => 'nullable|array',
             'customer_status' => 'nullable|array',
+            'billing_name' => 'nullable|string|max:255',
+            'billing_email' => 'nullable|email|max:255',
+            'billing_phone' => 'nullable|string|max:20',    
         ]);
 
         // Handle logo upload

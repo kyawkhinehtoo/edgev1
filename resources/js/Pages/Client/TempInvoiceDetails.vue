@@ -12,7 +12,7 @@
           <!-- Invoice Header -->
           <div class="mb-6 grid grid-cols-4 gap-4" v-if="tempInvoiceItems.data.length > 0">
             <!-- Invoice Info - Column 1 -->
-            <div class="space-y-2">
+            <div class="space-y-2 col-span-2">
               <h3 class="text-lg font-semibold">Invoice Info</h3>
               <div class="text-lg space-y-1">
                 <p><span class="font-medium">ISP:</span> {{ tempInvoiceItems.data[0].temp_invoice.isp?.name }}</p>
@@ -21,56 +21,24 @@
               </div>
             </div>
 
-            <!-- Customer Stats - Column 2 -->
-            <div class="space-y-2">
-              <h3 class="text-lg font-semibold">Summary Overview</h3>
-              <div class="grid grid-cols-2 gap-2">
-                <div class="bg-blue-50 rounded p-2 text-center">
-                  <p class="text-xs text-blue-600">MRC</p>
-                  <p class="text-lg font-semibold text-blue-700">{{ tempInvoiceItems.data[0].temp_invoice.total_mrc_customer }}</p>
-                </div>
-                <div class="bg-blue-50 rounded p-2 text-center">
-                    <p class="text-xs text-blue-600">Total MRC Amount</p>
-                    <p class="text-lg font-semibold text-blue-700">{{ formatNumber(tempInvoiceItems.data[0].temp_invoice.total_mrc_amount) }}</p>
-                  </div>
-                <div class="bg-green-50 rounded p-2 text-center">
-                  <p class="text-xs text-green-600">New</p>
-                  <p class="text-lg font-semibold text-green-700">{{ tempInvoiceItems.data[0].temp_invoice.total_new_customer }}</p>
-                </div>
-               
-                  <div class="bg-green-50 rounded p-2 text-center">
-                    <p class="text-xs text-green-600">Total New Amount</p>
-                    <p class="text-lg font-semibold text-green-700">{{ formatNumber(tempInvoiceItems.data[0].temp_invoice.total_installation_amount) }}</p>
-                  </div>
-                  <div class="bg-yellow-50 rounded p-2 text-center">
-                    <p class="text-xs text-yellow-600">Additional</p>
-                    <p class="text-lg font-semibold text-yellow-700">{{ tempInvoiceItems.data[0].temp_invoice.additional_description }}</p>
-                  </div>
-                 
-                    <div class="bg-yellow-50 rounded p-2 text-center">
-                      <p class="text-xs text-yellow-600">Total New Amount</p>
-                      <p class="text-lg font-semibold text-yellow-700">{{ formatNumber(tempInvoiceItems.data[0].temp_invoice.additional_fees) }}</p>
-                    </div>
-                
-              </div>
-            </div>
+            
 
-            <!-- Summary - Column 3 -->
+            <!-- Summary - Column 2 -->
             <div class="space-y-2 col-span-2">
               <h3 class="text-lg font-semibold">Summary Brakedown</h3>
               <div class="bg-gray-50 rounded p-2 text-sm">
-                <div class="grid grid-cols-5 gap-2 border-b border-gray-200 pb-1 mb-1">
+                <div class="grid grid-cols-4 gap-2 border-b border-gray-200 pb-1 mb-1">
                   <div class="col-span-2 font-medium text-gray-600">Description</div>
                   <div class="text-center font-medium text-gray-600">QTY</div>
-                  <div class="text-right font-medium text-gray-600">Price</div>
+                 
                   <div class="text-right font-medium text-gray-600">Total</div>
                 </div>
                 <div v-for="tempInvoice in tempInvoices" 
                      :key="tempInvoice.category" 
-                     class="grid grid-cols-5 gap-2 py-1 hover:bg-gray-100">
+                     class="grid grid-cols-4 gap-2 py-1 hover:bg-gray-100">
                   <div class="col-span-2 truncate">{{ tempInvoice.category }}</div>
                   <div class="text-center">{{ tempInvoice.total_customers }}</div>
-                  <div class="text-right">{{ formatNumber(tempInvoice.unit_price) }}</div>
+                 
                   <div class="text-right font-medium">{{ formatNumber(tempInvoice.total_amount) }}</div>
                 </div>
               </div>
@@ -88,9 +56,12 @@
                     class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                   >
                     <option value="">All Types</option>
-                    <option value="FullRecurring">Full Recurring</option>
-                    <option value="ProRatedRecurring">Pro-rated Recurring</option>
+                    <option value="FullPortLeasing">Full Portleasing</option>
+                    <option value="ProRatedPortLeasing">Pro-rated Portleasing</option>
                     <option value="NewInstallation">New Installation</option>
+                    <option value="Materials">Materials</option>
+                    <option value="Maintenance">Maintenance</option>
+                    <option value="Suspension">Suspension</option>
                   </select>
                 </div>
                 <div class="w-64">

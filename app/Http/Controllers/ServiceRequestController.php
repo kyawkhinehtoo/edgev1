@@ -12,12 +12,17 @@ use App\Models\Role;
 use App\Models\User;
 
 use App\Models\Customer;
+use App\Models\CustomerAddress;
 use App\Models\CustomerHistory;
 use App\Models\Incident;
 use App\Models\IncidentHistory;
 
 use App\Models\Status;
 use App\Models\FileUpload;
+use App\Models\InstallationService;
+use App\Models\Partner;
+use App\Models\Subcom;
+use App\Models\Task;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Inertia\Inertia;
@@ -42,59 +47,80 @@ class ServiceRequestController extends Controller
          $townships = Township::get();
          $users = User::get();
          $status = Status::get();
-         $incidents = DB::table('incidents')
+         $subcons = Subcom::where('disabled',0)->get();
+         $relocationServices = InstallationService::where('type', 'relocation')
+                        ->where('status', 1)
+                        ->get(['id', 'name']);
+         $incidents = Incident::with('customer.snPort.snSplitter')
+                        ->with('customer.snPort.dnSplitter')
+                        ->with('customer.snPort.popDevice')
+                        ->with('customer.snPort.pop')
+                        ->with('customer.snPort.pop.partner')
+                        ->with('customer.currentAddress.township')
                         ->join('users','users.id','=','incidents.incharge_id')
                         ->join('customers','customers.id','=','incidents.customer_id')
                         ->join('status','customers.status_id','=','status.id')
-                        ->join('packages','customers.package_id','=','packages.id')
+                        ->leftjoin('tasks','incidents.id','tasks.incident_id')
+                        ->leftjoin('subcoms','tasks.assigned','subcoms.id')
                         ->whereIn('incidents.type',['relocation','termination','plan_change','suspension','resume'])
                         ->when($closed, function ($query,$closed) {
-          
                             $query->whereIN('incidents.status', [3,4]);
                         }, function ($query) {
-                            $query->whereIN('incidents.status', [1,2]);
+                            $query->whereIN('incidents.status', [1,2,5]);
                         })
-         ->when($request->general, function($query, $general){
-            $query->where(function ($query) use ($general) {
-                $query->where('customers.name', 'LIKE', '%' . $general . '%')
-                    ->orWhere('customers.ftth_id', 'LIKE', '%' . $general . '%')
-                    ->orWhere('customers.phone_1', 'LIKE', '%' . $general . '%')
-                    ->orWhere('customers.phone_2', 'LIKE', '%' . $general . '%')
-                    ->orWhere('customers.address', 'LIKE', '%' . $general . '%')
-                    ->orWhere('customers.sale_channel', 'LIKE', '%' . $general . '%')
-                    ->orWhere('incidents.type', 'LIKE', '%' . $general . '%')
-                    ->orWhere('incidents.code', 'LIKE', '%' . $general . '%');
-            });
-         })
-         ->when($sorting, function ($query, $sort = null) {
-          
-            $sort_by = 'customers.id';
-            if ($sort[0] == 'id') {
-                $sort_by = 'incidents.id';
-            } elseif ($sort[0] == 'date') {
-                $sort_by = 'incidents.date';
-            } elseif ($sort[0] == 'cid') {
-                $sort_by = 'customers.ftth_id';
-            } elseif ($sort[0] == 'type') {
-                $sort_by = 'incidents.type';
-            } elseif ($sort[0] == 'start') {
-                $sort_by = 'incidents.start_date';
-            }elseif ($sort[0] == 'end') {
-                $sort_by = 'incidents.end_date';
-            }elseif ($sort[0] == 'request') {
-                $sort_by = 'incidents.incharge_id';
-            }elseif ($sort[0] == 'status') {
-                $sort_by = 'incidents.status';
-            }
-
-            $query->orderBy($sort_by,$sort[1]);
-        }, function ($query) {
-            $query->orderBy('incidents.id','ASC');
-        })
-        
-         ->select('incidents.*','customers.id as customer_id','customers.ftth_id as ftth_id','customers.package_id as current_package','incidents.package_id as new_package','users.name as incharge','customers.address as current_address','customers.township_id as current_township','status.name as status_name','status.id as status_id')
-         ->paginate(10);
+                        ->when($request->general, function($query, $general){
+                            $query->where(function ($query) use ($general) {
+                                $query->where('customers.name', 'LIKE', '%' . $general . '%')
+                                    ->orWhere('customers.ftth_id', 'LIKE', '%' . $general . '%')
+                                    ->orWhere('customers.phone_1', 'LIKE', '%' . $general . '%')
+                                    ->orWhere('customers.phone_2', 'LIKE', '%' . $general . '%')
+                                    ->orWhere('customers.sale_channel', 'LIKE', '%' . $general . '%')
+                                    ->orWhere('incidents.type', 'LIKE', '%' . $general . '%')
+                                    ->orWhere('incidents.code', 'LIKE', '%' . $general . '%');
+                            });
+                        })
+                        ->when($sorting, function ($query, $sort = null) {
+                            $sort_by = 'customers.id';
+                            if ($sort[0] == 'id') {
+                                $sort_by = 'incidents.id';
+                            } elseif ($sort[0] == 'date') {
+                                $sort_by = 'incidents.date';
+                            } elseif ($sort[0] == 'cid') {
+                                $sort_by = 'customers.ftth_id';
+                            } elseif ($sort[0] == 'type') {
+                                $sort_by = 'incidents.type';
+                            } elseif ($sort[0] == 'start') {
+                                $sort_by = 'incidents.start_date';
+                            } elseif ($sort[0] == 'end') {
+                                $sort_by = 'incidents.end_date';
+                            } elseif ($sort[0] == 'request') {
+                                $sort_by = 'incidents.incharge_id';
+                            } elseif ($sort[0] == 'status') {
+                                $sort_by = 'incidents.status';
+                            }
+                            $query->orderBy($sort_by,$sort[1]);
+                        }, function ($query) {
+                            $query->orderBy('incidents.id','ASC');
+                        })
+                        ->select(
+                            'incidents.*',
+                            'customers.id as customer_id',
+                            'customers.ftth_id as ftth_id',
+                            'customers.package_id as current_package',
+                            'incidents.package_id as new_package',
+                            'users.name as incharge',
+                            'status.name as status_name',
+                            'status.id as status_id',
+                            'subcoms.id as subcon_id',
+                            'tasks.target as assign_date',
+                            'tasks.status as task_status',
+                            'tasks.complete_date as complete_date',
+                        )
+                        ->paginate(10);
          $incidents->appends($request->all())->links();
+         $partners  = Partner::select('id', 'name')
+                        ->where('is_active', 1)
+                        ->get();
         return Inertia::render('Client/ServiceRequest', 
         [  
             'incidents' => $incidents,
@@ -102,97 +128,193 @@ class ServiceRequestController extends Controller
             'townships' => $townships,
             'users' => $users,
             'status' => $status,
+            'partners' => $partners,
+            'subcons' => $subcons,
+            'relocationServices'=>$relocationServices
         ]);
 
     }
-    public function update(Request $request){
+    public function assign(Request $request){
+        $validator = Validator::make($request->all(), [
+            'new_pop_id' => 'required|integer|exists:pops,id',
+            'new_pop_device_id' => 'required|integer|exists:pop_devices,id',
+            'new_sn_splitter_id' => 'required|integer|exists:sn_splitters,id',
+            'new_dn_splitter_id' => 'required|integer|exists:dn_splitters,id',
+            'new_port_number_id' => 'required|integer',
+            'assign_date' => 'required|date',
+            'subcon_id' => 'required|integer|exists:subcoms,id',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+      
         if($request->has('id'))
         {
-            if($request->type)
-           {
+            $incident = Incident::find($request->input('id'));
+         
+            $incident->new_partner_id = $request->new_partner_id;
+            $incident->new_pop_id = $request->new_pop_id;
+            $incident->new_pop_device_id = $request->new_pop_device_id;
+            $incident->new_dn_splitter_id = $request->new_dn_splitter_id;
+            $incident->new_sn_splitter_id = $request->new_sn_splitter_id;
+            $incident->new_port_number = $request->new_port_number_id;
+
            
-                $customer = Customer::find($request->input('customer_id'));
-                if($request->new_address)
-                $customer->address = $request->new_address;
-                if($customer->new_location)
-                $customer->location = $request->new_location;
-                if ($request->new_package)
-                $customer->package_id = $request->new_package['id'];
-                if($request->new_township){
-                    $customer->township_id = $request->new_township['id'];
+            $incident->update();
+
+            $task = Task::firstOrNew(['incident_id' => $request->input('id')]);
+            $isNew = !$task->exists;
+            $task->assigned = $request->subcon_id;
+            $task->target = $request->assign_date;
+            $task->description = 'Relocation';
+            $task->status = !empty($task->status) ? $task->status : 1;
+            $task->save();
+            if ($isNew) {
+                if ($incident->status != 2) {
+                    $incident->status = 2;
                 }
-                if ($request->type == 'termination'){
+            } else {
+                if ($incident->status != 2 && $incident->status != 3) {
+                    $incident->status = 2;
+                }
+            }
+            $incident->update();
+        }
+         return redirect()->route('servicerequest.index')->with('message', 'Incident has been assigned.');
+    }
+    public function update(Request $request){
+       
+        if($request->has('id'))
+        {
+            $incident = Incident::with('customer.snPort.snSplitter')
+                        ->with('customer.snPort.dnSplitter')
+                        ->with('customer.snPort.popDevice')
+                        ->with('customer.snPort.pop')
+                        ->with('customer.snPort.pop.partner')
+                        ->with('customer.currentAddress.township')
+                        ->join('users','users.id','=','incidents.incharge_id')
+                        ->join('customers','customers.id','=','incidents.customer_id')
+                        ->join('status','customers.status_id','=','status.id')
+                        ->join('tasks','incidents.id','tasks.incident_id')
+                        ->whereIn('incidents.type',['relocation','termination','plan_change','suspension','resume'])
+                        ->whereIn('incidents.status', [1,2,5])
+                        ->select(
+                            'incidents.*',
+                            'customers.id as customer_id',
+                            'customers.ftth_id as ftth_id',
+                            'customers.package_id as current_package',
+                            'incidents.package_id as new_package',
+                            'users.name as incharge',
+                            'status.name as status_name',
+                            'status.id as status_id',
+                            'tasks.complete_date as complete_date',
+                        )
+                        ->where('incidents.id', '=', $request->input('id'))
+                        ->first();
+            if($request->type && $incident)
+           {
+         
+                $customer = Customer::find($incident->customer_id);
+
+                //Relocation Customer
+                if($incident->new_address && $incident->location && $incident->new_township && $incident->type='relocation'){ 
+                    $oldAddress = CustomerAddress::where('customer_id', $customer->id)
+                        ->where('is_current', 1)
+                        ->first();
+                    if ($oldAddress) {
+                        $oldAddress->is_current = 0;
+                        $oldAddress->save();
+                    }
+                    $customerAddress = new CustomerAddress();
+                    $customerAddress->customer_id = $customer->id;
+                    $customerAddress->address = $incident->new_address;
+                    $customerAddress->location = $incident->location;
+                    $customerAddress->township_id = $incident->new_township;
+                    $customerAddress->type = 'relocated';
+                    $customerAddress->installation_date = $incident->complete_date;
+                    $customerAddress->installation_service_id = $incident->relocation_service_id;
+                    $customerAddress->is_current = 1;
+                    $customerAddress->save();
+                }
+               
+                // if ($incident->new_package)
+                // $customer->package_id = $incident->new_package['id'];
+                // if($incident->new_township){
+                //     $customer->township_id = $incident->new_township;
+                // }
+                if ($incident->type == 'termination'){
                     $status = Status::where('name','LIKE','%Termina%')->first();
                     $customer->status_id = $status->id;
                 }
-                if ($request->type == 'suspension'){
+                if ($incident->type == 'suspension'){
                     $status = Status::where('name','LIKE','%Suspen%')->first();
                     $customer->status_id = $status->id;
                 }
-                if ($request->type == 'resume'){
+                if ($incident->type == 'resume'){
                     $status = Status::where('name','=','Active')->first();
                     $customer->status_id = $status->id;
                 }
                     
                 $customer->update();
 
-                CustomerHistory::where('customer_id', '=', $request->customer_id)->update(['active'=>0]);
+                CustomerHistory::where('customer_id', '=', $incident->customer_id)->update(['active'=>0]);
 
                 $new_history = new CustomerHistory();
-                $new_history->old_status = $request->status_id;
+                $new_history->old_status = $incident->status_id;
                 $new_history->customer_id = $customer->id;
-                $new_history->general = $request->type ;
-                $new_history->type = $request->type ;
+                $new_history->general = $incident->type ;
+                $new_history->type = $incident->type ;
                 $new_history->actor_id = Auth::user()->id;
                 $new_history->active = 1;
                 $new_history->date = date("Y-m-j h:m:s");
                
-                if ($request->start_date){
-                    $new_history->start_date = $request->start_date;
+                if ($incident->start_date){
+                    $new_history->start_date = $incident->start_date;
                 }
                 
-                if ($request->end_date)
-                    $new_history->end_date = $request->end_date;
+                if ($incident->end_date)
+                    $new_history->end_date = $incident->end_date;
         
-                if ($request->type == 'relocation'){
+                if ($incident->type == 'relocation'){
                     //new
-                    if ($request->new_address)
-                    $new_history->new_address = $request->new_address;
-                    if ($request->new_location)
-                    $new_history->new_location = $request->new_location;
+                    if ($incident->new_address)
+                    $new_history->new_address = $incident->new_address;
+                    if ($incident->new_location)
+                    $new_history->new_location = $incident->new_location;
                     //old
-                    $new_history->old_address = $request->current_address;
-                    $new_history->old_location = $request->latitude . ',' . $request->longitude;
+                    $new_history->old_address = $incident->current_address;
+                    $new_history->old_location = $incident->location;
 
                     $status = Status::where('name','=','Active')->first();
                     $new_history->new_status = $status->id;
                 }
-                if ($request->type == 'termination'){
+                if ($incident->type == 'termination'){
                     $status = Status::where('name','LIKE','%Termina%')->first();
                     $new_history->new_status = $status->id;
                 }
-                if ($request->type == 'suspension'){
+                if ($incident->type == 'suspension'){
                     $status = Status::where('name','LIKE','%Suspen%')->first();
                     $new_history->new_status = $status->id;
                 }
-                if ($request->type == 'resume'){
+                if ($incident->type == 'resume'){
                     $status = Status::where('name','=','Active')->first();
                     $new_history->new_status = $status->id;
                 }
-                if ($request->type == 'plan change'){
+                if ($incident->type == 'plan change'){
                     //new
-                    if ($request->new_package)
-                    $new_history->new_package = $request->new_package['id'];
+                    if ($incident->new_package)
+                    $new_history->new_package = $incident->new_package['id'];
                     //old
-                    if ($request->current_package)
-                    $new_history->old_package = $request->current_package['id'];
+                    if ($incident->current_package)
+                    $new_history->old_package = $incident->current_package['id'];
                 
                     // $status = Status::where('name','=','Active')->first();
                     // $new_history->new_status = $status->id;
                     $myDateTime = new DateTime;
                     $newtime = clone $myDateTime;
-                    if ($request->start_date){
-                        $myDateTime = new DateTime($request->start_date);
+                    if ($incident->start_date){
+                        $myDateTime = new DateTime($incident->start_date);
                         $new_history->start_date = $newtime->format('Y-m-j h:m:s');
                     }
                    
@@ -207,7 +329,7 @@ class ServiceRequestController extends Controller
                 }
                 $new_history->save();
 
-                $incident = Incident::find($request->input('id'));
+                // $incident = Incident::find($incident->id);
                 $incident->status = 3;
                 $incident->close_date = date("Y-m-j h:m:s");
                 $incident->close_time = date("h:m:s");

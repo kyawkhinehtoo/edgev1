@@ -27,7 +27,7 @@ class Task extends Model
      * @var array
      */
     protected $fillable = [
-        'incident_id','description','assigned','target','status', 'comment', 'root_causes_id', 'sub_root_causes_id', 'created_at', 'updated_at'
+        'incident_id','description','assigned','target','complete_date','status', 'comment', 'root_causes_id', 'sub_root_causes_id', 'created_at', 'updated_at'
     ];
 
     /**
@@ -45,7 +45,7 @@ class Task extends Model
      * @var array
      */
     protected $casts = [
-        'description' => 'string','assigned' => 'string','status' => 'string', 'comment' => 'string', 'created_at' => 'timestamp', 'updated_at' => 'timestamp'
+        'description' => 'string','assigned' => 'string','status' => 'string', 'comment' => 'string','complete_date'=>'datetime:Y-m-d', 'created_at' => 'timestamp', 'updated_at' => 'timestamp'
     ];
 
     /**
@@ -54,7 +54,7 @@ class Task extends Model
      * @var array
      */
     protected $dates = [
-        'created_at', 'updated_at'
+      'complete_date',  'created_at', 'updated_at'
     ];
 
     /**

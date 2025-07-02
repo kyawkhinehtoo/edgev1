@@ -64,6 +64,8 @@ class Role extends Model
         'limit_region',
         'dn_panel',
         'installation_supervisor',
+        'product_catalog',
+        'smtp_setting',
         'created_at',
         'updated_at'
     ];
@@ -111,6 +113,7 @@ class Role extends Model
         'limit_region' => 'integer',
         'dn_panel' => 'integer',
         'installation_supervisor' => 'integer',
+        'smtp_setting' => 'integer',
         'created_at' => 'timestamp',
         'updated_at' => 'timestamp'
     ];

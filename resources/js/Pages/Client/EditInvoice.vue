@@ -48,36 +48,37 @@
               </tr>
             </thead>
             <tbody>
-              <tr class="border-b">
-                <td class="py-3 px-2">Monthly Recurring Charges</td>
-                <td class="py-3 px-2 text-right">{{ form.total_mrc_customer }}</td>
-                <td class="py-3 px-2 text-right">${{ form.total_mrc_amount }}</td>
-              </tr>
-              <tr class="border-b">
-                <td class="py-3 px-2">New Installation Charges</td>
-                <td class="py-3 px-2 text-right">{{ form.total_new_customer }}</td>
+               <tr class="border-b">
+                <td class="py-3 px-2">Monthly Port Leasing Charges</td>
+                <td class="py-3 px-2 text-right">{{ form.total_port_leasing_customer }}</td>
+                <td class="py-3 px-2 text-right">${{ form.total_port_leasing_amount }}</td>
+                </tr>
+                <tr class="border-b">
+                <td class="py-3 px-2">Maintenance Charges</td>
+                <td class="py-3 px-2 text-right">{{ form.total_maintenance_customer }}</td>
+                <td class="py-3 px-2 text-right">${{ form.total_maintenance_amount }}</td>
+                </tr>
+                <tr class="border-b">
+                <td class="py-3 px-2">Suspension Charges</td>
+                <td class="py-3 px-2 text-right">{{ form.total_suspension_customer }}</td>
+                <td class="py-3 px-2 text-right">${{ form.total_suspension_amount }}</td>
+                </tr>
+                
+                <tr class="border-b">
+                <td class="py-3 px-2">Installation Charges</td>
+                <td class="py-3 px-2 text-right">{{ form.total_installation_customer }}</td>
                 <td class="py-3 px-2 text-right">${{ form.total_installation_amount }}</td>
-              </tr>
-              <tr class="border-b">
-                <td class="py-3 px-2">
-                  <input
-                    v-model="form.additional_description"
-                    type="text"
-                    placeholder="Additional Description"
-                    class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                </td>
-                <td class="py-3 px-2"></td>
-                <td class="py-3 px-2">
-                  <input
-                    v-model="form.additional_fees"
-                    type="number"
-                    step="0.01"
-                    class="w-full text-right border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    @input="updateCalculations"
-                  />
-                </td>
-              </tr>
+                </tr>
+                <tr class="border-b">
+                <td class="py-3 px-2">Relocation Charges</td>
+                <td class="py-3 px-2 text-right">{{ form.total_relocation_customer }}</td>
+                <td class="py-3 px-2 text-right">${{ form.total_relocation_amount }}</td>
+                </tr>
+                <tr class="border-b">
+                <td class="py-3 px-2">Material Charges</td>
+                <td class="py-3 px-2 text-right">{{ form.total_material_customer }}</td>
+                <td class="py-3 px-2 text-right">${{ form.total_material_amount }}</td>
+                </tr>
             </tbody>
           </table>
         </div>
@@ -165,10 +166,22 @@ export default defineComponent({
       id: '',
       bill_number: '',
       isp_name: '',
-      total_mrc_amount: 0,
-      total_installation_amount: 0,
-      total_mrc_customer: 0,
-      total_new_customer: 0,
+      // total_mrc_amount: 0,
+      // total_installation_amount: 0,
+      // total_mrc_customer: 0,
+      // total_new_customer: 0,
+       total_port_leasing_customer : 0,
+      total_maintenance_customer : 0,
+      total_suspension_customer : 0,
+      total_installation_customer : 0,
+      total_relocation_customer : 0,
+      total_material_customer : 0,
+      total_port_leasing_amount : 0,
+      total_maintenance_amount : 0,
+      total_suspension_amount : 0,
+      total_installation_amount : 0,
+      total_relocation_amount : 0,
+      total_material_amount : 0,
       additional_description: '',
       additional_fees: 0,
       sub_total: 0,
@@ -182,9 +195,14 @@ export default defineComponent({
 
     const updateCalculations = () => {
   // Calculate sub total
-  form.sub_total = Number(form.total_mrc_amount) + 
-                   Number(form.total_installation_amount) + 
-                   Number(form.additional_fees);
+  form.sub_total =
+    Number(form.total_port_leasing_amount) +
+    Number(form.total_maintenance_amount) +
+    Number(form.total_suspension_amount) +
+    Number(form.total_installation_amount) +
+    Number(form.total_relocation_amount) +
+    Number(form.total_material_amount) +
+    Number(form.additional_fees);
 
   // Calculate tax amount (after applying discount)
   form.tax_amount = ((form.sub_total - Number(form.discount_amount)) * Number(form.tax_percent)) / 100;
@@ -198,9 +216,18 @@ export default defineComponent({
         form.id = newValue.id
         form.bill_number = newValue.bill?.bill_number
         form.isp_name = newValue.isp?.name
-        form.total_mrc_amount = newValue.total_mrc_amount
+        form.total_port_leasing_customer = newValue.total_port_leasing_customer
+        form.total_maintenance_customer = newValue.total_maintenance_customer
+        form.total_suspension_customer = newValue.total_suspension_customer
+        form.total_installation_customer = newValue.total_installation_customer
+        form.total_relocation_customer = newValue.total_relocation_customer
+        form.total_material_customer = newValue.total_material_customer
+        form.total_port_leasing_amount = newValue.total_port_leasing_amount
+        form.total_maintenance_amount = newValue.total_maintenance_amount
+        form.total_suspension_amount = newValue.total_suspension_amount
         form.total_installation_amount = newValue.total_installation_amount
-        form.total_mrc_customer = newValue.total_mrc_customer
+        form.total_relocation_amount = newValue.total_relocation_amount
+        form.total_material_amount = newValue.total_material_amount
         form.total_new_customer = newValue.total_new_customer
         form.additional_description = newValue.additional_description
         form.additional_fees = newValue.additional_fees

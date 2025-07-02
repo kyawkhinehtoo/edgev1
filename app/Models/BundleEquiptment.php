@@ -32,7 +32,7 @@ class BundleEquiptment extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'detail', 'created_at', 'updated_at'
+        'name', 'type','detail', 'price','is_active','created_at', 'updated_at'
     ];
 
     /**

@@ -18,25 +18,23 @@
               {{ task_user === 'my' ? 'My Tasks' : 'All Tasks' }}
             </span>
             <label class="inline-flex relative cursor-pointer  ">
-              
-              <input type="checkbox" 
-                     class="sr-only peer" 
-                     :checked="task_user === 'all'" 
-                     @change="task_user === 'my' ? goAllTasks() : goMyTasks()">
+
+              <input type="checkbox" class="sr-only peer" :checked="task_user === 'all'"
+                @change="task_user === 'my' ? goAllTasks() : goMyTasks()">
               <div class="w-14 h-8 bg-gray-400 peer-focus:outline-none rounded-full peer 
                           peer-checked:after:translate-x-6 peer-checked:after:border-white 
                           after:content-[''] after:absolute after:top-[4px] after:left-[4px] 
                           after:bg-white after:border-gray-300 after:border after:rounded-full 
                           after:h-6 after:w-6 after:transition-all 
-                          peer-checked:bg-indigo-600 shadow-sm" ></div>
-              
+                          peer-checked:bg-indigo-600 shadow-sm"></div>
+
             </label>
           </div>
           <div class="flex w-full ">
             <button
               class="w-32 btn py-3 px-8 bg-gray-400 rounded rounded-r-none focus:ring-0 focus:border-transparent focus:outline-none shadow-lg  text-gray-50 text-xs font-semibold uppercase border-r-gray-300 border-r"
               :class="{ 'bg-yellow-300 text-gray-600 font-bold': search_status == 1 }" @click="goSearch(1)">WIP</button>
-              <button
+            <button
               class="w-32 btn py-3 px-8 bg-gray-400  focus:ring-0 focus:border-transparent focus:outline-none shadow-lg text-gray-50 text-xs font-semibold uppercase border-r-gray-300 border-r"
               :class="{ 'bg-yellow-500 text-gray-600 font-bold': search_status == 3 }"
               @click="goSearch(3)">Pending</button>
@@ -44,12 +42,12 @@
               class="w-32 btn py-3 px-8 bg-gray-400  focus:ring-0 focus:border-transparent focus:outline-none shadow-lg text-gray-50 text-xs font-semibold uppercase border-r-gray-300 border-r"
               :class="{ 'bg-green-300 text-gray-600 font-bold': search_status == 2 }"
               @click="goSearch(2)">Completed</button>
-             
+
             <button
               class=" w-32  btn py-3 px-8 bg-gray-400 rounded rounded-l-none focus:ring-0 focus:border-transparent focus:outline-none shadow-lg text-gray-50 text-xs font-semibold uppercase"
               :class="{ 'bg-indigo-600 font-bold': search_status == 'all' }" @click="goSearch('all')">All</button>
           </div>
-         
+
         </div>
 
         <div v-if="!edit">
@@ -81,6 +79,9 @@
                     Target Date</th>
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Complete Date</th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status</th>
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -89,7 +90,9 @@
               </thead>
               <tbody class="bg-white divide-y divide-gray-200 text-sm   w-full text-left">
                 <tr v-for="(row, index) in tasks.data" v-bind:key="row.id">
-                  <td class="px-2 py-3 whitespace-nowrap"><i class="fa fa-circle mr-2"  :class="{'text-yellow-400': row.priority=='normal','text-yellow-600': row.priority=='high','text-red-600': row.priority=='critical' }"></i> {{ (index += tasks.from) }}</td>
+                  <td class="px-2 py-3 whitespace-nowrap"><i class="fa fa-circle mr-2"
+                      :class="{ 'text-yellow-400': row.priority == 'normal', 'text-yellow-600': row.priority == 'high', 'text-red-600': row.priority == 'critical' }"></i>
+                    {{ (index += tasks.from) }}</td>
 
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.code }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.ftth_id }}</td>
@@ -97,6 +100,7 @@
                   <td class="px-6 py-3 whitespace-nowrap">{{ getName(row.assigned) }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.incharge.match(/\b\w/g).join("") }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.target }}</td>
+                  <td class="px-6 py-3 whitespace-nowrap">{{ row.complete_date }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ getStatus(row.status) }}</td>
                   <td class="px-6 py-3 whitespace-nowrap"><a href="#" @click="editTask(row)" class="text-blue-600"><i
                         class="fa fa-edit"></i></a></td>
@@ -115,7 +119,7 @@
 
                 <div>
                   <span class="text-xs font-bold px-2.5 py-0.5 rounded items-center justify-center "
-                    :class="{ 'bg-yellow-400': row.status == 1 ,'bg-yellow-500': row.status == 3 , 'bg-green-300': row.status != 1 }">
+                    :class="{ 'bg-yellow-400': row.status == 1, 'bg-yellow-500': row.status == 3, 'bg-green-300': row.status != 1 }">
                     {{ getStatus(row.status) }}</span>
                 </div>
               </div>
@@ -168,242 +172,272 @@
             <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               :class="[tab == 1 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
                 @click="tabClick(1)" preserve-state>Genaral</a></li>
-            
+
             <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               :class="[tab == 2 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
                 @click="tabClick(2)" preserve-state>Customer Info</a></li>
-          
+
           </ul>
         </div>
         <!-- Tabs -->
         <!-- Tab Contents -->
         <div id="tab-contents">
-            <!-- tab1 -->
-            <div :class="[tab == 1 ? '' : 'hidden']">
-              <div class="grid grid-cols-1 md:grid-cols-4 gap-2 w-full bg-white p-4" v-if="edit">
-                
-                <div class="py-2 col-span-1 w-full ">
-                  <div class="flex md:justify-end">
-                    <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Code :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 md:col-span-3 col-span-1">
-                  <div class="flex">
-                    <label for="ftth_id" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2">
-                      <i class="fa fa-circle mr-2"  :class="{'text-yellow-400': form.data?.priority=='normal','text-yellow-600': form.data?.priority=='high','text-red-600': form.data?.priority=='critical' }"></i> {{ form.data?.code }}  
-                    </label>
-                  </div>
-                </div>
-                <div class="py-2 col-span-1 w-full ">
-                  <div class="flex md:justify-end">
-                    <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Customer ID :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 md:col-span-3 col-span-1">
-                  <div class="flex">
-                    <label for="ftth_id" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2">
-                      {{ form.data?.ftth_id }}
-                    </label>
-                  </div>
-                </div>
-                <div class="py-2 col-span-1 w-full ">
-                  <div class="flex md:justify-end">
-                    <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Ticket Type :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 md:col-span-3 col-span-1">
-                  <div class="flex">
-                    <label for="type" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2 capitalize">
-                      {{ form.data?.type.replace("_", " ") }}
-                    </label>
-                  </div>
-                </div>
-                <div class="py-2 col-span-1 w-full" v-if="form.data?.topic">
-                  <div class="flex md:justify-end">
-                    <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Ticket Topic :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 md:col-span-3 col-span-1" v-if="form.data?.topic">
-                  <div class="flex">
-                    <label for="type" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2 capitalize">
-                      {{ form.data?.topic.replace("_", " ") }}
-                    </label>
-                  </div>
-                </div>
-                <div class="py-2 col-span-1 w-full">
-                  <div class="flex md:justify-end">
-                    <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Ticket Detail :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 md:col-span-3 col-span-1">
-                  <div class="flex">
-                    <label for="type" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2  whitespace-normal">
-                      {{ form.data?.incident_description }}
-                    </label>
-                  </div>
-                </div>
-                <div class="py-2 col-span-1 w-full">
-                  <div class="flex md:justify-end">
-                    <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Ticket Opened At :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 md:col-span-3 col-span-1">
-                  <div class="flex">
-                    <label for="type" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2  whitespace-normal">
-                      {{ form.data?.date }} : {{ form.data?.time }}
-                    </label>
-                  </div>
-                </div>
-                <div class="py-2 col-span-1 w-full ">
-                  <div class="flex md:justify-end">
-                    <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Assigned : </label>
-                  </div>
-                </div>
-                <div class="md:py-2 md:col-span-3 col-span-1">
-                  <div class="flex rounded-md shadow-sm">
-                    <div class="flex rounded-md shadow-sm w-full" v-if="subcons.length !== 0">
-                      <multiselect deselect-label="Selected already" :options="subcons" track-by="id" label="name"
-                        v-model="form.assigned" :allow-empty="false" :multiple="false"></multiselect>
-                    </div>
-                    <p v-if="$page.props.errors.assigned" class="mt-2 text-sm text-red-500">{{ $page.props.errors.assigned }}
-                    </p>
-                  </div>
-                </div>
-                <div class="py-2 col-span-1 sm:col-span-1">
-                  <div class="flex md:justify-end">
-                    <label for="target" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Target : </label>
-                  </div>
-                </div>
-                <div class="md:py-2 col-span-1 md:col-span-3">
-                  <div class="flex rounded-md shadow-sm">
-                    <input type="date" v-model="form.target" name="target" id="target"
-                      class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
+          <!-- tab1 -->
+          <div :class="[tab == 1 ? '' : 'hidden']">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-2 w-full bg-white p-4" v-if="edit">
 
-                  </div>
-                  <p v-if="$page.props.errors.target" class="mt-2 text-sm text-red-500">{{ $page.props.errors.target }}</p>
-                </div>
-                <div class="py-2 col-span-1 sm:col-span-1">
-                  <div class="flex md:justify-end">
-                    <label for="description" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Description :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 col-span-1 md:col-span-3">
-                  <div class="flex rounded-md shadow-sm">
-                    <textarea v-model="form.description" name="description" id="description"
-                      class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"></textarea>
-
-                  </div>
-                  <p v-if="$page.props.errors.description" class="mt-2 text-sm text-red-500">{{ $page.props.errors.description
-                  }}
-                  </p>
-                </div>
-              
-                <div class="py-2 col-span-1 sm:col-span-1">
-                  <div class="flex md:justify-end">
-                    <label for="status" class="block text-sm font-medium text-gray-700  md:mr-2"> Status :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 col-span-1 md:col-span-3">
-              
-                    <div class="flex gap-4">
-                      <label class="inline-flex items-center">
-                        <input type="radio" v-model="form.status" name="status" value="1" class="form-radio text-yellow-500">
-                        <span class="ml-2">WIP</span>
-                      </label>
-                      <label class="inline-flex items-center">
-                        <input type="radio" v-model="form.status" name="status" value="3" class="form-radio text-red-500">
-                        <span class="ml-2">Pending</span>
-                      </label>
-                      <label class="inline-flex items-center">
-                        <input type="radio" v-model="form.status" name="status" value="2" class="form-radio text-green-500">
-                        <span class="ml-2">Completed</span>
-                      </label>
-                      <label class="inline-flex items-center">
-                        <input type="radio" v-model="form.status" name="status" value="0" class="form-radio text-indigo-500">
-                        <span class="ml-2">Deleted</span>
-                      </label>
-                    </div>
-          
-              
-                  <p v-if="$page.props.errors.status" class="mt-2 text-sm text-red-500">{{ $page.props.errors.status }}</p>
-                </div>
-                <template v-if="form.status == 3">
-                  <div class="py-2 col-span-1">
-                    <div class="flex md:justify-end">
-                      <label for="root_causes_id" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Root Cause for
-                        Pending
-                        : </label>
-                    </div>
-                  </div>
-                  <div class="py-2 col-span-1 md:col-span-3">
-                    <div class="flex rounded-md shadow-sm w-full" v-if="pendingRootCause?.length !== 0">
-                      <multiselect deselect-label="Selected already" :options="pendingRootCause" track-by="id" label="name"
-                        v-model="form.root_causes" :allow-empty="false" :multiple="false"
-                        @update:model-value="form.root_causes_id = $event?.id"></multiselect>
-                    </div>
-                    <p v-if="$page.props.errors.root_causes_id" class="mt-2 text-sm text-red-500">{{
-                      $page.props.errors.root_causes_id }}</p>
-                  </div>
-
-                  <div class="py-2 col-span-1">
-                    <div class="flex md:justify-end">
-                      <label for="sub_root_causes" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2">Sub Root Cause :
-                      </label>
-                    </div>
-                  </div>
-                  <div class="py-2 col-span-1 md:col-span-3">
-                    <div class="flex rounded-md shadow-sm w-full" v-if="subRCA?.length !== 0">
-                      <multiselect deselect-label="Selected already" :options="subRCA" track-by="id" label="name"
-                        v-model="form.sub_root_causes" :allow-empty="false" :multiple="false"
-                        @update:model-value="form.sub_root_causes_id = $event?.id"></multiselect>
-                    </div>
-
-                    <p v-if="$page.props.errors.sub_root_causes_id" class="mt-2 text-sm text-red-500">{{
-                      $page.props.errors.sub_root_causes_id }}</p>
-                  </div>
-                </template>
-                <div class="py-2 col-span-1 sm:col-span-1">
-                  <div class="flex md:justify-end">
-                    <label for="comment" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Comments :
-                    </label>
-                  </div>
-                </div>
-                <div class="md:py-2 col-span-1 md:col-span-3">
-                  <div class="flex rounded-md shadow-sm">
-                    <textarea v-model="form.comment" name="comment" id="comment"
-                      class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"></textarea>
-
-                  </div>
-                  <p v-if="$page.props.errors.comment" class="mt-2 text-sm text-red-500">{{ $page.props.errors.comment
-                  }}
-                  </p>
-                </div>
-                <div class="col-span-1 md:col-span-4 flex md:justify-end justify-between mt-4">
-
-                  <a href="#" @click="saveTask()"
-                    class="text-center px-4 py-3 bg-green-500 border border-transparent rounded-sm font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-400 active:bg-green-600 focus:outline-none focus:border-gray-900 disabled:opacity-25 transition mr-1"><span
-                      v-if="!editMode">Save Task</span><span v-if="editMode">Update Task</span><i
-                      class="fas fa-save opacity-75 ml-1 text-sm"></i></a>
-                  <a href="#" @click="cancelTask()"
-                    class="text-center px-4 py-3 bg-gray-500 border border-transparent rounded-sm font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-400 active:bg-gray-600 focus:outline-none focus:border-gray-900 disabled:opacity-25 transition">Cancel<i
-                      class="fas fa-save opacity-75 ml-1 text-sm"></i></a>
+              <div class="py-2 col-span-1 w-full ">
+                <div class="flex md:justify-end">
+                  <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Code :
+                  </label>
                 </div>
               </div>
+              <div class="md:py-2 md:col-span-3 col-span-1">
+                <div class="flex">
+                  <label for="ftth_id" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2">
+                    <i class="fa fa-circle mr-2"
+                      :class="{ 'text-yellow-400': form.data?.priority == 'normal', 'text-yellow-600': form.data?.priority == 'high', 'text-red-600': form.data?.priority == 'critical' }"></i>
+                    {{ form.data?.code }}
+                  </label>
+                </div>
+              </div>
+              <div class="py-2 col-span-1 w-full ">
+                <div class="flex md:justify-end">
+                  <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Customer ID :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 md:col-span-3 col-span-1">
+                <div class="flex">
+                  <label for="ftth_id" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2">
+                    {{ form.data?.ftth_id }}
+                  </label>
+                </div>
+              </div>
+              <div class="py-2 col-span-1 w-full ">
+                <div class="flex md:justify-end">
+                  <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Ticket Type :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 md:col-span-3 col-span-1">
+                <div class="flex">
+                  <label for="type" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2 capitalize">
+                    {{ form.data?.type.replace("_", " ") }}
+                  </label>
+                </div>
+              </div>
+              <div class="py-2 col-span-1 w-full" v-if="form.data?.topic">
+                <div class="flex md:justify-end">
+                  <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Ticket Topic :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 md:col-span-3 col-span-1" v-if="form.data?.topic">
+                <div class="flex">
+                  <label for="type" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2 capitalize">
+                    {{ form.data?.topic.replace("_", " ") }}
+                  </label>
+                </div>
+              </div>
+              <div class="py-2 col-span-1 w-full">
+                <div class="flex md:justify-end">
+                  <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Ticket Detail :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 md:col-span-3 col-span-1">
+                <div class="flex">
+                  <label for="type" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2  whitespace-normal">
+                    {{ form.data?.incident_description }}
+                  </label>
+                </div>
+              </div>
+              <div class="py-2 col-span-1 w-full">
+                <div class="flex md:justify-end">
+                  <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Ticket Opened
+                    At :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 md:col-span-3 col-span-1">
+                <div class="flex">
+                  <label for="type" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2  whitespace-normal">
+                    {{ form.data?.date }} : {{ form.data?.time }}
+                  </label>
+                </div>
+              </div>
+              <div class="py-2 col-span-1 w-full ">
+                <div class="flex md:justify-end">
+                  <label for="assigned" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Assigned :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 md:col-span-3 col-span-1">
+                <div class="flex rounded-md shadow-sm">
+                  <div class="flex rounded-md shadow-sm w-full" v-if="subcons.length !== 0">
+                    <multiselect deselect-label="Selected already" :options="subcons" track-by="id" label="name"
+                      v-model="form.assigned" :allow-empty="false" :multiple="false"></multiselect>
+                  </div>
+                  <p v-if="$page.props.errors.assigned" class="mt-2 text-sm text-red-500">{{ $page.props.errors.assigned
+                    }}
+                  </p>
+                </div>
+              </div>
+              <div class="py-2 col-span-1 sm:col-span-1">
+                <div class="flex md:justify-end">
+                  <label for="target" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Target : </label>
+                </div>
+              </div>
+              <div class="md:py-2 col-span-1 md:col-span-3">
+                <div class="flex rounded-md shadow-sm">
+                  <input type="date" v-model="form.target" name="target" id="target"
+                    class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
+
+                </div>
+                <p v-if="$page.props.errors.target" class="mt-2 text-sm text-red-500">{{ $page.props.errors.target }}
+                </p>
+              </div>
+              <div class="py-2 col-span-1 sm:col-span-1">
+                <div class="flex md:justify-end">
+                  <label for="description" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Description
+                    :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 col-span-1 md:col-span-3">
+                <div class="flex rounded-md shadow-sm">
+                  <textarea v-model="form.description" name="description" id="description"
+                    class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"></textarea>
+
+                </div>
+                <p v-if="$page.props.errors.description" class="mt-2 text-sm text-red-500">{{
+                  $page.props.errors.description
+                  }}
+                </p>
+              </div>
+
+              <div class="py-2 col-span-1 sm:col-span-1">
+                <div class="flex md:justify-end">
+                  <label for="status" class="block text-sm font-medium text-gray-700  md:mr-2"> Status :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 col-span-1 md:col-span-3">
+
+                <div class="flex gap-4">
+                  <label class="inline-flex items-center">
+                    <input type="radio" v-model="form.status" name="status" value="1"
+                      class="form-radio text-yellow-500">
+                    <span class="ml-2">WIP</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input type="radio" v-model="form.status" name="status" value="3" class="form-radio text-red-500">
+                    <span class="ml-2">Pending</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input type="radio" v-model="form.status" name="status" value="2" class="form-radio text-green-500">
+                    <span class="ml-2">Completed</span>
+                  </label>
+                  <label class="inline-flex items-center">
+                    <input type="radio" v-model="form.status" name="status" value="0"
+                      class="form-radio text-indigo-500">
+                    <span class="ml-2">Deleted</span>
+                  </label>
+                </div>
+
+
+                <p v-if="$page.props.errors.status" class="mt-2 text-sm text-red-500">{{ $page.props.errors.status }}
+                </p>
+              </div>
+              <template v-if="form.status == 2">
+               <div class="py-2 col-span-1 sm:col-span-1">
+                <div class="flex md:justify-end">
+                  <label for="target" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Complete At : </label>
+                </div>
+              </div>
+                <div class="md:py-2 col-span-1 md:col-span-3">
+                  <div class="flex rounded-md shadow-sm">
+                    <input type="date" v-model="form.complete_date" name="complete_date" id="complete_date"
+                       class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" />
+
+                    <p v-if="$page.props.errors.complete_date" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.complete_date }}></p>
+                  </div>
+                </div>
+              </template>
+              <template v-if="form.status == 3">
+                <div class="py-2 col-span-1">
+                  <div class="flex md:justify-end">
+                    <label for="root_causes_id" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Root
+                      Cause for
+                      Pending
+                      : </label>
+                  </div>
+                </div>
+
+                <div class="py-2 col-span-1 md:col-span-3">
+                  <div class="flex rounded-md shadow-sm w-full" v-if="pendingRootCause?.length !== 0">
+                    <multiselect deselect-label="Selected already" :options="pendingRootCause" track-by="id"
+                      label="name" v-model="form.root_causes" :allow-empty="false" :multiple="false"
+                      @update:model-value="form.root_causes_id = $event?.id"></multiselect>
+                  </div>
+                  <p v-if="$page.props.errors.root_causes_id" class="mt-2 text-sm text-red-500">{{
+                    $page.props.errors.root_causes_id }}</p>
+                </div>
+
+                <div class="py-2 col-span-1">
+                  <div class="flex md:justify-end">
+                    <label for="sub_root_causes" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2">Sub
+                      Root Cause :
+                    </label>
+                  </div>
+                </div>
+                <div class="py-2 col-span-1 md:col-span-3">
+                  <div class="flex rounded-md shadow-sm w-full" v-if="subRCA?.length !== 0">
+                    <multiselect deselect-label="Selected already" :options="subRCA" track-by="id" label="name"
+                      v-model="form.sub_root_causes" :allow-empty="false" :multiple="false"
+                      @update:model-value="form.sub_root_causes_id = $event?.id"></multiselect>
+                  </div>
+
+                  <p v-if="$page.props.errors.sub_root_causes_id" class="mt-2 text-sm text-red-500">{{
+                    $page.props.errors.sub_root_causes_id }}</p>
+                </div>
+              </template>
+              <div class="py-2 col-span-1 sm:col-span-1">
+                <div class="flex md:justify-end">
+                  <label for="comment" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Comments :
+                  </label>
+                </div>
+              </div>
+              <div class="md:py-2 col-span-1 md:col-span-3">
+                <div class="flex rounded-md shadow-sm">
+                  <textarea v-model="form.comment" name="comment" id="comment"
+                    class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"></textarea>
+
+                </div>
+                <p v-if="$page.props.errors.comment" class="mt-2 text-sm text-red-500">{{ $page.props.errors.comment
+                }}
+                </p>
+              </div>
+              <div class="col-span-1 md:col-span-4 flex md:justify-end justify-between mt-4">
+
+                <a href="#" @click="saveTask()"
+                  class="text-center px-4 py-3 bg-green-500 border border-transparent rounded-sm font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-400 active:bg-green-600 focus:outline-none focus:border-gray-900 disabled:opacity-25 transition mr-1"><span
+                    v-if="!editMode">Save Task</span><span v-if="editMode">Update Task</span><i
+                    class="fas fa-save opacity-75 ml-1 text-sm"></i></a>
+                <a href="#" @click="cancelTask()"
+                  class="text-center px-4 py-3 bg-gray-500 border border-transparent rounded-sm font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-400 active:bg-gray-600 focus:outline-none focus:border-gray-900 disabled:opacity-25 transition">Cancel<i
+                    class="fas fa-save opacity-75 ml-1 text-sm"></i></a>
+              </div>
             </div>
-            <!-- tab 1-->
-            <!--tab 2-->
-            <div :class="[tab == 2 ? '' : 'hidden']">
-              <customer-detail :data="selected_id" v-if="selected_id && tab ==2 "  />
-            </div>
-            <!--tab 2-->
+          </div>
+          <!-- tab 1-->
+          <!--tab 2-->
+          <div :class="[tab == 2 ? '' : 'hidden']">
+            <customer-detail :data="selected_id" v-if="selected_id && tab == 2" />
+          </div>
+          <!--tab 2-->
         </div>
         <!-- Tab Contents -->
       </div>
@@ -470,7 +504,7 @@ export default {
 
     const form = reactive({
       id: null,
-      code:null,
+      code: null,
       priority: null,
       assigned: null,
       target: null,
@@ -483,6 +517,7 @@ export default {
       sub_root_causes: null,
       root_causes_id: null,
       sub_root_causes_id: null,
+      complete_date: null,
     });
     function resetForm() {
       form.id = null;
@@ -498,7 +533,9 @@ export default {
       form.sub_root_causes = null;
       form.root_causes_id = null;
       form.sub_root_causes_id = null;
+      form.complete_date = null;
       selected_id.value = null;
+
     }
     function editTask(data) {
 
@@ -516,6 +553,7 @@ export default {
       form.sub_root_causes = null;
       form.root_causes_id = data.root_causes_id;
       form.sub_root_causes_id = data.sub_root_causes_id;
+      form.complete_date = data.complete_date;
       editMode.value = true;
       edit.value = true;
       selected_id.value = data.incident_id;
@@ -577,7 +615,7 @@ export default {
             });
           },
           onError: (errors) => {
-            console.log("error .." ,errors);
+            console.log("error ..", errors);
           },
         });
       } else {
@@ -632,8 +670,8 @@ export default {
       }
       router.get(url, { keyword: search.value }, { preserveState: true });
     }
-   
-    function goSearch(data){
+
+    function goSearch(data) {
       search_status.value = data;
       changeStatus();
     }
@@ -678,9 +716,9 @@ export default {
     const tab = ref(1);
 
     function tabClick(val) {
-       tab.value = val;
-      }
-    return { search, loading, form, formatter, edit, editMode, search_status, task_user, getName, getStatus, editTask, completeIt, saveTask, cancelTask, completeTask, searchTask,  goMyTasks, goAllTasks, changeStatus, subRCA ,goSearch,tabClick,tab,selected_id};
+      tab.value = val;
+    }
+    return { search, loading, form, formatter, edit, editMode, search_status, task_user, getName, getStatus, editTask, completeIt, saveTask, cancelTask, completeTask, searchTask, goMyTasks, goAllTasks, changeStatus, subRCA, goSearch, tabClick, tab, selected_id };
   },
 };
 </script>

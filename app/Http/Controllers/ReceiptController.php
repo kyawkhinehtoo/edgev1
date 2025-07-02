@@ -259,30 +259,27 @@ class ReceiptController extends Controller
         $invoice = Invoice::query()->with('isp','bill','receiptRecord','receiptRecord.collectedPerson')->where('invoices.receipt_id',$request->id)->first();
 
         $invoiceItems  = DB::table('invoice_items AS tii')
-        ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
-        ->join('packages AS p', 'c.package_id', '=', 'p.id')
-        ->selectRaw("
-            CASE 
-                WHEN tii.type LIKE '%ProRated%' THEN 'MRC ProRated'
-                WHEN tii.type LIKE '%Recurring%' THEN CONCAT('MRC ', p.name)
-                WHEN tii.type LIKE '%Installation%' THEN 
-                    CONCAT('New Installation for ', p.installation_timeline, ' hour')
-                ELSE 'Other'
-            END AS category,
-            MIN(
+           ->join('customers AS c', 'tii.customer_id', '=', 'c.id')
+            ->join('port_sharing_services AS p', 'c.port_sharing_service_id', '=', 'p.id')
+            ->join('maintenance_services AS m', 'c.maintenance_service_id', '=', 'm.id')
+            ->join('installation_services AS i', 'c.installation_service_id', '=', 'i.id')
+            ->selectRaw("
                 CASE 
-                    WHEN tii.type LIKE '%ProRated%' THEN 0
-                    WHEN tii.type LIKE '%Installation%' THEN p.otc 
-                    ELSE p.price 
-                END
-            ) AS unit_price,
-            COUNT(*) AS total_customers,
-            SUM(tii.total_amount) AS total_amount
-        ")
-        ->where('tii.invoice_id', $invoice->id)
-        ->orderBy('category')
-        ->groupBy('category')
-        ->get();
+                    WHEN tii.type = 'FullPortLeasing' THEN CONCAT('MRC ', p.name)
+                    WHEN tii.type = 'ProRatedPortLeasing' THEN 'MRC ProRated'
+                    WHEN tii.type = 'NewInstallation' THEN CONCAT('New Installation for ', i.sla_hours, ' hour')
+                    WHEN tii.type = 'Materials' THEN 'Materials'
+                    WHEN tii.type = 'Maintenance' THEN 'Maintenance'
+                    WHEN tii.type = 'Suspension' THEN 'Suspension'
+                    ELSE 'Other'
+                END AS category,
+                COUNT(*) AS total_customers,
+                SUM(tii.total_amount) AS total_amount
+            ")
+            ->where('tii.invoice_id', $invoice->id)
+            ->groupBy('category')
+            ->orderBy('category','DESC')
+            ->get();
         $options = [
             'format' => 'A4',
             'default_font_size' => '11',

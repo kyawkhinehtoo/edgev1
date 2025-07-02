@@ -50,6 +50,15 @@ class Incident extends Model
         'root_cause_id',
         'sub_root_cause_id',
         'rca_notes',
+        
+        'new_partner_id',
+        'new_pop_id',
+        'new_pop_device_id',
+        'new_dn_splitter_id',
+        'new_sn_splitter_id',
+        'new_port_number',
+        'relocation_service_id',
+        'start_date',
         'created_at',
         'updated_at'
     ];
@@ -82,8 +91,8 @@ class Incident extends Model
         'new_address'=> 'string',
         'location'=> 'string',
         'termination'=> 'timestamp',
-        'date'=> 'timestamp',
-        'close_date'=> 'timestamp',
+        'date'=> 'datetime:d-m-Y',
+        'close_date'=> 'datetime:d-m-Y',
         'time'=> 'timestamp',
         'close_time'=> 'timestamp',
         'description' => 'string',
@@ -92,6 +101,12 @@ class Incident extends Model
         'root_cause_id' => 'integer',
         'sub_root_cause_id' => 'integer',
         'rca_notes' => 'string',
+        'new_sn_splitter_id' => 'integer',
+        'new_port_number' => 'string',
+        'new_pop_device_id' => 'integer',
+        'new_pop_id' => 'integer',
+        'new_dn_splitter_id' => 'integer',
+        'start_date => datetime:d-m-Y',
         'created_at' => 'timestamp', 
         'updated_at' => 'timestamp'
     ];
@@ -102,9 +117,23 @@ class Incident extends Model
      * @var array
      */
     protected $dates = [
-        'suspense_from','suspense_to','resume','termination','date', 'created_at', 'updated_at'
+        'suspense_from','suspense_to','resume','termination', 'created_at', 'updated_at'
     ];
-
+    //  protected $casts = [
+    //     'ftth_id' => 'string',
+    //     'name' => 'string',
+    //     'phone_1' => 'string',
+    //     'created_at' => 'timestamp',
+    //     'updated_at' => 'timestamp',
+    //     'order_date' => 'datetime:Y-m-d',
+    //     'service_activation_date' => 'datetime:Y-m-d',
+    //     'prefer_install_date' => 'datetime:Y-m-d',
+    //     'installation_date' => 'datetime:Y-m-d',
+    //     'installation_reappointment_date' => 'datetime:Y-m-d',
+    //     'subcom_assign_date' => 'datetime:Y-m-d H:i:s',
+    //     'way_list_date' => 'datetime:Y-m-d',
+    //     'service_termination_date' => 'datetime:Y-m-d',
+    // ];
     /**
      * Indicates if the model should be timestamped.
      *
@@ -126,5 +155,9 @@ class Incident extends Model
     public function subRootCause()
     {
         return $this->belongsTo(SubRootCause::class);
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
     }
 }
