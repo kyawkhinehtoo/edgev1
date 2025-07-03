@@ -76,6 +76,7 @@ class CustomerController extends Controller
         $bundle_equiptments = BundleEquiptment::get();
         $active = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->whereIn('status.type', ['active', 'disabled'])
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -102,13 +103,14 @@ class CustomerController extends Controller
         // ->count();
         $suspense = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+         	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->where('status.type', '=', 'suspense')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if($user_type == 'partner') {
@@ -125,13 +127,14 @@ class CustomerController extends Controller
             ->count();
         $installation_request = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+            ->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->where('status.type', '=', 'new')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if($user_type == 'partner') {
@@ -147,6 +150,7 @@ class CustomerController extends Controller
             })
             ->count();
         $terminate = DB::table('customers')
+            ->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->join('status', 'customers.status_id', '=', 'status.id')
             ->where('status.type', '=', 'terminate')
             ->where(function ($query) {
@@ -154,7 +158,7 @@ class CustomerController extends Controller
                     ->orWhereNull('customers.deleted');
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if($user_type == 'partner') {
@@ -186,6 +190,8 @@ class CustomerController extends Controller
             ->orderBy('speed', 'ASC')->get();
          //dd($request);
         $customers =  Customer::with('package','currentAddress.township','isp','status')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
+          	->join('townships','townships.id','customer_addresses.township_id')
             ->leftjoin('sn_ports', 'customers.id', '=', 'sn_ports.customer_id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -347,7 +353,7 @@ class CustomerController extends Controller
                 // Default sorting if no sort parameter is provided
                 $query->orderBy('customers.id', 'desc');
             })
-            ->select('customers.*')
+            ->select('customers.*','customer_addresses.address as address', 'customer_addresses.location as location', 'customer_addresses.township_id as township_id','townships.name as township_name')
         
             ->paginate(10);
             $dynamicRanderPage = "Client/Customer";

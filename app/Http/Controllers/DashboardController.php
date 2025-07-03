@@ -26,76 +26,89 @@ class DashboardController extends Controller
         }
         $all_customers = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->whereNotIn('status.type', ['cancel'])
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
-            ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+           ->when($user->role?->limit_region, function ($query) use ($user) {
+               return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+          ->where('customer_addresses.is_current',1)
             ->count();
         $total = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->whereIn('status.type', ['active', 'disabled'])
-
+			
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+           ->where('customer_addresses.is_current',1)
             ->count();
 
         $to_install = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+            ->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->whereIn('status.type', ['new', 'pending'])
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+          ->where('customer_addresses.is_current',1)
             ->count();
 
         $suspense = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+           ->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->where('status.type', '=', 'suspense')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+               return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+          ->where('customer_addresses.is_current',1)
             ->count();
         $terminate = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+           ->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->where('status.type', '=', 'terminate')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+          ->where('customer_addresses.is_current',1)
             ->count();
 
         $install_week = DB::table('customers')
+          ->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
-            ->whereRaw('week(installation_date)=week(now()) AND year(installation_date)=year(NOW())')
+            ->whereRaw('week(customers.installation_date)=week(now()) AND year(customers.installation_date)=year(NOW())')
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+               return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+          ->where('customer_addresses.is_current',1)
             ->count();
 
         $ftth = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -104,12 +117,14 @@ class DashboardController extends Controller
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('port_sharing_services.type', 'ftth')
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+          ->where('customer_addresses.is_current',1)
             ->count();
 
         $b2b = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -118,11 +133,13 @@ class DashboardController extends Controller
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('port_sharing_services.type', '=', 'b2b')
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+          ->where('customer_addresses.is_current',1)
             ->count();
 
         $dia = DB::table('customers')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->join('status', 'customers.status_id', '=', 'status.id')
             ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
@@ -132,11 +149,13 @@ class DashboardController extends Controller
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('port_sharing_services.type', 'dia')
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+          ->where('customer_addresses.is_current',1)
             ->count();
         //SELECT p.name,COUNT(c.ftth_id) AS customers FROM packages p JOIN customers c ON c.package_id=p.id  WHERE p.`type`='ftth' GROUP BY p.name;
         $ftth_total = DB::table('customers')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->join('status', 'customers.status_id', '=', 'status.id')
             ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
@@ -146,15 +165,16 @@ class DashboardController extends Controller
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('port_sharing_services.type', 'ftth')
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
             ->select('port_sharing_services.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
             ->groupBy('port_sharing_services.name')
             ->orderBy('port_sharing_services.name', 'DESC')
-            
+            ->where('customer_addresses.is_current',1)
             ->get();
 
         $b2b_total = DB::table('customers')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->join('status', 'customers.status_id', '=', 'status.id')
             ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
@@ -164,14 +184,16 @@ class DashboardController extends Controller
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('port_sharing_services.type', 'b2b')
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
             ->select('port_sharing_services.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
             ->groupBy('port_sharing_services.name')
             ->orderBy('port_sharing_services.name', 'DESC')
+          ->where('customer_addresses.is_current',1)
             ->get();
 
         $dia_total = DB::table('customers')
+          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
             ->join('status', 'customers.status_id', '=', 'status.id')
             ->join('port_sharing_services', 'customers.port_sharing_service_id', '=', 'port_sharing_services.id')
             ->where(function ($query) {
@@ -181,11 +203,12 @@ class DashboardController extends Controller
             ->whereIn('status.type', ['active', 'suspense', 'disabled'])
             ->where('port_sharing_services.type', 'dia')
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
             ->select('port_sharing_services.name', DB::raw('COUNT(customers.ftth_id) AS customers'))
             ->groupBy('port_sharing_services.name')
             ->orderBy('port_sharing_services.name', 'DESC')
+          ->where('customer_addresses.is_current',1)
             ->get();
 
 

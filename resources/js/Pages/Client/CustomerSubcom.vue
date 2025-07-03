@@ -105,7 +105,7 @@
           </div>
           <p class="text-sm text-gray-600"><strong>Name:</strong> {{ row.name }}</p>
           <p class="text-sm text-gray-600"><strong>Package:</strong> {{ row.bandwidth }}</p>
-          <p class="text-sm text-gray-600"><strong>Township:</strong> {{ row.township.name }}</p>
+          <p class="text-sm text-gray-600"><strong>Township:</strong> {{ row.township_name }}</p>
           <p class="text-sm text-gray-600"><strong>Status:</strong> {{ row.status.name }}</p>
           <p class="text-sm text-gray-600"><strong>Order Date:</strong> {{ row.order_date }}</p>
           <p class="text-sm text-gray-600"><strong>Prefer Install Date:</strong> {{ row.prefer_install_date }}</p>
@@ -168,7 +168,7 @@
                 <td class="px-3 py-3 text-xs font-medium">{{ row.way_list_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.bandwidth }}</td>
-                <td class="px-3 py-3 text-xs font-medium">{{ row.township.name }}</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.township_name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">
                   {{ 
                     row.installation_status 
