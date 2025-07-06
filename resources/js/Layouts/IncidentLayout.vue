@@ -9,8 +9,11 @@
 
         <div class="min-h-screen bg-gray-100">
             <nav class="bg-white border-b border-gray-100">
+              <div class="h-1 m-0 p-0" style="background: linear-gradient(to right, #076E9AFF 35%, #0495ABCC 65%);"></div>
+              <div class="h-1 mt-0 p-0" style="background: linear-gradient(to right, #CF970BCC 20%, #D65B09FF 80%);"></div>
                 <!-- Primary Navigation Menu -->
-                <div class="mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto px-4 sm:px-6 lg:px-8 py-2" >
+                   
                     <div class="flex justify-between h-16">
                         <div class="flex">
                             <!-- Logo -->

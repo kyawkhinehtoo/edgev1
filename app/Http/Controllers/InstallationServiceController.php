@@ -35,6 +35,7 @@ class InstallationServiceController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'type' => 'required|in:new,relocation',
+            'service_type' => 'required|in:ftth,dia,dplc,ipvpn',
             'sla_hours' => 'required|numeric',
             'fees' => 'required|numeric',
             'currency' => 'required|in:baht,usd,mmk',
@@ -48,6 +49,7 @@ class InstallationServiceController extends Controller
         $service = new InstallationService();
         $service->name = $request->name;
         $service->type = $request->type;
+        $service->service_type = $request->service_type;
         $service->sla_hours = $request->sla_hours;
         $service->fees = $request->fees;
         $service->currency = $request->currency;
@@ -63,6 +65,7 @@ class InstallationServiceController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'type' => 'required|in:new,relocation',
+            'service_type' => 'required|in:ftth,dia,dplc,ipvpn',
             'sla_hours' => 'required|numeric',
             'fees' => 'required|numeric',
             'currency' => 'required|in:baht,usd,mmk',
@@ -76,6 +79,7 @@ class InstallationServiceController extends Controller
         $service = InstallationService::findOrFail($id);
         $service->name = $request->name;
         $service->type = $request->type;
+        $service->service_type = $request->service_type;
         $service->sla_hours = $request->sla_hours;
         $service->fees = $request->fees;
         $service->currency = $request->currency;

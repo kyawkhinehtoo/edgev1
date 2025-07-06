@@ -32,6 +32,9 @@
                                     Service Name</th>
                                 <th scope="col"
                                     class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Service Type</th>
+                                <th scope="col"
+                                    class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Short Code</th>
                                 <th scope="col"
                                     class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -49,6 +52,8 @@
                                     index
                                 }}</td>
                                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">{{ row.name }}
+                                </td>
+                                <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap uppercase">{{ row.service_type }}
                                 </td>
                                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{{ row.short_code
                                 }}</span></td>
@@ -101,7 +106,36 @@
                                                         placeholder="e.g., BM">
                                                 </div>
                                             </div>
-
+                                            <div>
+                                                <label for="type"
+                                                    class="block text-md font-medium text-gray-700">Service
+                                                    Type</label>
+                                                <div class="mt-2 flex">
+                                                    <label class="flex-auto items-center">
+                                                        <input type="radio" class="form-radio h-5 w-5 text-green-600"
+                                                            name="type" v-model="form.service_type" value="ftth" />
+                                                        <span class="ml-2 text-gray-700 text-sm">FTTH</span>
+                                                    </label>
+                                                    <label class="flex-auto items-center">
+                                                        <input type="radio"
+                                                            class="form-radio h-5 w-5 text-yellow-600"
+                                                            name="type" v-model="form.service_type" value="dia" />
+                                                        <span class="ml-2 text-gray-700 text-sm">DIA</span>
+                                                    </label>
+                                                    <label class="flex-auto items-center">
+                                                        <input type="radio"
+                                                            class="form-radio h-5 w-5 text-blue-600"
+                                                            name="type" v-model="form.service_type" value="dplc" />
+                                                        <span class="ml-2 text-gray-700 text-sm">DPLC</span>
+                                                    </label>
+                                                    <label class="flex-auto items-center">
+                                                        <input type="radio"
+                                                            class="form-radio h-5 w-5 text-red-600"
+                                                            name="type" v-model="form.service_type" value="ipvpn" />
+                                                        <span class="ml-2 text-gray-700 text-sm">IPVPN</span>
+                                                    </label>
+                                                    </div>
+                                            </div>
                                             <div class="col-span-1 sm:col-span-1">
                                                 <label for="sla_hours"
                                                     class="block text-md font-medium text-gray-700">SLA Hours</label>
@@ -228,6 +262,7 @@ export default {
             id: null,
             name: null,
             short_code: null,
+            service_type: null,
             sla_hours: null,
             fees: null,
             currency: "mmk", // Default to MMK
@@ -241,6 +276,7 @@ export default {
         function resetForm() {
             form.id = null;
             form.name = null;
+            form.service_type = 'ftth'; // Default to FTTH
             form.short_code = null;
             form.sla_hours = null;
             form.fees = null;
@@ -297,6 +333,7 @@ export default {
             form.id = data.id;
             form.name = data.name;
             form.short_code = data.short_code;
+            form.service_type = data.service_type || "ftth"; // Use existing service type or default to FTTH
             form.sla_hours = data.sla_hours;
             form.fees = data.fees;
             form.currency = data.currency || "mmk"; // Use existing currency or default to MMK

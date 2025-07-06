@@ -94,7 +94,7 @@ watch(
               
 
               <div>
-                <label class="block text-sm font-medium text-gray-700">DN Box</label>
+                <label class="block text-sm font-medium text-gray-700">Node Box</label>
                 <multiselect deselect-label="Selected already" :options="dnBoxes" track-by="id"
                 label="name" v-model="form.dn" :allow-empty="false" :multiple="false" tabindex="2"
                 @update:modelValue="form.dn_id = $event?.id">

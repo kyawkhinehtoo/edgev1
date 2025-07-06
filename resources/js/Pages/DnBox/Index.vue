@@ -12,7 +12,7 @@ const props = defineProps({
   <AppLayout title="DN Boxes">
     <template #header>
       <h2 class="font-semibold text-xl text-white leading-tight">
-        DN Boxes
+        Distribution Node
       </h2>
     </template>
 
@@ -20,12 +20,12 @@ const props = defineProps({
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
           <div class="flex justify-between mb-6">
-            <h3 class="text-lg font-medium">DN Box List</h3>
+            <h3 class="text-lg font-medium">Distribution Node</h3>
             <Link
               :href="route('dn-boxes.create')"
               class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Add New DN Box
+              Add New Node
             </Link>
           </div>
 
@@ -33,6 +33,8 @@ const props = defineProps({
             <thead>
               <tr>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Township</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -42,6 +44,8 @@ const props = defineProps({
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="dnBox in dnBoxes.data" :key="dnBox.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ dnBox.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap capitalize">{{ dnBox.type || 'dnbox' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ dnBox.township ? dnBox.township.name : '-' }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ dnBox.location }}</td>
                 <td class="px-6 py-4">{{ dnBox.description }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">

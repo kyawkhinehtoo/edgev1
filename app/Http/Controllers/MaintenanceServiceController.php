@@ -34,6 +34,7 @@ class MaintenanceServiceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'service_type' => 'required|in:ftth,dia,dplc,ipvpn',
             'sla_hours' => 'required|numeric',
             'fees' => 'required|numeric',
             'currency' => 'required|in:baht,usd,mmk',
@@ -47,6 +48,7 @@ class MaintenanceServiceController extends Controller
         $service = new MaintenanceService();
         $service->name = $request->name;
         $service->sla_hours = $request->sla_hours;
+        $service->service_type = $request->service_type;
         $service->fees = $request->fees;
         $service->currency = $request->currency;
         $service->short_code = $request->short_code;
@@ -60,6 +62,7 @@ class MaintenanceServiceController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'service_type' => 'required|in:ftth,dia,dplc,ipvpn',
             'sla_hours' => 'required|numeric',
             'fees' => 'required|numeric',
             'currency' => 'required|in:baht,usd,mmk',
@@ -73,6 +76,7 @@ class MaintenanceServiceController extends Controller
         $service = MaintenanceService::findOrFail($id);
         $service->name = $request->name;
         $service->sla_hours = $request->sla_hours;
+        $service->service_type = $request->service_type;
         $service->fees = $request->fees;
         $service->currency = $request->currency;
         $service->short_code = $request->short_code;

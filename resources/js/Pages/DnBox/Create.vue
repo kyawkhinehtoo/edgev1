@@ -1,10 +1,18 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import Multiselect from '@suadelabs/vue3-multiselect';
+
+const props = defineProps({
+  townships: Array
+})
 
 const form = useForm({
   name: '',
   location: '',
+  type: 'dnbox',
+  township_id: null,
+  township: null,
   description: '',
   status: 'active'
 })
@@ -22,7 +30,7 @@ const submit = () => {
   <AppLayout title="Create DN Box">
     <template #header>
       <h2 class="font-semibold text-xl text-white leading-tight">
-        Create DN Box
+        Create New Node
       </h2>
     </template>
 
@@ -39,6 +47,34 @@ const submit = () => {
                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
                 <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Node Type</label>
+                <select
+                  v-model="form.type"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="dnbox">DN Box</option>
+                  <option value="cabinet">Cabinet</option>
+                </select>
+                <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">{{ form.errors.type }}</div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Township</label>
+                <Multiselect
+                  v-model="form.township"
+                  :options="townships"
+                  :searchable="true"
+                  :create-option="false"
+                  placeholder="Select a township"
+                  label="name"
+                  track-by="id"
+                  @update:modelValue="form.township_id = form.township ? form.township.id : null"
+                  class="mt-1"
+                />
+                <div v-if="form.errors.township_id" class="text-red-500 text-sm mt-1">{{ form.errors.township_id }}</div>
               </div>
 
               <div>

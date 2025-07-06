@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DnBox;
+use App\Models\Township;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\Rule;
@@ -11,7 +12,9 @@ class DnBoxController extends Controller
 {
     public function index()
     {
-        $dnBoxes = DnBox::orderBy('created_at', 'desc')->paginate(10);
+        $dnBoxes = DnBox::with('township')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
         
         return Inertia::render('DnBox/Index', [
             'dnBoxes' => $dnBoxes
@@ -20,7 +23,10 @@ class DnBoxController extends Controller
 
     public function create()
     {
-        return Inertia::render('DnBox/Create');
+        return Inertia::render('DnBox/Create', [
+            'townships' => Township::all(),
+        ]);
+        
     }
 
     public function store(Request $request)
@@ -50,6 +56,8 @@ class DnBoxController extends Controller
                     }
                 }
             ],
+            'type' => 'required|string|in:dnbox,cabinet',
+            'township_id' => 'nullable|exists:townships,id',
             'description' => 'nullable|string|max:1000',
             'status' => 'required|string|in:active,inactive'
         ], [
@@ -65,7 +73,8 @@ class DnBoxController extends Controller
     public function edit(DnBox $dnBox)
     {
         return Inertia::render('DnBox/Edit', [
-            'dnBox' => $dnBox
+            'dnBox' => $dnBox->load('township'),
+            'townships' => Township::all(),
         ]);
     }
 
@@ -96,6 +105,8 @@ class DnBoxController extends Controller
                     }
                 }
             ],
+            'type' => 'required|string|in:dnbox,cabinet',
+            'township_id' => 'nullable|exists:townships,id',
             'description' => 'nullable|string|max:1000',
             'status' => 'required|string|in:active,inactive'
         ], [

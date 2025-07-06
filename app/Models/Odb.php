@@ -40,4 +40,9 @@ class Odb extends Model
     {
         return $this->belongsTo(Odf::class);
     }
+
+    /**
+     * Get the Township that owns the ODB.
+     */
+   
 }

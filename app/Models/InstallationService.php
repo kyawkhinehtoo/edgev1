@@ -38,6 +38,7 @@ class InstallationService extends Model
     protected $fillable = [
         'name',
         'type',
+        'service_type',
         'sla_hours',
         'fees',
         'currency',

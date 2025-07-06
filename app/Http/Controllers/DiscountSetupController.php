@@ -12,7 +12,7 @@ class DiscountSetupController extends Controller
 {
     public function index(Request $request)
     {
-        $port_sharing_services = PortSharingService::where('status',1)->where('type','ftth')->get();
+        $port_sharing_services = PortSharingService::where('status',1)->get();
         $isps = Isp::where('is_active',1)->get();
         $discounts = DiscountSetup::with('portSharingService', 'isp', 'creator')
             ->when($request->input('general'), function ($query) use ($request) {

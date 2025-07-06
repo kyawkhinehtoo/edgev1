@@ -35,6 +35,9 @@
                                     Service Type</th>
                                 <th scope="col"
                                     class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Installation Type</th>
+                                <th scope="col"
+                                    class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Short Code</th>
                                 <th scope="col"
                                     class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -53,6 +56,8 @@
                                     index
                                 }}</td>
                                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">{{ row.name }}
+                                </td>
+                                <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap uppercase">{{ row.service_type }}
                                 </td>
                                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">{{ row.type }}
                                 </td>
@@ -113,10 +118,9 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <div>
+                                             <div>
                                                 <label for="type"
-                                                    class="block text-md font-medium text-gray-700">Service
+                                                    class="block text-md font-medium text-gray-700">Installation
                                                     Type</label>
                                                 <div class="mt-2 flex">
                                                     <label class="flex-auto items-center">
@@ -130,6 +134,36 @@
                                                             class="form-radio h-5 w-5 text-green-600"
                                                             name="type" v-model="form.type" value="relocation" />
                                                         <span class="ml-2 text-gray-700 text-sm">Relocation</span>
+                                                    </label>
+                                                    </div>
+                                            </div>
+                                            <div>
+                                                <label for="type"
+                                                    class="block text-md font-medium text-gray-700">Service
+                                                    Type</label>
+                                                <div class="mt-2 flex">
+                                                    <label class="flex-auto items-center">
+                                                        <input type="radio" class="form-radio h-5 w-5 text-green-600"
+                                                            name="type" v-model="form.service_type" value="ftth" />
+                                                        <span class="ml-2 text-gray-700 text-sm">FTTH</span>
+                                                    </label>
+                                                    <label class="flex-auto items-center">
+                                                        <input type="radio"
+                                                            class="form-radio h-5 w-5 text-yellow-600"
+                                                            name="type" v-model="form.service_type" value="dia" />
+                                                        <span class="ml-2 text-gray-700 text-sm">DIA</span>
+                                                    </label>
+                                                    <label class="flex-auto items-center">
+                                                        <input type="radio"
+                                                            class="form-radio h-5 w-5 text-blue-600"
+                                                            name="type" v-model="form.service_type" value="dplc" />
+                                                        <span class="ml-2 text-gray-700 text-sm">DPLC</span>
+                                                    </label>
+                                                    <label class="flex-auto items-center">
+                                                        <input type="radio"
+                                                            class="form-radio h-5 w-5 text-red-600"
+                                                            name="type" v-model="form.service_type" value="ipvpn" />
+                                                        <span class="ml-2 text-gray-700 text-sm">IPVPN</span>
                                                     </label>
                                                     </div>
                                             </div>
@@ -258,6 +292,7 @@ export default {
             id: null,
             name: null,
             type: "new", // Default to New Installation
+            service_type: "ftth", // Default to New Installation
             short_code: null,
             sla_hours: null,
             fees: null,
@@ -273,6 +308,7 @@ export default {
             form.id = null;
             form.name = null;
             form.type = "new"; // Reset to default
+            form.service_type = "ftth"; // Reset to default
             form.short_code = null;
             form.sla_hours = null;
             form.fees = null;
@@ -319,6 +355,7 @@ export default {
             form.id = data.id;
             form.name = data.name;
             form.type = data.type || "New Installation"; // Use existing type or default
+            form.service_type = data.service_type || "ftth"; // Use existing service type or default
             form.short_code = data.short_code;
             form.sla_hours = data.sla_hours;
             form.fees = data.fees;

@@ -55,11 +55,7 @@ const submit = () => {
                   </span>
                   
                 <h1 class="mt-2 font-bold antialiased flex text-gray-800 text-2xl">Welcome to EDGE OSS-BSS Portal</h1>
-                <p class="mt-1 text-sm text-gray-800 font-semibold">
-                    We're glad to have you here! This portal is your all-in-one platform for managing operations, billing, and support services efficiently. Whether you're tracking service requests, viewing account details, or monitoring system performance, EDGE is designed to simplify your workflow and empower your operations. 
-                    <br />Please log in to get started.
-
-                </p>
+            
             </span>
         </template>
 

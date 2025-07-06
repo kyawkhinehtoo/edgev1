@@ -37,6 +37,7 @@ class MaintenanceService extends Model
     protected $fillable = [
         'name',
         'sla_hours',
+        'service_type',
         'fees',
         'currency',
         'short_code',

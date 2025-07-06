@@ -161,6 +161,27 @@
                         </div>
                       </div>
                       <div class="py-2">
+                        <label for="port_sharing_service">Service Type</label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                        <multiselect 
+                          v-model="form.port_sharing_service" 
+                          :options="port_sharing_services"
+                          :show-labels="false" 
+                          :searchable="true"
+                          :close-on-select="true"
+                          :placeholder="'Select Service'"
+                          label="name"
+                          track-by="id"
+                          class="w-full"
+                          @select="(event) => {
+                            form.port_sharing_service_id = event.id;
+                            getFixRate(event.rate);
+                          }"
+                        >
+                        </multiselect>
+                        </div>
+                      </div>
+                      <div class="py-2">
                         <label for="type" class="block text-md font-medium text-gray-700">Discount
                           Type</label>
                         <div class="mt-2 flex items-center gap-2">
@@ -186,7 +207,7 @@
                           Rate </label>
                         <div class="mb-4 ">
                           <div v-for="(rule, index) in form.fix_rate" :key="index" class="rule inline-flex items-center"
-                            v-if="form.fix_rate">
+                            v-if="form.fix_rate && form.port_sharing_service">
 
                             <label class="block text-gray-700 text-sm font-bold">Ports
                             </label>
@@ -235,16 +256,7 @@
                           </multiselect>
                         </div>
                       </div>
-                      <div class="py-2">
-                        <label for="port_sharing_service">Port Sharing Service</label>
-                        <div class="mt-1 flex rounded-md shadow-sm">
-                          <multiselect v-model="form.port_sharing_service" :options="port_sharing_services"
-                            :show-labels="false" :searchable="true" :close-on-select="true"
-                            :placeholder="'Select Service'" label="name" track-by="id" class="w-full"
-                            @select="form.port_sharing_service_id = $event.id">
-                          </multiselect>
-                        </div>
-                      </div>
+                      
                       <div class="py-2 grid grid-cols-2 gap-2">
                         <div>
                           <label for="start_date">Start Date</label>
@@ -327,7 +339,8 @@ import {
 } from '@inertiajs/vue3';
 import {
   ref,
-  reactive
+  reactive,
+  watch
 } from 'vue';
 import Pagination from '@/Components/Pagination.vue';
 import Multiselect from '@suadelabs/vue3-multiselect';
@@ -471,7 +484,14 @@ export default {
       }
       return true;
     }
-
+    const getFixRate = (rate) => {
+      console.log("form.port_sharing_service", rate);
+      if (rate ) {
+        form.fix_rate = (isJsonString(rate)) ? JSON.parse(rate) : rateRules.value;
+      }
+    }
+    
+    
     function submit() {
       if (!editMode.value) {
         form._method = "POST";
@@ -521,7 +541,8 @@ export default {
       addRule,
       removeRule,
       edit,
-      submit
+      submit,
+      getFixRate
     };
   }
 };

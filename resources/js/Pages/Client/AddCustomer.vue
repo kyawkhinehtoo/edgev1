@@ -38,7 +38,7 @@
                     <div class="mt-1 flex rounded-md shadow-sm" v-if="townships.length !== 0">
                       <multiselect deselect-label="Selected already" :options="townships" track-by="id" label="name"
                         v-model="form.township" placeholder="Select Township" :allow-empty="false" 
-                        :disabled="checkPerm('township_id')" required>
+                       required>
                       </multiselect>
                     </div>
                     <p v-show="$page.props.errors.township_id" class="mt-2 text-sm text-red-500">{{
@@ -72,7 +72,7 @@
                       </span>
                       <input type="text" v-model="form.latitude" name="latitude" id="latitude"
                         class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                        v-on:keypress="isNumber(event)" :disabled="checkPerm('location')" />
+                        v-on:keypress="isNumber(event)"  />
                     </div>
                     <p v-show="$page.props.errors.latitude" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.latitude }}</p>
@@ -86,7 +86,7 @@
                       </span>
                       <input type="text" v-model="form.longitude" name="longitude" id="longitude"
                         class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                        v-on:keypress="isNumber(event)" :disabled="checkPerm('location')" />
+                        v-on:keypress="isNumber(event)"  />
                     </div>
                     <p v-show="$page.props.errors.longitude" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.longitude }}</p>
@@ -103,7 +103,7 @@
                       </span>
                       <textarea v-model="form.address" name="address" id="address"
                         class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                        required :disabled="checkPerm('address')" />
+                      />
                     </div>
                     <p v-show="$page.props.errors.address" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.address }}</p>
@@ -168,7 +168,7 @@
                       Customer Status </label>
                     <div class="mt-1 flex rounded-md shadow-sm" v-if="status_list.length !== 0">
                       <multiselect deselect-label="Selected already" :options="status_list" track-by="id" label="name"
-                        v-model="form.status" :allow-empty="false" :disabled="checkPerm('status_id')">
+                        v-model="form.status" :allow-empty="false" disabled>
                       </multiselect>
                     </div>
                     <p v-show="$page.props.errors.status" class="mt-2 text-sm text-red-500">{{
@@ -356,7 +356,7 @@ export default {
       installation_date: "",
       isp_ftth_id: "",
       package: "",
-      status:  "",
+      status: props.status_list.find((item) => item.id == 1),
       township: "",
       prefer_install_date: "",
       order_remark:"",

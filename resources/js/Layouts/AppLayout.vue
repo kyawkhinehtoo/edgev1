@@ -13,6 +13,7 @@
       isCollapsed ? 'sm:w-20 z-20' : 'sm:w-64',
       'dark:bg-gray-900 p-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-200'
     ]">
+    
       <div class="w-full flex justify-between items-center shadow-none shadow-gray-300 shadow-left">
    
         <a href="javascript:void(0)" class="text-gray-400 flex items-center w-full">
@@ -252,7 +253,7 @@ export default {
            
             { name: "JC Box List", route: "jc-boxes.index", icon: "fas fa-square mr-2" },
             { name: "Core Assignment", route: "core-assignments.index", icon: "fas fa-equals mr-2" },
-            { name: "DN Box", route: "dn-boxes.index", icon: "fas fa-tv mr-2" },
+            { name: "Distribution Node", route: "dn-boxes.index", icon: "fas fa-tv mr-2" },
             { name: "DN Splitter", route: "dn-splitters.index", icon: "fas fa-network-wired mr-2" },
             { name: "SN Box", route: "sn-boxes.index", icon: "fas fa-tv mr-2" },
             { name: "SN Splitter", route: "sn-splitters.index", icon: "fas fa-network-wired mr-2" },

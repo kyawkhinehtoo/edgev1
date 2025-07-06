@@ -63,7 +63,7 @@
                                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
                                     {{ row . max_speed }} Mbps
                                     <span v-if="row.type === 'FTTH'" class="text-xs text-gray-500">(Max)</span>
-                                    <span v-if="row.type === 'DIA'" class="text-xs text-gray-500">(Max)</span>
+                                    <span v-if="row.type === 'DIA'" class="text-xs text-gray-500">(Per Mbps)</span>
                                     <span v-if="row.type === 'IPVPN'" class="text-xs text-gray-500">(Per Mbps)</span>
                                     <span v-if="row.type === 'DPLC'" class="text-xs text-gray-500">(Per Mbps)</span>
                                 </td>
@@ -72,7 +72,7 @@
                                         <span v-for="(item, index) in JSON.parse(row.rate)" :key="index"
                                             class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                             <span class="font-semibold">{{ item . min }}</span>
-                                            &nbsp;{{ row . type == 'FTTH' || row . type == 'DIA' ? 'Ports:' : 'Mbps:' }}
+                                            &nbsp;{{ row . type == 'FTTH'  ? 'Ports:' : 'Mbps:' }}
                                             <span class="ml-1 font-semibold">{{ item . fees }}</span>
                                             <span class="ml-1 uppercase">{{ row . currency }}</span>
                                         </span>
@@ -162,7 +162,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="py-2"
-                                                    v-if="form.type === 'FTTH' || form.type === 'DIA'">
+                                                    v-if="form.type === 'FTTH' ">
                                                     <label for="max_speed"
                                                         class="block text-md font-medium text-gray-700">Max
                                                         Speed</label>
@@ -235,7 +235,7 @@
                                                         class="rule inline-flex items-center" v-if="form.rate">
 
                                                         <label
-                                                            class="block text-gray-700 text-sm font-bold">{{ form.type=='FTTH' || form.type=='DIA'? 'Ports':'Min Mbps' }} </label>
+                                                            class="block text-gray-700 text-sm font-bold">{{ form.type=='FTTH' ? 'Ports':'Min Mbps' }} </label>
                                                         <div class="mt-1 flex rounded-md shadow-sm">
                                                             <input type="number" v-model="rule.min"
                                                                 placeholder="e.g., 10000"
