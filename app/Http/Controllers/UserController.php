@@ -64,7 +64,7 @@ class UserController extends Controller
             'partner_id' => ['nullable', 'exists:partners,id'],
             'password' => ['required', 'string'],
         ])->validate();
-           
+        //   dd($request->all());
         User::create([
             'name' => $request->name,
             'email' => $request->email,

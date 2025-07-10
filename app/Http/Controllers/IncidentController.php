@@ -83,6 +83,9 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
+            ->when($user->role->incident_supervisor, function($query) use ($user){
+                $query->where('incidents.supervisor_id',$user->id);
+             })
             ->whereNotIn('incidents.status',[3,4])
             //->groupBy('incidents.id')
             ->count();
@@ -100,6 +103,9 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
+            ->when($user->role->incident_supervisor, function($query) use ($user){
+                $query->where('incidents.supervisor_id',$user->id);
+             })
              ->whereNotIn('incidents.status',[3,4])
            // ->groupBy('incidents.id')
             ->count();
@@ -117,6 +123,9 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
+            ->when($user->role->incident_supervisor, function($query) use ($user){
+                $query->where('incidents.supervisor_id',$user->id);
+             })
             ->whereNotIn('incidents.status',[3,4])
       
             ->count('incidents.id');
@@ -129,6 +138,11 @@ class IncidentController extends Controller
             ->get();
         $team = DB::table('users')
             ->select('users.name as name', 'users.id as id')
+            ->get();
+        $supervisors = DB::table('users')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->select('users.name as name', 'users.id as id')
+            ->where('roles.incident_supervisor', 1)
             ->get();
         $subcons = Subcom::get();
         if ($user->user_type == 'subcon') {
@@ -174,10 +188,16 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
             $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($request->status, function ($query, $status) {
-            $query->where('incidents.status', '=', $status);
-            }, function ($query) {
-            $query->whereRaw('incidents.status in (1,2,5)');
+            ->when($request->status, function ($query, $status) use ($user){
+                 $query->where('incidents.status', '=', $status);
+            }, function ($query) use ($user) {
+                if($user->role->incident_supervisor == 1){
+                   return $query->whereRaw('incidents.status in (2,5,6)');
+                }
+                if($user->role->incident_oss == 1){
+                return $query->whereRaw('incidents.status in (1,5)');
+                }
+                return $query->whereRaw('incidents.status in (1,2,3,5,6)');
             })
             ->when($request->keyword, function ($query, $search) {
             $query->where(function ($query) use ($search) {
@@ -195,10 +215,16 @@ class IncidentController extends Controller
             $query->where('incidents.priority', '=', $priority);
             })
             ->when($request->date, function ($query, $date) {
-            $d = explode(',', $date);
-            $from = date($d[0]);
-            $to = date($d[1]);
-            $query->whereBetween('incidents.date', [$from, $to]);
+                if(!empty(trim($date)) && $date !== null) {
+                 
+                $d = explode(',', $date);
+                $from = date($d[0]);
+                $to = date($d[1]);
+                $query->whereBetween('incidents.date', [$from, $to]);
+                }
+            })
+            ->when($user->role->incident_supervisor, function($query) use ($user){
+               $query->where('incidents.supervisor_id',$user->id);
             })
             ->when($orderby, function ($query, $sort) {
             $query->orderByRaw($sort);
@@ -251,6 +277,9 @@ class IncidentController extends Controller
             }, function ($query) {
                 $query->orderBy('incidents.id', 'DESC');
             })
+            ->when($user->role->incident_supervisor, function($query) use ($user){
+                $query->where('incidents.supervisor_id',$user->id);
+             })
             ->select(
                 'incidents.*',
                 'incidents.status as status',
@@ -282,6 +311,7 @@ class IncidentController extends Controller
                 'subRootCause' => $subRootCause,
                 'pendingRootCause' => $pendingRootCause,
                 'relocationServices'=> $relocationServices,
+                'supervisors'=> $supervisors,
             ]
         );
     }
@@ -617,6 +647,7 @@ class IncidentController extends Controller
             'customer_id' => ['required'],
         ])->validate();
         // dd($request->all());
+        $user = User::with('role')->where('id', Auth::id())->first();
         if ($request->customer_id['id']) {
             $incident = new Incident();
             // $incident->code = $request->code;
@@ -669,6 +700,14 @@ class IncidentController extends Controller
             if (isset($request->resolved_time) && $request->status == 5)
                 $incident->resolved_time = $request->resolved_time;
 
+            if (isset($request->supervisor_id)){
+                if($user->role->incident_oss == 1 ){
+                    $incident->supervisor_id = $request->supervisor_id;
+                    $incident->assigned_by = $user->id;
+                }
+                
+            }
+               
             $incident->date = $request->date;
             $incident->time = $request->time;
             $incident->description = $request->description;
@@ -733,7 +772,7 @@ class IncidentController extends Controller
             'sub_root_cause_id.required_if' => 'Please mention the sub RCA before closing the incident.',
             'rca_notes.required_if' => 'Please mention the RCA notes before closing the incident.',
         ])->validate();
-
+        $user = User::with('role')->where('id', Auth::id())->first();
         if ($request->has('id')) {
             $old_incident = Incident::find($request->input('id'));
 
@@ -799,7 +838,13 @@ class IncidentController extends Controller
 
                 if (isset($request->resolved_time) && $request->status == 5)
                     $incident->resolved_time = $request->resolved_time;
-
+                if (isset($request->supervisor_id)){
+                    if($user->role->incident_oss == 1 ){
+                        $incident->supervisor_id = $request->supervisor_id;
+                        $incident->assigned_by = $user->id;
+                    }
+                   
+                }
                 $incident->description = $request->description;
 
                 $incident->root_cause_id = $request->root_cause_id;
@@ -835,6 +880,8 @@ class IncidentController extends Controller
             $status = "Deleted";
         } else if ($data == 5) {
             $status = "Resolved";
+        }else if ($data == 6) {
+            $status = "Supervisor Assigned";
         }
         return $status;
     }
@@ -892,7 +939,10 @@ class IncidentController extends Controller
                     $update .=  ($old->$key != $value) ? $key . ':' . $value["name"] . ',' : '';
                 } else if ($key == "new_township") {
                     $update .=  ($old->$key != $value) ? $key . ':' . $value["name"] . ',' : '';
-                } else {
+                } else if ($key == "supervisor") {
+                    $update .=  ($old->$key != $value) ? $key . ':' . $value["name"] . ',' : '';
+                }
+                else {
                     try {
                         $update .= ($old->$key != $value) ? $key . ':' . ucwords($value) . ',' : '';
                     } catch (\Throwable $th) {

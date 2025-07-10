@@ -26,6 +26,9 @@ trait IncidentTrait {
         })
        ->where('incidents.status','<>',3)
        ->where('incidents.status','<>',4)
+       ->when($user->role->incident_supervisor, function($query) use ($user){
+        $query->where('incidents.supervisor_id',$user->id);
+        })
        ->when($user->user_type, function ($query, $user_type) use ($user) {
         if($user_type == 'partner') {
             $query->where('customers.partner_id', '=', $user->partner_id);

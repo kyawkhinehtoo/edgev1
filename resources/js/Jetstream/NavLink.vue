@@ -1,10 +1,12 @@
 <script setup>
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import Show from '@/Pages/Profile/Show.vue';
 
 const props = defineProps({
     href: String,
     active: Boolean,
+    show : Boolean,
     isCollapsed: Boolean,
 });
 
@@ -16,10 +18,16 @@ const classes = computed(() => {
 </script>
 
 <template>
-    <Link :href="href" class="py-2 text-xs" :class="classes" :style="props.active? { color: $page.props.accent_color }:''" v-if="isCollapsed">
-        <slot />
-    </Link>
-    <Link :href="href" class="text-xs uppercase py-3 px-4 font-bold block rounded-md mt-1"  :class="classes" :style="props.active? { color: $page.props.accent_color }:''" v-else>
-        <slot />
-    </Link>
+    <div v-if="isCollapsed" class="bg-white m-0">
+        <Link :href="href" class="py-2 px-4 text-xs w-full rounded-md" :class="classes" :style="props.active? { color: $page.props.accent_color }:''"  v-if="show">
+            <slot />  
+        </Link>
+    </div>
+   
+    <template v-else>
+        <Link :href="href" class="text-xs uppercase py-3 px-4 font-bold block rounded-md mt-1"  :class="classes" :style="props.active? { color: $page.props.accent_color }:''" v-if="show">
+            <slot />
+          </Link>
+    </template>
+    
 </template>

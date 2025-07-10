@@ -30,13 +30,13 @@
                             <!-- Navigation Links -->
                             <div class="hidden space-x-2 sm:-my-px sm:ml-10 sm:flex">
                                
-                                <jet-nav-link :href="route('dashboard')">
+                                <jet-nav-link :href="route('dashboard')" :show="true">
                                      <i class="fa fas fa-home"></i>
                                 </jet-nav-link>
-                                <jet-nav-link :href="route('incident.index')" :active="route().current('incident.*')">
+                                <jet-nav-link :href="route('incident.index')" :active="route().current('incident.*')" :show="true">
                                     Ticket
                                 </jet-nav-link>
-                                <jet-nav-link :href="route('mytask.index')" :active="route().current('mytask.*')" v-if="$page.props.login_type != 'isp' "> 
+                                <jet-nav-link :href="route('mytask.index')" :active="route().current('mytask.*')" v-if="$page.props.login_type != 'isp' " :show="true"> 
                                     My Task
                                 </jet-nav-link>
                                 

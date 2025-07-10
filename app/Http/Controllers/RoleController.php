@@ -76,8 +76,12 @@ class RoleController extends Controller
             'limit_region' => 'nullable|boolean',
             'dn_panel' => 'nullable|boolean',
             'installation_supervisor' => 'nullable|boolean',
+            'incident_supervisor'=>'nullable|boolean',
+            'installation_oss'=>'nullable|boolean',
+            'incident_oss'=>'nullable|boolean',
             'product_catalog' => 'nullable|boolean',
             'smtp_setting' => 'nullable|boolean',
+            'service_request' => 'nullable|boolean',
             'townships' => 'nullable|array',
         ]);
 
@@ -123,8 +127,12 @@ class RoleController extends Controller
             'customer_status' => 'nullable|array',
             'dn_panel' => 'nullable|boolean',
             'installation_supervisor' => 'nullable|boolean',
+            'incident_supervisor'=>'nullable|boolean',
+            'installation_oss'=>'nullable|boolean',
+            'incident_oss'=>'nullable|boolean',
             'product_catalog' => 'nullable|boolean',
             'smtp_setting' => 'nullable|boolean',
+            'service_request' => 'nullable|boolean',
             'townships' => 'nullable|array',
         ]);
 

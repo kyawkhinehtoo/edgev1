@@ -66,6 +66,10 @@ class Role extends Model
         'installation_supervisor',
         'product_catalog',
         'smtp_setting',
+        'incident_supervisor',
+        'installation_oss',
+        'incident_oss',
+        'service_request',
         'created_at',
         'updated_at'
     ];

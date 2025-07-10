@@ -60,7 +60,9 @@ class Incident extends Model
         'relocation_service_id',
         'start_date',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'supervisor_id',
+        'assigned_by'
     ];
 
     /**
@@ -159,5 +161,15 @@ class Incident extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+        // Add these relationship methods to the model
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function assignedBy()
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
     }
 }

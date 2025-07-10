@@ -82,6 +82,9 @@ class CustomerController extends Controller
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
             })
+            ->when($user->role->installation_supervisor, function($query) use ($user){
+                $query->where('customers.supervisor_id',$user->id);
+             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
@@ -112,6 +115,9 @@ class CustomerController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+            ->when($user->role->installation_supervisor, function($query) use ($user){
+                $query->where('customers.supervisor_id',$user->id);
+             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
@@ -136,6 +142,9 @@ class CustomerController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+            ->when($user->role->installation_supervisor, function($query) use ($user){
+                $query->where('customers.supervisor_id',$user->id);
+             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
@@ -160,6 +169,9 @@ class CustomerController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                  return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
+            ->when($user->role->installation_supervisor, function($query) use ($user){
+                $query->where('customers.supervisor_id',$user->id);
+             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
@@ -329,7 +341,9 @@ class CustomerController extends Controller
                 });
                 
             })
-            
+            ->when($user->role->installation_supervisor, function($query) use ($user){
+                $query->where('customers.supervisor_id',$user->id);
+             })
             ->when($request->sort, function ($query, $sort) use ($request) {
                 $direction = $request->direction ?? 'asc';
                 
@@ -663,6 +677,10 @@ class CustomerController extends Controller
             return redirect()->back()->with('error', 'Invalid customer ID.');
         }
         $user = User::with('role')->find(Auth::user()->id);
+        $townshipArray = Township::when($user->role?->limit_region, function ($query) use ($user) {
+            return $query->whereIn('townships.id', $user->role?->townships->pluck('id'));
+        })->get()->toArray();
+        
 
         $typePermissions = [
             'subcon' => ['model' => Subcom::class, 'field' => 'subcom_id'],
@@ -687,10 +705,17 @@ class CustomerController extends Controller
                 return abort(403, 'Unauthorized access.');
             }
         }
-        $customer = Customer::with('currentAddress.township','partner','isp','snPort','snPort.snSplitter','snPort.snSplitter.snBox.dnSplitter.fiberCable','installationService','maintenanceService','portSharingService')
+        $customer = Customer::with('currentAddress.township','partner','isp','snPort','snPort.snSplitter','snPort.snSplitter.snBox.dnSplitter.fiberCable','installationService','maintenanceService','portSharingService','supervisor')
             ->where(function ($query) {
                 $query->where('deleted', 0)->orWhereNull('deleted');
             })->find($id);
+            $supervisors = DB::table('users')
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->join('role_township','roles.id','=','role_township.role_id')
+            ->select('users.name as name', 'users.id as id')
+           // ->where($customer->currentAddress.township,'=', 'role_township.township_id')
+            ->where('roles.installation_supervisor', 1)
+            ->get();
         $snPort =  SnPort::with('SnSplitter','DnSplitter','pop','popDevice')->where('customer_id', $id)->first();
         $bundle_equiptments = BundleEquiptment::get();
           
@@ -785,6 +810,7 @@ class CustomerController extends Controller
                 'bundle_equiptments' => $bundle_equiptments,
                 'subconCheckList' => $subconCheckList,
                 'snPort' => $snPort,
+                'supervisors' => $supervisors,
             ]
         );
     }
@@ -928,6 +954,13 @@ class CustomerController extends Controller
                             $customer->$value = Carbon::now()->format('Y-m-d H:i:s');
                         }
                     }
+                }
+                if ($value == 'supervisor_id' && isset($request->supervisor_id)){
+                    if($user->role->installation_oss == 1 ){
+                        $customer->supervisor_id = $request->supervisor_id;
+                        $customer->assigned_by = $user->id;
+                    }
+                    
                 }
                     
                 // check snPort table, if sn_id exists, then update the status to active
@@ -1460,7 +1493,7 @@ class CustomerController extends Controller
                 CustomerAddress::create([
                     'customer_id' => $customer->id,
                     'address' => $customer->address,
-                    'township_id' => $customer->township_id,
+                    'township_id' => $customer->township_id ?? 1,
                     'location' => $customer->location,
                     'is_current' => true,
                 ]);

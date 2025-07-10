@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-            $table->boolean('limit_region')->default(false)->after('name');
-            $table->boolean('dn_panel')->default(false)->after('name');
+            $table->boolean('limit_region')->nullable()->default(false)->after('name');
+            $table->boolean('dn_panel')->nullable()->default(false)->after('name');
         });
     }
 

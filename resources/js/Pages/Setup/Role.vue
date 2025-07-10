@@ -190,8 +190,20 @@
                             <label class="inline-flex ml-2 text-sm">
                               <input
                                 class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                type="checkbox" v-model="form.service_request" />
+                              Service Request
+                            </label>
+                            <label class="inline-flex ml-2 text-sm">
+                              <input
+                                class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
                                 type="checkbox" v-model="form.installation_supervisor" />
                               Installation Supervisor
+                            </label>
+                            <label class="inline-flex ml-2 text-sm">
+                              <input
+                                class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                type="checkbox" v-model="form.installation_oss" />
+                              Installation OSS
                             </label>
                           
                           
@@ -225,7 +237,18 @@
                                 Incident Only Access Permission
                               </label>
 
-
+                              <label class="inline-flex ml-2 text-sm">
+                                <input
+                                  class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                  type="checkbox" v-model="form.incident_supervisor" />
+                                Incident Supervisor
+                              </label>
+                              <label class="inline-flex ml-2 text-sm">
+                                <input
+                                  class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                  type="checkbox" v-model="form.incident_oss" />
+                                Incident OSS
+                              </label>
                             </div>
                           </fieldset>
                         </div>
@@ -438,7 +461,11 @@ export default {
       dn_panel:null,
       limit_region:null,
       installation_supervisor:null,
+      installation_oss: null,
+      incident_supervisor: null,
+      incident_oss: null,
       product_catalog:null,
+      service_request:null,
       townships:[],
     });
     const search = ref("");
@@ -481,6 +508,10 @@ export default {
       form.installation_supervisor = null;
       form.product_catalog = null;
       form.smtp_setting = null;
+      form.installation_oss = null;
+      form.incident_supervisor = null;
+      form.incident_oss = null;
+      form.service_request = null;
       form.townships = [];
     }
     function submit() {
@@ -555,8 +586,12 @@ export default {
       form.dn_panel = (data.dn_panel)? true : false;
       form.limit_region = (data.limit_region)? true : false;
       form.installation_supervisor = (data.installation_supervisor)? true : false;
+      form.installation_oss = (data.installation_oss)? true : false;
+      form.incident_supervisor = (data.incident_supervisor)? true : false;
+      form.incident_oss = (data.incident_oss)? true : false;
       form.product_catalog = (data.product_catalog)? true : false;
       form.smtp_setting = (data.smtp_setting)? true : false;
+      form.service_request = (data.service_request)? true : false;
       form.customer_status = data.customer_status;
       form.townships = data.townships || [];
       editMode.value = true;

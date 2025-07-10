@@ -54,6 +54,7 @@
               tabindex="5" @change="changeStatus">
               <option value="0">All Status</option>
               <option value="1">Open</option>
+              <option value="6">Supervisor Assigned</option>
               <option value="2">Escalated</option>
               <option value="5">Resolved Open</option>
               <option value="3">Closed</option>
@@ -331,6 +332,27 @@
                           $page.props.errors.incharge }}</p>
                       </div>
                       <!-- end of person incharge -->
+
+                      <!-- supervisor  -->
+                       <template v-if="user.role.incident_oss">
+                        <div class="py-2 col-span-1 sm:col-span-1" >
+                          <div class="mt-1 flex">
+                            <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign Supervisor : </label>
+                          </div>
+                        </div>
+                        <div class="py-2 col-span-4 sm:col-span-4">
+                          <div class="mt-1 flex rounded-md shadow-sm" v-if="supervisors?.length !== 0">
+                            <multiselect deselect-label="Selected already" :options="supervisors" track-by="id" label="name"
+                              v-model="form.supervisor" :allow-empty="true" 
+                                @update:modelValue="form.supervisor_id = $event?.id"
+                              ></multiselect>
+                          </div>
+                          <p v-if="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.supervisor_id }}</p>
+                        </div>
+                       </template>
+                     
+                      <!-- end of supervsior -->
                       <!-- type -->
                       <div class="py-2 col-span-1 sm:col-span-1">
                         <div class="mt-1 flex">
@@ -426,6 +448,7 @@
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="!write_permission">
                             <option value="1">Open</option>
+                            <option value="6">Supervisor Assigned</option>
                             <option value="2" disabled>Escalated</option>
                             <option value="5" disabled>Resolved Open</option>
                             <option value="3">Closed</option>
@@ -905,6 +928,7 @@ export default {
     subRootCause: Object,
     pendingRootCause: Object,
     relocationServices: Object,
+    supervisors:Object,
   },
   setup(props) {
     const search = ref("");
@@ -944,6 +968,8 @@ export default {
       priority: null,
       customer_id: null,
       incharge_id: props.team.filter((d) => d.id == props.user.id)[0],
+      supervisor_id: null,
+      supervisor: null,
       type: "default",
       topic: null,
       status: 1,
@@ -1033,6 +1059,8 @@ export default {
       form.start_date = data.start_date;
       form.end_date = data.end_date;
       form.new_address = data.new_address;
+      form.supervisor = props.supervisors.filter((d) => d.id == data.supervisor_id)[0];
+      form.supervisor_id = data.supervisor_id;
       form.new_township = props.townships.filter((d) => d.id == data.new_township)[0];
       form.package_id = props.packages.filter((d) => d.id == data.package_id)[0];
       form.description = data.description;
@@ -1084,6 +1112,8 @@ export default {
       form.sub_root_cause_id = null;
       form.relocation_service = "";
       form.relocation_service_id = null;
+      form.supervisor = null;
+      form.supervisor_id = null;
     }
 
     function getStatus(data) {
@@ -1098,6 +1128,8 @@ export default {
         status = "Deleted";
       } else if (data == 5) {
         status = "Resolved Open";
+      } else if (data == 6) {
+        status = "Supervisor Assigned";
       }
       return status;
     }

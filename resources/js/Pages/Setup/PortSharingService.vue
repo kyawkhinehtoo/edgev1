@@ -38,7 +38,7 @@
                                     Service Type</th>
                                 <th scope="col"
                                     class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Bandwidth </th>
+                                    Unit </th>
                                 <th scope="col"
                                     class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Prices</th>
@@ -61,11 +61,11 @@
                                     {{ row . type }}
                                 </td>
                                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
-                                    {{ row . max_speed }} Mbps
-                                    <span v-if="row.type === 'FTTH'" class="text-xs text-gray-500">(Max)</span>
-                                    <span v-if="row.type === 'DIA'" class="text-xs text-gray-500">(Per Mbps)</span>
-                                    <span v-if="row.type === 'IPVPN'" class="text-xs text-gray-500">(Per Mbps)</span>
-                                    <span v-if="row.type === 'DPLC'" class="text-xs text-gray-500">(Per Mbps)</span>
+                                    {{ row . max_speed }} 
+                                    <span v-if="row.type === 'FTTH'" class="text-xs text-gray-500">Mbps (Max)</span>
+                                    <span v-if="row.type === 'DIA'" class="text-xs text-gray-500">Port (Per Port)</span>
+                                    <span v-if="row.type === 'IPVPN'" class="text-xs text-gray-500">Mbps (Per Mbps)</span>
+                                    <span v-if="row.type === 'DPLC'" class="text-xs text-gray-500">Mbps (Per Mbps)</span>
                                 </td>
                                 <td class="px-3 py-3 text-left text-md font-medium">
                                     <div v-if="isJsonString(row.rate)" class="flex flex-wrap gap-1">

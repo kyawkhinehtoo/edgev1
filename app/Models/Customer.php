@@ -57,6 +57,8 @@ class Customer extends Model
         'installation_reappointment_date',
         'subcom_assign_date',
         'way_list_date',
+        'supervisor_id',
+        'assigned_by',
         'created_at',
         'updated_at',
         'deleted',
@@ -226,5 +228,9 @@ class Customer extends Model
     public function currentAddress()
     {
         return $this->hasOne(CustomerAddress::class)->where('is_current', true);
+    }
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class,'supervisor_id');
     }
 }

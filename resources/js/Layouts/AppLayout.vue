@@ -55,6 +55,7 @@
             :href="route(link.route)"
             :active="checkActive(link.route)"
             :isCollapsed="isCollapsed" 
+            :show = link.show
             class="flex items-center px-3"
           >
             <i :class="[link.icon, 'min-w-[20px]']"></i> 
@@ -186,36 +187,36 @@ export default {
           icon:"fas fa-user-tie",
           isOpen: false, // Tracks if the panel is open
           links: [
-            { name: "User Setup", route: "user.index", icon: "fas fa-user mr-2" },
-            { name: "Role Setup", route: "role.index", icon: "fas fa-user-tag mr-2" },
-            { name: "Partner Setup", route: "partner.index", icon: "fas fa-user-tag mr-2" },
-            { name: "ISP Setup", route: "isps.index", icon: "fas fa-user-tag mr-2" },
-            { name: "Subcon Setup", route: "subcom.index", icon: "fas fa-handshake mr-2" },
-            { name: "Subcon CheckList", route: "subcon-checklists.index", icon: "fas fa-handshake mr-2" },
-            { name: "Main RCA Setup", route: "root-causes.index", icon: "fas fa-handshake mr-2" },
-            { name: "Sub RCA Setup", route: "sub-root-causes.index", icon: "fas fa-handshake mr-2" },
+            { name: "User Setup", route: "user.index", icon: "fas fa-user mr-2" ,show : true},
+            { name: "Role Setup", route: "role.index", icon: "fas fa-user-tag mr-2" ,show : true},
+            { name: "Partner Setup", route: "partner.index", icon: "fas fa-user-tag mr-2" ,show : true},
+            { name: "ISP Setup", route: "isps.index", icon: "fas fa-user-tag mr-2",show : true },
+            { name: "Subcon Setup", route: "subcom.index", icon: "fas fa-handshake mr-2" ,show : true},
+            { name: "Subcon CheckList", route: "subcon-checklists.index", icon: "fas fa-handshake mr-2" ,show : true},
+            { name: "Main RCA Setup", route: "root-causes.index", icon: "fas fa-handshake mr-2" ,show : true},
+            { name: "Sub RCA Setup", route: "sub-root-causes.index", icon: "fas fa-handshake mr-2" ,show : true},
             
 
 
 
 
-            { name: "City Setup", route: "city.index", icon: "fas fa-city mr-2" },
-            { name: "Township Setup", route: "township.index", icon: "fas fa-city mr-2" },
-            { name: "Zone Setup", route: "zone.index", icon: "fas fa-handshake mr-2" },
-            { name: "Project Setup", route: "project.index", icon: "fas fa-handshake mr-2" },
+            { name: "City Setup", route: "city.index", icon: "fas fa-city mr-2" ,show : true},
+            { name: "Township Setup", route: "township.index", icon: "fas fa-city mr-2" ,show : true},
+            { name: "Zone Setup", route: "zone.index", icon: "fas fa-handshake mr-2" ,show : true},
+            { name: "Project Setup", route: "project.index", icon: "fas fa-handshake mr-2" ,show : true},
        
 
            
    
 
-            { name: "Customer Status", route: "status.index", icon: "fas fa-user-tag mr-2" },
-            { name: "Template", route: "template.index", icon: "fas fa-envelope mr-2" },
-            { name: "Announcement", route: "announcement.list", icon: "fas fa-bullhorn mr-2" },
-            { name: "SMS Gateway", route: "smsgateway.index", icon: "fas fa-sms mr-2" },
+            { name: "Customer Status", route: "status.index", icon: "fas fa-user-tag mr-2" ,show : true},
+            { name: "Template", route: "template.index", icon: "fas fa-envelope mr-2" ,show : true},
+            { name: "Announcement", route: "announcement.list", icon: "fas fa-bullhorn mr-2" ,show : true},
+            { name: "SMS Gateway", route: "smsgateway.index", icon: "fas fa-sms mr-2" ,show : true},
             // { name: "Radius Config", route: "radiusconfig.index", icon: "fas fa-sms mr-2" },
            
           
-            { name: "System Setting", route: "setting.index", icon: "fas fa-screwdriver-wrench mr-2" },
+            { name: "System Setting", route: "setting.index", icon: "fas fa-screwdriver-wrench mr-2" ,show : true},
           ],
         },
          {
@@ -225,17 +226,17 @@ export default {
           isOpen: false, // Tracks if the panel is open
           links: [
             
-            { name: "Material Setup", route: "equiptment.index", icon: "fas fa-warehouse mr-2" },
+            { name: "Material Setup", route: "equiptment.index", icon: "fas fa-warehouse mr-2" ,show : true,show : true},
 
            
            
-            { name: "Port Sharing Setup", route: "port-sharing-service.index", icon: "fas fa-cube mr-2" },
-            { name: "Maintenance Setup", route: "maintenance-service.index", icon: "fas fa-cube mr-2" },
-            { name: "Installation Setup", route: "installation-service.index", icon: "fas fa-cube mr-2" },
-            { name: "Discount Setup", route: "discount-setup.index", icon: "fas fa-percentage mr-2" },
+            { name: "Port Sharing Setup", route: "port-sharing-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
+            { name: "Maintenance Setup", route: "maintenance-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
+            { name: "Installation Setup", route: "installation-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
+            { name: "Discount Setup", route: "discount-setup.index", icon: "fas fa-percentage mr-2" ,show : true,show : true},
 
           
-            { name: "Suspense Config", route: "billconfig.index", icon: "fas fa-cube mr-2" },
+            { name: "Suspense Config", route: "billconfig.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
           
           ],
         },
@@ -245,18 +246,18 @@ export default {
           icon:"fas fa-route",
           isOpen: false,
           links: [
-            { name: "POP Setup", route: "pop.index", icon: "fas fa-building mr-2" },
-            { name: "ODF", route: "odfs.index", icon: "fas fa-network-wired mr-2" },
-            { name: "ODB", route: "odbs.index", icon: "fas fa-network-wired mr-2" },
-            { name: "ODB-Detail", route: "odb-fiber-cables.index", icon: "fas fa-network-wired mr-2" },
-            { name: "Fiber Core", route: "fiber-cables.index", icon: "fas fa-network-wired mr-2" },
+            { name: "POP Setup", route: "pop.index", icon: "fas fa-building mr-2" ,show : true},
+            { name: "ODF", route: "odfs.index", icon: "fas fa-network-wired mr-2" ,show : true},
+            { name: "ODB", route: "odbs.index", icon: "fas fa-network-wired mr-2" ,show : true},
+            { name: "ODB-Detail", route: "odb-fiber-cables.index", icon: "fas fa-network-wired mr-2" ,show : true},
+            { name: "Fiber Core", route: "fiber-cables.index", icon: "fas fa-network-wired mr-2",show : true },
            
-            { name: "JC Box List", route: "jc-boxes.index", icon: "fas fa-square mr-2" },
-            { name: "Core Assignment", route: "core-assignments.index", icon: "fas fa-equals mr-2" },
-            { name: "Distribution Node", route: "dn-boxes.index", icon: "fas fa-tv mr-2" },
-            { name: "DN Splitter", route: "dn-splitters.index", icon: "fas fa-network-wired mr-2" },
-            { name: "SN Box", route: "sn-boxes.index", icon: "fas fa-tv mr-2" },
-            { name: "SN Splitter", route: "sn-splitters.index", icon: "fas fa-network-wired mr-2" },
+            { name: "JC Box List", route: "jc-boxes.index", icon: "fas fa-square mr-2" ,show : true},
+            { name: "Core Assignment", route: "core-assignments.index", icon: "fas fa-equals mr-2",show : true },
+            { name: "Distribution Node", route: "dn-boxes.index", icon: "fas fa-tv mr-2",show : true },
+            { name: "DN Splitter", route: "dn-splitters.index", icon: "fas fa-network-wired mr-2" ,show : true},
+            { name: "SN Box", route: "sn-boxes.index", icon: "fas fa-tv mr-2",show : true },
+            { name: "SN Splitter", route: "sn-splitters.index", icon: "fas fa-network-wired mr-2" ,show : true},
           ],
         },
         {
@@ -265,10 +266,10 @@ export default {
           icon:"fas fa-users",
           isOpen: false,
           links: [
-            { name: "Dashboard", route: "dashboard", icon: "fas fa-tv mr-2" },
-            { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2" },
-            { name: "Service Request", route: "servicerequest.index", icon: "fas fa-tasks mr-2" },
-            { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600" },
+            { name: "Dashboard", route: "dashboard", icon: "fas fa-tv mr-2" , show : true},
+            { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2",show : true },
+            { name: "Service Request", route: "servicerequest.index", icon: "fas fa-tasks mr-2", show: this.$page.props?.role?.service_request == 1 },
+            { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600" ,show : true},
           ],
         },
         {
@@ -277,9 +278,9 @@ export default {
           icon:"fas fa-file-invoice",
           isOpen: false,
           links: [
-            { name: "Bill Generator", route: "billGenerator", icon: "fas fa-cogs mr-2" },
-            { name: "Temp Bill List", route: "tempBilling", icon: "fas fa-clipboard-list mr-2" },
-            { name: "Final Bill List", route: "showbill", icon: "fas fa-coins mr-2" },
+            { name: "Bill Generator", route: "billGenerator", icon: "fas fa-cogs mr-2" ,show : true},
+            { name: "Temp Bill List", route: "tempBilling", icon: "fas fa-clipboard-list mr-2" ,show : true},
+            { name: "Final Bill List", route: "showbill", icon: "fas fa-coins mr-2",show : true },
             // { name: "Bill Receipt", route: "receipt.index", icon: "fas fa-file-invoice-dollar mr-2" },
           ],
         },
@@ -289,9 +290,9 @@ export default {
           icon:"fas fa-users",
           isOpen: false,
           links: [
-            { name: "Home", route: "home", icon: "fas fa-home mr-2" },
-            { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2" },
-            { name: "DN SN Report", route: "dnSnReport", icon: "fas fa-tower-broadcast mr-2" },
+            { name: "Home", route: "home", icon: "fas fa-home mr-2",show : true },
+            { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2",show : true },
+            { name: "DN SN Report", route: "dnSnReport", icon: "fas fa-tower-broadcast mr-2",show : true },
           ],
         },
         {
@@ -300,10 +301,10 @@ export default {
           icon:"fas fa-users",
           isOpen: false,
           links: [
-            { name: "Home", route: "home", icon: "fas fa-home mr-2" },
-            { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2" },
-            { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600" },
-            { name: "Incident Report", route: "incidentReport", icon: "fas fa-users mr-2" },
+            { name: "Home", route: "home", icon: "fas fa-home mr-2" ,show : true},
+            { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2" ,show : true},
+            { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600" ,show : true},
+            { name: "Incident Report", route: "incidentReport", icon: "fas fa-users mr-2",show : true },
           ],
         },
         {
@@ -312,9 +313,9 @@ export default {
           icon:"fas fa-users",
           isOpen: false,
           links: [
-            { name: "Home", route: "home", icon: "fas fa-home mr-2" },
-            { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2" },
-            { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600" },
+            { name: "Home", route: "home", icon: "fas fa-home mr-2" ,show : true},
+            { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2",show : true },
+            { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600",show : true },
           ],
         },
         {
@@ -323,12 +324,12 @@ export default {
           icon:"fas fa-chart-line",
           isOpen: false,
           links: [
-            { name: "Incident Report", route: "incidentReport", icon: "fas fa-users mr-2" },
-            { name: "Bill Report", route: "dailyreceipt", icon: "fa fa-money-bill mr-2" },
+            { name: "Incident Report", route: "incidentReport", icon: "fas fa-users mr-2" ,show : true},
+            { name: "Bill Report", route: "dailyreceipt", icon: "fa fa-money-bill mr-2",show : true },
             // { name: "Radius User Report", route: "showRadius", icon: "fas fa-server mr-2" },
             // { name: "IP Usages Report", route: "publicIpReport", icon: "fas fa-server mr-2" },
-            { name: "DN SN Report", route: "dnSnReport", icon: "fas fa-tower-broadcast mr-2" },
-            { name: "Activity Log", route: "activity-log.index", icon: "fas fa-circle-info mr-2" },
+            { name: "DN SN Report", route: "dnSnReport", icon: "fas fa-tower-broadcast mr-2" ,show : true},
+            { name: "Activity Log", route: "activity-log.index", icon: "fas fa-circle-info mr-2" ,show : true},
           ],
         },
       ],
@@ -359,6 +360,8 @@ export default {
             return this.$page.props.login_type == 'isp';
           case 'subcon':
             return this.$page.props.login_type == 'subcon';
+          case 'servicerequest':
+            return this.$page.props?.role?.service_request;
           return false;
         }
       });

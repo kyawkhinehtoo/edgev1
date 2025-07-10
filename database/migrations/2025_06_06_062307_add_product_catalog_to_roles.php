@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('roles', function (Blueprint $table) {
-             $table->boolean('product_catalog')->default(false)->after('installation_supervisor');
+             $table->boolean('product_catalog')->nullable()->default(false)->after('installation_supervisor');
         });
     }
 

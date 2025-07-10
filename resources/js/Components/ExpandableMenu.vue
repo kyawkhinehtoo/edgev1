@@ -39,6 +39,7 @@ export default {
     icon: String,
     isOpen: Boolean,
     isCollapsed: Boolean,
+    show: Boolean,
     name: String
   },
   data() {

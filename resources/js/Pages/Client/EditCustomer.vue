@@ -314,6 +314,18 @@
                           $page.props.errors.order_remark }}</p>
                       </div>
 
+                      <div class="col-span-1 sm:col-span-1">
+                        <label for="order_remark" class="block text-sm font-medium text-gray-700"> Assign Supervisor </label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                          <multiselect deselect-label="Selected already" :options="supervisors" track-by="id" label="name"
+                          v-model="form.supervisor" :allow-empty="false"
+                          @update:modelValue="form.supervisor_id = $event?.id"
+                          :disabled="checkPerm('supervisor_id')" :class="text-xs">
+                        </multiselect>
+                        </div>
+                        <p v-show="$page.props.errors.order_remark" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.order_remark }}</p>
+                      </div>
 
                       <div class="col-span-1 sm:col-span-1"  v-if="$page.props.login_type == 'isp'">
                         <label for="isp" class="block text-sm font-medium text-gray-700"> Installation Date </label>
@@ -834,6 +846,7 @@ export default {
     installationServices: Object,
     portSharingServices: Object,
     maintenanceServices: Object,
+    supervisors: Object,
   },
   setup(props) {
     provide('role', props.role);
@@ -942,6 +955,8 @@ export default {
       end_meter_txt: props.customer.end_meter_txt,
       end_meter_image: props.customer.end_meter_image,
       service_type: props.customer.service_type,
+      supervisor_id : props.customer.supervisor_id,
+      supervisor : props.customer.supervisor,
       bundles : "",
     });
     const form2 = useForm({
