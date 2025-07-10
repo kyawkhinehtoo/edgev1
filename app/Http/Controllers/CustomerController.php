@@ -76,26 +76,25 @@ class CustomerController extends Controller
         $bundle_equiptments = BundleEquiptment::get();
         $active = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
+            ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
             ->whereIn('status.type', ['active', 'disabled'])
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
             })
-            ->when($user->role->installation_supervisor, function($query) use ($user){
-                $query->where('customers.supervisor_id',$user->id);
-             })
+            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+                $query->where('customers.supervisor_id', $user->id);
+            })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
-                if($user_type == 'partner') {
+                if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
                 }
-                if($user_type == 'isp') {
+                if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
                 }
-                if($user_type == 'subcon') {
+                if ($user_type == 'subcon') {
                     $query->where('customers.subcom_id', '=', $user->subcom_id);
                 }
-           
             })
             ->count();
 
@@ -106,7 +105,7 @@ class CustomerController extends Controller
         // ->count();
         $suspense = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-         	->join('customer_addresses','customers.id','customer_addresses.customer_id')
+            ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
             ->where('status.type', '=', 'suspense')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -115,25 +114,24 @@ class CustomerController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-            ->when($user->role->installation_supervisor, function($query) use ($user){
-                $query->where('customers.supervisor_id',$user->id);
-             })
+            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+                $query->where('customers.supervisor_id', $user->id);
+            })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
-                if($user_type == 'partner') {
+                if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
                 }
-                if($user_type == 'isp') {
+                if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
                 }
-                if($user_type == 'subcon') {
+                if ($user_type == 'subcon') {
                     $query->where('customers.subcom_id', '=', $user->subcom_id);
                 }
-           
             })
             ->count();
         $installation_request = DB::table('customers')
             ->join('status', 'customers.status_id', '=', 'status.id')
-            ->join('customer_addresses','customers.id','customer_addresses.customer_id')
+            ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
             ->where('status.type', '=', 'new')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -142,24 +140,23 @@ class CustomerController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-            ->when($user->role->installation_supervisor, function($query) use ($user){
-                $query->where('customers.supervisor_id',$user->id);
-             })
+            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+                $query->where('customers.supervisor_id', $user->id);
+            })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
-                if($user_type == 'partner') {
+                if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
                 }
-                if($user_type == 'isp') {
+                if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
                 }
-                if($user_type == 'subcon') {
+                if ($user_type == 'subcon') {
                     $query->where('customers.subcom_id', '=', $user->subcom_id);
                 }
-           
             })
             ->count();
         $terminate = DB::table('customers')
-            ->join('customer_addresses','customers.id','customer_addresses.customer_id')
+            ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
             ->join('status', 'customers.status_id', '=', 'status.id')
             ->where('status.type', '=', 'terminate')
             ->where(function ($query) {
@@ -167,22 +164,21 @@ class CustomerController extends Controller
                     ->orWhereNull('customers.deleted');
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
-                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
+                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-            ->when($user->role->installation_supervisor, function($query) use ($user){
-                $query->where('customers.supervisor_id',$user->id);
-             })
+            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+                $query->where('customers.supervisor_id', $user->id);
+            })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
-                if($user_type == 'partner') {
+                if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
                 }
-                if($user_type == 'isp') {
+                if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
                 }
-                if($user_type == 'subcon') {
+                if ($user_type == 'subcon') {
                     $query->where('customers.subcom_id', '=', $user->subcom_id);
                 }
-           
             })
             ->count();
 
@@ -200,10 +196,10 @@ class CustomerController extends Controller
         $package_speed = Package::select('speed', 'type')
             ->groupBy('speed', 'type')
             ->orderBy('speed', 'ASC')->get();
-         //dd($request);
-        $customers =  Customer::with('package','currentAddress.township','isp','status')
-          	->join('customer_addresses','customers.id','customer_addresses.customer_id')
-          	->join('townships','townships.id','customer_addresses.township_id')
+        //dd($request);
+        $customers =  Customer::with('package', 'currentAddress.township', 'isp', 'status')
+            ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
+            ->join('townships', 'townships.id', 'customer_addresses.township_id')
             ->leftjoin('sn_ports', 'customers.id', '=', 'sn_ports.customer_id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -218,17 +214,16 @@ class CustomerController extends Controller
                 });
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
-    
-                if($user_type == 'partner') {
+
+                if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
                 }
-                if($user_type == 'isp') {
+                if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
                 }
-                if($user_type == 'subcon') {
+                if ($user_type == 'subcon') {
                     $query->where('customers.subcom_id', '=', $user->subcom_id);
                 }
-           
             })
             ->when($request->keyword, function ($query, $search = null) {
                 $query->where(function ($query) use ($search) {
@@ -282,7 +277,7 @@ class CustomerController extends Controller
                 $speed_type =  explode("|", $package_speed);
                 $speed = $speed_type[0];
                 $type = $speed_type[1];
-                $query->whereHas('package', function($q) use ($speed, $type) {
+                $query->whereHas('package', function ($q) use ($speed, $type) {
                     $q->where('speed', '=', $speed);
                     $q->where('type', '=', $type);
                 });
@@ -308,7 +303,7 @@ class CustomerController extends Controller
                 $query->where('customers.partner_id', '=', $partner['id']);
             })
             ->when($request->status_type, function ($query, $status_type) {
-                $query->whereHas('status', function($q) use ($status_type) {
+                $query->whereHas('status', function ($q) use ($status_type) {
                     $q->where('type', '=', $status_type);
                 });
             })
@@ -324,33 +319,31 @@ class CustomerController extends Controller
             ->when($request->sh_installation_team, function ($query, $sh_installation_team) {
                 $query->where('customers.subcom_id', $sh_installation_team['id']);
             })
-            
+
             ->when($request->assign_date, function ($query, $assign_date) {
                 $startDate = Carbon::parse($assign_date[0])->format('Y-m-d');
                 $endDate = Carbon::parse($assign_date[1])->format('Y-m-d');
                 $query->whereBetween('customers.subcom_assign_date', [$startDate, $endDate]);
-    
             })
             ->when($request->installation_status, function ($query, $sh_installation_status) {
 
                 $query->where('customers.installation_status', $sh_installation_status);
             })
             ->when($request->sh_installation_timeline, function ($query, $sh_installation_timeline) {
-                $query->whereHas('package', function($q) use ($sh_installation_timeline) {
+                $query->whereHas('package', function ($q) use ($sh_installation_timeline) {
                     $q->where('installation_timeline', '=', $sh_installation_timeline);
                 });
-                
             })
-            ->when($user->role->installation_supervisor, function($query) use ($user){
-                $query->where('customers.supervisor_id',$user->id);
-             })
+            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+                $query->where('customers.supervisor_id', $user->id);
+            })
             ->when($request->sort, function ($query, $sort) use ($request) {
                 $direction = $request->direction ?? 'asc';
-                
+
                 // Handle special cases for related tables
                 switch ($sort) {
                     case 'package':
-                        
+
                         $query->orderBy('package_id', $direction);
                         break;
                     case 'township':
@@ -367,14 +360,14 @@ class CustomerController extends Controller
                 // Default sorting if no sort parameter is provided
                 $query->orderBy('customers.id', 'desc');
             })
-            ->select('customers.*','customer_addresses.address as address', 'customer_addresses.location as location', 'customer_addresses.township_id as township_id','townships.name as township_name')
-        
+            ->select('customers.*', 'customer_addresses.address as address', 'customer_addresses.location as location', 'customer_addresses.township_id as township_id', 'townships.name as township_name')
+
             ->paginate(10);
-            $dynamicRanderPage = "Client/Customer";
-            if($user->user_type == 'subcon') {
-                $dynamicRanderPage = "Client/CustomerSubcom";
-            }
-       
+        $dynamicRanderPage = "Client/Customer";
+        if ($user->user_type == 'subcon') {
+            $dynamicRanderPage = "Client/CustomerSubcom";
+        }
+
         // dd($customers->toSQL(), $customers->getBindings());
         $customers->appends($request->all())->links();
         return Inertia::render($dynamicRanderPage, [
@@ -393,7 +386,7 @@ class CustomerController extends Controller
             'installationTeams' => $installationTeams,
             'onuSerials' => $onuSerials,
             'isps' => $isps,
-            'partners'=>$partners,
+            'partners' => $partners,
         ]);
     }
 
@@ -403,6 +396,7 @@ class CustomerController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
     public function create()
     {
 
@@ -412,14 +406,14 @@ class CustomerController extends Controller
         $pops = Pop::get();
         $bundle_equiptments = BundleEquiptment::get();
 
-        $installationServices = InstallationService::where('type','new')->get();
+        $installationServices = InstallationService::where('type', 'new')->get();
         $portSharingServices = PortSharingService::get();
         $maintenanceServices = MaintenanceService::get();
-      
 
+        $cities = City::get();
         $dn = DB::table('dn_ports')
             ->get();
-     
+
         $auth_role = DB::table('users')
             ->join('roles', 'users.role_id', '=', 'roles.id')
             ->where('roles.name', 'NOT LIKE', '%Admin%')
@@ -434,7 +428,7 @@ class CustomerController extends Controller
         $subcoms = Subcom::all();
         $isps = Isp::all();
         $partners = Partner::all();
-        $townships = Township::join('cities', 'townships.city_id', '=', 'cities.id')->select('townships.*', 'cities.name as city_name', 'cities.short_code as city_code', 'cities.id as city_id')->get();
+        // $townships = Township::join('cities', 'townships.city_id', '=', 'cities.id')->select('townships.*', 'cities.name as city_name', 'cities.short_code as city_code', 'cities.id as city_id')->get();
         $status_list = $this->getStatusList();
         $max_id = $this->getmaxid();
         $user = User::with('role')->find(Auth::user()->id);
@@ -443,7 +437,6 @@ class CustomerController extends Controller
             [
                 'packages' => $packages,
                 'projects' => $projects,
-                'townships' => $townships,
                 'status_list' => $status_list,
                 'subcoms' => $subcoms,
                 'user' => $user,
@@ -458,6 +451,7 @@ class CustomerController extends Controller
                 'installationServices' => $installationServices,
                 'portSharingServices' => $portSharingServices,
                 'maintenanceServices' => $maintenanceServices,
+                'cities' => $cities,
             ]
         );
     }
@@ -476,15 +470,16 @@ class CustomerController extends Controller
             'dob' => 'nullable|date',
             'status' => 'required',
             'order_date' => 'date',
-            'township' => 'required',
+            'city_id' => 'required',
+            'township_id' => 'required',
             'installation_date' => 'nullable|date',
             'isp_ftth_id' => 'required|unique:customers,isp_ftth_id',
             'installation_service_id' => 'required_if:service_type,FTTH',
             'maintenance_service_id' => 'required',
-            'service_type' =>'required',
-            'bandwidth' =>'required|integer',
+            'service_type' => 'required',
+            'bandwidth' => 'required|integer',
         ]);
-       
+
         if ($user->user_type === 'internal') {
             $validator->addRules([
                 'isp_id' => 'required',
@@ -500,14 +495,14 @@ class CustomerController extends Controller
             ->where('type', $request->service_type)
             ->orderBy('max_speed', 'asc')
             ->first();
-        
+
         if (!$selectedService) {
             // Manually throw ValidationException with custom message
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'bandwidth' => 'Invalid bandwidth value, please check.',
             ]);
         }
-       
+
         $maintenanceService = MaintenanceService::find($request->maintenance_service_id);
         if (!$maintenanceService) {
             // Manually throw ValidationException with custom message
@@ -515,34 +510,33 @@ class CustomerController extends Controller
                 'maintenance_service_id' => 'Invalid Maintenance value, please check.',
             ]);
         }
-        
-        
+
+
         $isp = null;
-        if($user->user_type == 'isp') {
+        if ($user->user_type == 'isp') {
             $isp = Isp::find($user->isp_id);
-        }else{
+        } else {
             $isp = Isp::find($request->isp_id['id']);
         }
-            //already exists
-            if ($isp) {
-                $max_c_id = $this->getmaxid();
-                $city_id = $request->township['city_id'];
-                $result = null;
-                foreach ($max_c_id as $value) {
-                    if ((int)$value['id'] == (int)$city_id) {
-                        $result = $value['value'];
-                    }
+        //already exists
+        if ($isp) {
+            $max_c_id = $this->getmaxid();
+            $city_id = $request->city_id;
+            $result = null;
+            foreach ($max_c_id as $value) {
+                if ((int)$value['id'] == (int)$city_id) {
+                    $result = $value['value'];
                 }
-            //   $max_id = $max_c_id [$request->city_id];
-                $auto_ftth_id =$isp->short_code.$request->township['city_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type,0,2).$selectedService->short_code.$maintenanceService->sla_hours;
-                $auto_ftth_id = strtoupper($auto_ftth_id);
-                
-            }else{
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'isp_id' => 'Something missing value, please check.',
-                ]);
             }
-          
+            //   $max_id = $max_c_id [$request->city_id];
+            $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type, 0, 2) . $selectedService->short_code . $maintenanceService->sla_hours;
+            $auto_ftth_id = strtoupper($auto_ftth_id);
+        } else {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'isp_id' => 'Something missing value, please check.',
+            ]);
+        }
+
 
         DB::beginTransaction();
         try {
@@ -561,7 +555,7 @@ class CustomerController extends Controller
             $customer->service_type = $request->service_type ?? '';
             $customer->port_sharing_service_id = $selectedService ? $selectedService->id : null;
             if ($request->service_type == 'ftth') {
-            $customer->installation_service_id = $request->installation_service_id ?? null;
+                $customer->installation_service_id = $request->installation_service_id ?? null;
             }
             $customer->maintenance_service_id = $request->maintenance_service_id ?? null;
             $customer->order_remark = $request->order_remark ?? '';
@@ -587,9 +581,9 @@ class CustomerController extends Controller
 
 
         $logData = [];
-      //  $changes = $customer->getChanges();
-      $changes = $customer->getAttributes();
- 
+        //  $changes = $customer->getChanges();
+        $changes = $customer->getAttributes();
+
         app(\App\Services\CustomerHistoryService::class)->storeCustomerHistory(
             $customer,         // newly updated Customer
             null,      // old snapshot
@@ -609,7 +603,7 @@ class CustomerController extends Controller
             ->log('Customer Created: ' . $customer->ftth_id);
         $logData = [];
         $changes = $customerAddress->getAttributes();
-        
+
         activity()
             ->causedBy(User::find(Auth::id()))
             ->performedOn($customerAddress)
@@ -618,7 +612,7 @@ class CustomerController extends Controller
         return redirect()->route('customer.index')->with('message', 'Customer Created Successfully.');
     }
 
-    public function getPermision():Array
+    public function getPermision(): array
     {
         $user = User::find(Auth::user()->id);
         switch ($user->user_type) {
@@ -643,7 +637,7 @@ class CustomerController extends Controller
                 break;
         }
     }
-    public function getStatusList():Array
+    public function getStatusList(): array
     {
         $user = User::find(Auth::user()->id);
         switch ($user->user_type) {
@@ -656,7 +650,7 @@ class CustomerController extends Controller
                 return $isp && $isp->customer_status ? $isp->customer_status : [];
                 break;
             case 'internal':
-                $role = Role::find($user->role_id)->first();
+                $role = $user->role;
                 return $role && $role->customer_status ? $role->customer_status : [];
                 break;
             default:
@@ -680,7 +674,7 @@ class CustomerController extends Controller
         $townshipArray = Township::when($user->role?->limit_region, function ($query) use ($user) {
             return $query->whereIn('townships.id', $user->role?->townships->pluck('id'));
         })->get()->toArray();
-        
+        $cities = City::get();
 
         $typePermissions = [
             'subcon' => ['model' => Subcom::class, 'field' => 'subcom_id'],
@@ -692,11 +686,11 @@ class CustomerController extends Controller
             $permission = $typePermissions[$user->user_type];
             $model = $permission['model'];
             $field = $permission['field'];
-            
+
             $entity = $model::find($user->{$field});
             $hasAccess = Customer::where(function ($query) {
-                    $query->where('deleted', 0)->orWhereNull('deleted');
-                })
+                $query->where('deleted', 0)->orWhereNull('deleted');
+            })
                 ->where($field, $entity->id)
                 ->where('id', $id)
                 ->exists();
@@ -705,23 +699,24 @@ class CustomerController extends Controller
                 return abort(403, 'Unauthorized access.');
             }
         }
-        $customer = Customer::with('currentAddress.township','partner','isp','snPort','snPort.snSplitter','snPort.snSplitter.snBox.dnSplitter.fiberCable','installationService','maintenanceService','portSharingService','supervisor')
+        $customer = Customer::with('currentAddress.township','city', 'partner', 'isp', 'snPort', 'snPort.snSplitter', 'snPort.snSplitter.snBox.dnSplitter.fiberCable', 'installationService', 'maintenanceService', 'portSharingService', 'supervisor')
             ->where(function ($query) {
                 $query->where('deleted', 0)->orWhereNull('deleted');
             })->find($id);
-            $supervisors = DB::table('users')
+        $supervisors = DB::table('users')
             ->join('roles', 'users.role_id', '=', 'roles.id')
-            ->join('role_township','roles.id','=','role_township.role_id')
+            ->join('role_township', 'roles.id', '=', 'role_township.role_id')
             ->select('users.name as name', 'users.id as id')
-           // ->where($customer->currentAddress.township,'=', 'role_township.township_id')
+            // ->where($customer->currentAddress.township,'=', 'role_township.township_id')
             ->where('roles.installation_supervisor', 1)
+            ->groupBy('users.id', 'users.name')
             ->get();
-        $snPort =  SnPort::with('SnSplitter','DnSplitter','pop','popDevice')->where('customer_id', $id)->first();
+        $snPort =  SnPort::with('SnSplitter', 'DnSplitter', 'pop', 'popDevice')->where('customer_id', $id)->first();
         $bundle_equiptments = BundleEquiptment::get();
-          
-    
-        
-        $installationServices = InstallationService::where('type','new')->get();
+
+
+
+        $installationServices = InstallationService::where('type', 'new')->get();
         $portSharingServices = PortSharingService::get();
         $maintenanceServices = MaintenanceService::get();
         // if($user->user_type == 'subcon') {
@@ -732,35 +727,35 @@ class CustomerController extends Controller
         //         'subconCheckList' => $subconCheckList
         //     ]);
         // }
-        $subconCheckList = SubconChecklist::where('service_type','installation')->get();
-            
+        $subconCheckList = SubconChecklist::where('service_type', 'installation')->get();
+
         // Get existing checklist values for this customer
         $checklistValues = SubconChecklistValue::where('customer_id', $id)->get();
-        
+
         // Format checklist values and images for easy access in the frontend
         $formattedValues = [];
         $checklistImages = [];
-        
-        foreach($checklistValues as $value) {
+
+        foreach ($checklistValues as $value) {
             $formattedValues[$value->subcon_checklist_id] = [
                 'title' => $value->title,
                 'attachment' => $value->attachment,
                 'status' => $value->status
             ];
-            
-            if($value->attachment) {
+
+            if ($value->attachment) {
                 $checklistImages[$value->subcon_checklist_id] = $value->attachment;
             }
         }
-        
+
         // Add checklist values and images to customer object
         $customer->checklist_values = $formattedValues;
         $customer->checklist_images = $checklistImages;
-        if($user->user_type == 'subcon') {
-            
+        if ($user->user_type == 'subcon') {
+
             return Inertia::render('Client/SubcomCustomerView', [
                 'customer' => $customer,
-                'bundle_equiptments'=>$bundle_equiptments,
+                'bundle_equiptments' => $bundle_equiptments,
                 'subconCheckList' => $subconCheckList,
                 'snPort' => $snPort
             ]);
@@ -773,19 +768,19 @@ class CustomerController extends Controller
         $pops = Pop::all();
         $popDevices = PopDevice::all();
         $projects = Project::get();
-       
+
         $subcoms = Subcom::all();
         $townships = Township::join('cities', 'townships.city_id', '=', 'cities.id')->select('townships.*', 'cities.name as city_name', 'cities.short_code as city_code', 'cities.id as city_id')->get();
         $allStatus = Status::get()->toArray();
         $status_list = $this->getStatusList();
-        
+
         $userPerm = $this->getPermision();
-       
-       
-        
-      
+
+
+
+
         $total_documents = FileUpload::where('customer_id', $customer->id)->whereNull('incident_id')->count();
-       
+
 
         return Inertia::render(
             'Client/EditCustomer',
@@ -811,6 +806,7 @@ class CustomerController extends Controller
                 'subconCheckList' => $subconCheckList,
                 'snPort' => $snPort,
                 'supervisors' => $supervisors,
+                'cities' => $cities,
             ]
         );
     }
@@ -831,6 +827,8 @@ class CustomerController extends Controller
         Validator::make($request->all(), [
             'name' => 'required|max:255',
             'phone_1' => 'required|max:255',
+            'city_id' => 'required',
+            'township_id' => 'required',
             'address' => 'required',
             'latitude' => 'required|max:255',
             'longitude' => 'required|max:255',
@@ -840,17 +838,17 @@ class CustomerController extends Controller
             'status' => 'required',
             'installation_date' => 'nullable|date',
             'bandwidth' => 'required|integer',
-             'service_type' =>'required',
+            'service_type' => 'required',
             // 'route_kmz_image' => 'nullable|image|max:10240',
             // 'drum_no_image' => 'nullable|image|max:10240',
             // 'start_meter_image' => 'nullable|image|max:10240',
             // 'end_meter_image' => 'nullable|image|max:10240',
-           
+
             // 'splitter_no' => [
             //     'nullable',
             //     function ($attribute, $value, $fail) use ($request) {
             //         if ($value && $request->pop_id && $request->pop_device_id && $request->dn_id && $request->sn_id) {
-               
+
             //             $exists = Customer::where('splitter_no', json_decode($value)->name)
             //                 ->where('pop_id', json_decode($request->pop_id)->id)
             //                 ->where('pop_device_id', json_decode($request->pop_device_id)->id)
@@ -858,7 +856,7 @@ class CustomerController extends Controller
             //                 ->where('sn_id', json_decode($request->sn_id)->id)
             //                 ->where('id', '!=', $request->id ?? null)
             //                 ->exists();
-                        
+
             //             if ($exists) {
             //                 $fail('The splitter number is already in use for this combination of POP, POP Device, DN, and SN.');
             //             }
@@ -866,59 +864,72 @@ class CustomerController extends Controller
             //     }
             // ],
         ])->validate();
-        if ($request->has('id') && !$user?->roles?->read_customer && $userPerms ){
+        if ($request->has('id') && !$user?->roles?->read_customer && $userPerms) {
             $customer = Customer::find($request->input('id'));
             $oldCustomer = clone $customer;
-           
+
 
 
             foreach ($userPerms as $key => $value) {
-                if ($value != 'id' && $value!= 'created_at' && $value!= 'updated_at' && $value!= 'deleted')
-                    $customer->$value = $request->$value;
 
-             
-                if ($value == 'status_id') 
-                    $customer->$value = $request->status?json_decode($request->status)?->id:null;
                
+              
+
+                if ($value == 'status_id'){
+                     $customer->$value = $request->status ? json_decode($request->status)?->id : null;
+                     continue;
+                }
+                   
+
                 if ($value == 'project_id') {
-                    if (!empty($request->project))
-                        $customer->$value =  $request->project?json_decode($request->project)?->id:null;
+                    if (!empty($request->project)){
+                    $customer->$value =  $request->project ? json_decode($request->project)?->id : null;
+                    }
+                     continue;
                 }
                 if ($value == 'pop_id') {
                     if (isset($request->pop_id))
-                        $customer->$value =  $request->pop_id?json_decode($request->pop_id)?->id:null;
+                        $customer->$value =  $request->pop_id ? json_decode($request->pop_id)?->id : null;
+                     continue;
                 }
                 if ($value == 'pop_device_id') {
                     if (isset($request->pop_device_id))
-                        $customer->$value =  $request->pop_device_id?json_decode($request->pop_device_id)?->id:null;
+                        $customer->$value =  $request->pop_device_id ? json_decode($request->pop_device_id)?->id : null;
+                     continue;
                 }
                 if ($value == 'gpon_ontid') {
                     if (isset($request->gpon_ontid))
-                        $customer->$value =  $request->gpon_ontid?json_decode($request->gpon_ontid)?->name:null;
+                        $customer->$value =  $request->gpon_ontid ? json_decode($request->gpon_ontid)?->name : null;
+                     continue;
                 }
                 if ($value == 'partner_id') {
-                    if (isset($request->partner_id))
-                    $customer->$value =  $request->partner_id?json_decode($request->partner_id)?->id:null;
+                    if (isset($request->partner_id)){
+                        $partner_id  =  $request->partner_id ? json_decode($request->partner_id)?->id : null;
+                        $customer->$value = $partner_id;
+                    }
+                      continue;   
                 }
                 if ($value == 'isp_id') {
                     if (isset($request->isp_id))
-                    $customer->$value =  $request->isp_id?json_decode($request->isp_id)?->id:null;
+                        $customer->$value =  $request->isp_id ? json_decode($request->isp_id)?->id : null;
+                     continue;
                 }
                 if ($value == 'bundle') {
                     if (!empty($request->bundles)) {
-                        $bundle_list = json_decode($request->bundles) ;
+                        $bundle_list = json_decode($request->bundles);
                         $customer->bundle = '';
                         foreach ($bundle_list as $key => $value) {
-    
+
                             if ($key !== array_key_last($bundle_list))
-                                $customer->bundle .= $value->id. ',';
+                                $customer->bundle .= $value->id . ',';
                             else
                                 $customer->bundle .= $value->id;
                         }
                     }
+                     continue;
                 }
-                if($value == 'bandwidth') {
-                    if($request->bandwidth){
+                if ($value == 'bandwidth') {
+                    if ($request->bandwidth) {
                         $bandwidth = (int) $request->bandwidth;
                         $selectedService = PortSharingService::where('max_speed', '>=', $bandwidth)
                             ->orderBy('max_speed', 'asc')
@@ -926,6 +937,7 @@ class CustomerController extends Controller
                         $customer->bandwidth = $bandwidth;
                         $customer->port_sharing_service_id = $selectedService->id;
                     }
+                     continue;
                 }
                 // if ($value == 'sn_id') {
                 //     if (!empty($request->sn_id))
@@ -942,106 +954,115 @@ class CustomerController extends Controller
 
                 //Subcom info
                 if ($value == 'installation_status') {
-                    $customer->$value =  $request->installation_status?json_decode($request->installation_status)?->id:null;
+                    $customer->$value =  $request->installation_status ? json_decode($request->installation_status)?->id : null;
+                     continue;
                 }
-               
+
                 if ($value == 'subcom_id') {
-                    $customer->$value =  $request->subcom?json_decode($request->subcom)?->id:null;       
+                    $customer->$value =  $request->subcom ? json_decode($request->subcom)?->id : null;
+                     continue;
                 }
-                if($value == 'subcom_assign_date'){
-                    if (!empty($request->subcom) && !$oldCustomer->subcom_assign_date){
-                        if(!$customer->subcom_assign_date){
+                if ($value == 'subcom_assign_date') {
+                    if (!empty($request->subcom) && !$oldCustomer->subcom_assign_date) {
+                        if (!$customer->subcom_assign_date) {
                             $customer->$value = Carbon::now()->format('Y-m-d H:i:s');
                         }
                     }
+                     continue;
                 }
-                if ($value == 'supervisor_id' && isset($request->supervisor_id)){
-                    if($user->role->installation_oss == 1 ){
+                if ($value == 'supervisor_id' && isset($request->supervisor_id)) {
+                    if ($user->role->installation_oss == 1) {
                         $customer->supervisor_id = $request->supervisor_id;
                         $customer->assigned_by = $user->id;
                     }
+                     continue;
+                }
+
+                // check snPort table, if sn_id exists, then update the status to active
+                if (!empty($request->sn_id)) {
+                    $snId = json_decode($request->sn_id)->id;
+                    $snPort = SnPort::where('customer_id', $customer->id)
+                        ->first();
+                    $portNumber = null;
+                    if (!empty($request->splitter_no)) {
+                        $portNumber = json_decode($request->splitter_no)->id;
+                    }
+                    if ($snPort) {
+                        $snPort->sn_splitter_id = $snId;
+                        $snPort->port_number = $portNumber;
+                        $snPort->status = 'active';
+                        $snPort->update();
+                    } else {
+                        $snPort = new SnPort();
+                        $snPort->customer_id = $customer->id;
+                        $snPort->port_number = $portNumber;
+                        $snPort->sn_splitter_id = $snId;
+                        $snPort->status = 'active';
+                        $snPort->save();
+                    }
                     
                 }
-                    
-                // check snPort table, if sn_id exists, then update the status to active
-                    if(!empty($request->sn_id)){
-                        $snId = json_decode($request->sn_id)->id;
-                        $snPort = SnPort::where('customer_id', $customer->id)
-                            ->first();
-                        $portNumber = null;
-                            if(!empty($request->splitter_no)){
-                                $portNumber = json_decode($request->splitter_no)->id;
-                            }
-                        if ($snPort) {
-                            $snPort->sn_splitter_id = $snId;
-                            $snPort->port_number = $portNumber;
-                            $snPort->status = 'active';
-                            $snPort->update();
-                        }else{
-                            $snPort = new SnPort();
-                            $snPort->customer_id = $customer->id;
-                            $snPort->port_number = $portNumber;
-                            $snPort->sn_splitter_id = $snId;
-                            $snPort->status = 'active';
-                            $snPort->save();
-                        }
-                    }
-                   
-                    if(!empty($request->pop_device_id)){
-                        $popDeviceId = json_decode($request->pop_device_id)->id;
-                        $snPort = SnPort::where('customer_id', $customer->id)
-                            ->first();
-                        if ($snPort) {
-                            $snPort->pop_device_id = $popDeviceId;
-                            $snPort->status = 'active';
-                            $snPort->update();
-                        }else{
-                            $snPort = new SnPort();
-                            $snPort->customer_id = $customer->id;
-                            $snPort->pop_device_id = $popDeviceId;
-                            $snPort->status = 'active';
-                            $snPort->save();
-                        }
-                    }
-                    if(!empty($request->pop_id)){
-                        $popId = json_decode($request->pop_id)->id;
-                        $snPort = SnPort::where('customer_id', $customer->id)
-                            ->first();
-                        if ($snPort) {
-                            $snPort->pop_id = $popId;
-                            $snPort->status = 'active';
-                            $snPort->update();
-                        }else{
-                            $snPort = new SnPort();
-                            $snPort->customer_id = $customer->id;
-                            $snPort->pop_id = $popId;
-                            $snPort->status = 'active';
-                            $snPort->save();
-                        }
-                    }
-                    if(!empty($request->dn_id)){
-                        $dnSplitterId = json_decode($request->dn_id)->id;
-                        $snPort = SnPort::where('customer_id', $customer->id)
-                            ->first();
-                        if ($snPort) {
-                            $snPort->dn_splitter_id = $dnSplitterId;
-                            $snPort->status = 'active';
-                            $snPort->update();
-                        }else{
-                            $snPort = new SnPort();
-                            $snPort->customer_id = $customer->id;
-                            $snPort->dn_splitter_id = $dnSplitterId;
-                            $snPort->status = 'active';
-                            $snPort->save();
-                        }
-                    }
-                   
 
-                  
-                
-                
-            }
-            
+                if (!empty($request->pop_device_id)) {
+                    $popDeviceId = json_decode($request->pop_device_id)->id;
+                    $snPort = SnPort::where('customer_id', $customer->id)
+                        ->first();
+                    if ($snPort) {
+                        $snPort->pop_device_id = $popDeviceId;
+                        $snPort->status = 'active';
+                        $snPort->update();
+                    } else {
+                        $snPort = new SnPort();
+                        $snPort->customer_id = $customer->id;
+                        $snPort->pop_device_id = $popDeviceId;
+                        $snPort->status = 'active';
+                        $snPort->save();
+                    }
+                    
+                }
+                if (!empty($request->pop_id)) {
+                    $popId = json_decode($request->pop_id)->id;
+                    $snPort = SnPort::where('customer_id', $customer->id)
+                        ->first();
+                    if ($snPort) {
+                        $snPort->pop_id = $popId;
+                        $snPort->status = 'active';
+                        $snPort->update();
+                    } else {
+                        $snPort = new SnPort();
+                        $snPort->customer_id = $customer->id;
+                        $snPort->pop_id = $popId;
+                        $snPort->status = 'active';
+                        $snPort->save();
+                    }
+                    
+                }
+                if (!empty($request->dn_id)) {
+                    $dnSplitterId = json_decode($request->dn_id)->id;
+                    $snPort = SnPort::where('customer_id', $customer->id)
+                        ->first();
+                    if ($snPort) {
+                        $snPort->dn_splitter_id = $dnSplitterId;
+                        $snPort->status = 'active';
+                        $snPort->update();
+                    } else {
+                        $snPort = new SnPort();
+                        $snPort->customer_id = $customer->id;
+                        $snPort->dn_splitter_id = $dnSplitterId;
+                        $snPort->status = 'active';
+                        $snPort->save();
+                    }
+                   
+                }
+               
+                 // check $value is in the list of customers table fields
+                if (!\Schema::hasColumn('customers', is_object($value) ? '' : $value)) {
+                    continue;
+                }
+                if ($value != 'id' && $value != 'created_at' && $value != 'updated_at' && $value != 'deleted')
+                    $customer->$value = $request->$value;
+            }// end of foreach loop
+
             $customerAddress = CustomerAddress::firstOrNew([
                 'customer_id' => $customer->id,
                 'is_current' => 1
@@ -1049,7 +1070,7 @@ class CustomerController extends Controller
             $customerAddress->township_id = isset($request->township_id) ? $request->township_id : null;
             $customerAddress->location = ($request->latitude ?? '') . ',' . ($request->longitude ?? '');
             $customerAddress->address = $request->address ?? '';
-            $customerAddress->type = $customerAddress->type??'new_installation';
+            $customerAddress->type = $customerAddress->type ?? 'new_installation';
             $customerAddress->is_current = 1;
             $customerAddress->save();
 
@@ -1076,12 +1097,10 @@ class CustomerController extends Controller
                 ->withProperties(['changes' => $logData])  // Log the changes with from-to values
                 ->log('Customer updated: ' . $customer->ftth_id);
 
-          
+
             return redirect()->back()->with('message', 'Customer Updated Successfully.');
         }
         return redirect()->back()->with('message', 'No Changed has updated.');
-
-        
     }
     public function getHistory($id)
     {
@@ -1185,35 +1204,41 @@ class CustomerController extends Controller
     {
         $bundle_equiptments = BundleEquiptment::get();
         $subconCheckList = SubconChecklist::where('service_type', 'installation')->get();
-        
+
         // Load the customer with all necessary relationships
         $customer = Customer::with([
-            'township', 'package', 'status', 'isp', 'pop', 'dn', 'sn'
+            'township',
+            'package',
+            'status',
+            'isp',
+            'pop',
+            'dn',
+            'sn'
         ])->findOrFail($id);
-        
+
         // Load checklist values for this customer
         $checklistValues = SubconChecklistValue::where('customer_id', $id)->get();
-        
+
         // Format checklist values for easy access in the frontend
         $formattedChecklistValues = [];
         $checklistImages = [];
-        
+
         foreach ($checklistValues as $value) {
             $formattedChecklistValues[$value->subcon_checklist_id] = [
                 'id' => $value->id,
                 'title' => $value->title,
                 'status' => $value->status
             ];
-            
+
             if ($value->attachment) {
                 $checklistImages[$value->subcon_checklist_id] = $value->attachment;
             }
         }
-        
+
         // Add checklist values and images to the customer object
         $customer->checklist_values = $formattedChecklistValues;
         $customer->checklist_images = $checklistImages;
-    
+
         return Inertia::render('Client/SubcomCustomerView', [
             'customer' => $customer,
             'bundle_equiptments' => $bundle_equiptments,
@@ -1224,25 +1249,25 @@ class CustomerController extends Controller
     public function subcomUpdate(Request $request, $id)
     {
         $customer = Customer::findOrFail($id);
-        
+
         // Get all request keys to identify checklist fields
         $requestKeys = array_keys($request->all());
         $checklistFields = [];
-        
+
         // Extract checklist fields from request
         foreach ($requestKeys as $key) {
             if (preg_match('/^checklist_(\d+)_(title|attachment|status)$/', $key, $matches)) {
                 $checklistId = $matches[1];
                 $fieldType = $matches[2];
-                
+
                 if (!isset($checklistFields[$checklistId])) {
                     $checklistFields[$checklistId] = [];
                 }
-                
+
                 $checklistFields[$checklistId][$fieldType] = $key;
             }
         }
-        
+
         // Add validation rules for checklist fields
         $validationRules = [
             'installation_status' => 'required|array',
@@ -1254,7 +1279,7 @@ class CustomerController extends Controller
             'onu_power' => 'nullable|string',
             'installation_remark' => 'nullable|string'
         ];
-        
+
         // Add validation rules for each checklist field
         foreach ($checklistFields as $checklistId => $fields) {
             if (isset($fields['title'])) {
@@ -1273,12 +1298,12 @@ class CustomerController extends Controller
         if ($validator->fails()) {
             return back()->withErrors($validator);
         }
-        
-        $oldCustomer = clone $customer;
-        
-    
 
-        $customer->installation_status = ($request->installation_status)?$request->installation_status['id']:null;
+        $oldCustomer = clone $customer;
+
+
+
+        $customer->installation_status = ($request->installation_status) ? $request->installation_status['id'] : null;
         $customer->way_list_date = $request->way_list_date;
         $customer->installation_date = $request->installation_date;
         $customer->fiber_distance = $request->fiber_distance;
@@ -1287,7 +1312,7 @@ class CustomerController extends Controller
         $customer->onu_power = $request->onu_power;
         $customer->installation_remark = $request->installation_remark;
 
-        
+
         if (!empty($request->bundles)) {
             $customer->bundle = '';
             foreach ($request->bundles as $key => $value) {
@@ -1297,62 +1322,62 @@ class CustomerController extends Controller
                     $customer->bundle .= $value['id'];
             }
         }
-        
+
         // Process and save checklist values
         foreach ($checklistFields as $checklistId => $fields) {
             $title = isset($fields['title']) ? $request->input($fields['title']) : null;
             $status = isset($fields['status']) ? $request->input($fields['status']) : null;
             $attachmentPath = null;
-            
+
             // Process attachment if exists
             if (isset($fields['attachment']) && $request->hasFile($fields['attachment'])) {
                 $attachmentPath = $request->file($fields['attachment'])
                     ->store('checklist_attachments/' . $customer->id, 'public');
             }
-            
-            // Find existing checklist value or create new one
-            if($title){
 
-            
-            $checklistValue = SubconChecklistValue::updateOrCreate(
-                [
-                    'subcon_checklist_id' => $checklistId,
-                    'customer_id' => $customer->id,
-                ],
-                [
-                    'title' => $title,
-                    'status' => $status,
-                    'current_actor_user_id' => Auth::id(),
-                    'last_status_changed_at' => now(),
-                ]
-            );
-            
-            // Update attachment only if a new file was uploaded
-            if ($attachmentPath) {
-                // Delete old attachment if exists
-                if ($checklistValue->attachment) {
-                    Storage::delete('public/' . $checklistValue->attachment);
+            // Find existing checklist value or create new one
+            if ($title) {
+
+
+                $checklistValue = SubconChecklistValue::updateOrCreate(
+                    [
+                        'subcon_checklist_id' => $checklistId,
+                        'customer_id' => $customer->id,
+                    ],
+                    [
+                        'title' => $title,
+                        'status' => $status,
+                        'current_actor_user_id' => Auth::id(),
+                        'last_status_changed_at' => now(),
+                    ]
+                );
+
+                // Update attachment only if a new file was uploaded
+                if ($attachmentPath) {
+                    // Delete old attachment if exists
+                    if ($checklistValue->attachment) {
+                        Storage::delete('public/' . $checklistValue->attachment);
+                    }
+                    $checklistValue->attachment = $attachmentPath;
+                    $checklistValue->save();
                 }
-                $checklistValue->attachment = $attachmentPath;
-                $checklistValue->save();
-            }
-            
-            // Create history record
-            SubconChecklistValueHistory::create([
-                'checklist_value_id' => $checklistValue->id,
-                'title' => $title,
-                'attachment' => $attachmentPath ?: $checklistValue->attachment,
-                'action' => $status,
-                'actor_id' => Auth::id(),
-                'acted_at' => now(),
-            ]);
+
+                // Create history record
+                SubconChecklistValueHistory::create([
+                    'checklist_value_id' => $checklistValue->id,
+                    'title' => $title,
+                    'attachment' => $attachmentPath ?: $checklistValue->attachment,
+                    'action' => $status,
+                    'actor_id' => Auth::id(),
+                    'acted_at' => now(),
+                ]);
             }
         }
-        
+
         $original = $customer->getOriginal();  // Get the original values before update
         $customer->update();                   // Perform the update
         $changes = $customer->getChanges();    // Get the updated values after the update
-        
+
         app(\App\Services\CustomerHistoryService::class)->storeCustomerHistory(
             $customer,         // newly updated Customer
             $oldCustomer,      // old snapshot
@@ -1360,7 +1385,7 @@ class CustomerController extends Controller
             $id,
             $request->input('start_date') // optional
         );
-        
+
         $logData = [];
         foreach ($changes as $key => $newValue) {
             $logData[$key] = [
@@ -1368,7 +1393,7 @@ class CustomerController extends Controller
                 'to' => $newValue                   // New value
             ];
         }
-        
+
         activity()
             ->causedBy(User::find(Auth::id()))
             ->performedOn($customer)
@@ -1377,44 +1402,45 @@ class CustomerController extends Controller
 
         return redirect()->back()->with('message', 'Customer updated successfully');
     }
-    public function installationApproval(Request $request, $id){
+    public function installationApproval(Request $request, $id)
+    {
         $customer = Customer::findOrFail($id);
-        
+
         // Get all request keys to identify checklist fields
         $requestKeys = array_keys($request->all());
         $checklistFields = [];
-        
+
         // Extract checklist fields from request
         foreach ($requestKeys as $key) {
             if (preg_match('/^checklist_(\d+)_(title|attachment|status)$/', $key, $matches)) {
                 $checklistId = $matches[1];
                 $fieldType = $matches[2];
-                
+
                 if (!isset($checklistFields[$checklistId])) {
                     $checklistFields[$checklistId] = [];
                 }
-                
+
                 $checklistFields[$checklistId][$fieldType] = $key;
             }
         }
-        
+
         // Add validation rules for checklist fields
-     
-        
+
+
         // Add validation rules for each checklist field
         foreach ($checklistFields as $checklistId => $fields) {
             if (isset($fields['title'])) {
                 $validationRules[$fields['title']] = 'nullable|string';
             }
-             if (isset($fields['status'])) {
+            if (isset($fields['status'])) {
                 $validationRules[$fields['status']] = 'nullable|string|in:requested,approved,declined';
             }
         }
 
-        
 
-     
-        
+
+
+
         // Process and save checklist values
         foreach ($checklistFields as $checklistId => $fields) {
             $title = isset($fields['title']) ? $request->input($fields['title']) : null;
@@ -1425,13 +1451,13 @@ class CustomerController extends Controller
                 'subcon_checklist_id' => $checklistId,
                 'customer_id' => $customer->id,
             ])->first();
- 
+
             // Only proceed if record exists
             if ($checklistValue) {
-           
+
                 $checklistValue->update([
                     'title' => $title,
-                    'status' => $status, 
+                    'status' => $status,
                     'current_actor_user_id' => Auth::id(),
                     'last_status_changed_at' => now(),
                 ]);
@@ -1449,9 +1475,9 @@ class CustomerController extends Controller
                 }
             }
         }
-        
-      
-        
+
+
+
         // activity()
         //     ->causedBy(User::find(Auth::id()))
         //     ->performedOn($customer)
@@ -1460,19 +1486,20 @@ class CustomerController extends Controller
 
         return redirect()->back()->with('message', 'Customer updated successfully');
     }
-    public function fixCustomerPackage(){
+    public function fixCustomerPackage()
+    {
         $customers = Customer::all();
         $bandwidthOptions = [10, 20, 30, 35, 40, 50, 55, 60, 80, 100, 120, 150, 200];
-        
+
         foreach ($customers as $customer) {
             // if($customer->bandwidth == 0 || $customer->bandwidth == null){
-                $bandwidth = $bandwidthOptions[array_rand($bandwidthOptions)];
-                $portSharingServices = PortSharingService::where('max_speed','>=', $bandwidth)->orderByDesc('max_speed',)->first();
-                $maintenanceServices = MaintenanceService::all()->random();
-                dd($maintenanceServices);
-                $installationServices = InstallationService::all()->random();
-                $customer->bandwidth = $bandwidth;
-                $customer->port_sharing_service_id = $portSharingServices->id;
+            $bandwidth = $bandwidthOptions[array_rand($bandwidthOptions)];
+            $portSharingServices = PortSharingService::where('max_speed', '>=', $bandwidth)->orderByDesc('max_speed',)->first();
+            $maintenanceServices = MaintenanceService::all()->random();
+            dd($maintenanceServices);
+            $installationServices = InstallationService::all()->random();
+            $customer->bandwidth = $bandwidth;
+            $customer->port_sharing_service_id = $portSharingServices->id;
 
             // }
             $customer->package_id = 1;
@@ -1503,4 +1530,16 @@ class CustomerController extends Controller
         return response()->json(['message' => 'Addresses migrated successfully.']);
     }
 
+    public function getTownshipByCityId($cityId)
+    {
+        if (!$cityId) {
+            return response()->json(['error' => 'City ID is required'], 400);
+        }
+        $townships = Township::where('city_id', $cityId)
+            ->when(Auth::user()->role?->limit_region, function ($query) {
+                return $query->whereIn('townships.id', Auth::user()->role?->townships->pluck('id'));
+            })
+            ->get();
+        return response()->json($townships);
+    }
 }

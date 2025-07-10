@@ -132,6 +132,18 @@ class PortController extends Controller
         return response()
             ->json([], 200);
     }
+    public function getFeederByOLT($request){
+        if ($request && is_numeric($request)) {
+           $fiberCables = OdbFiberCable::join('fiber_cables','fiber_cables.id', '=', 'odb_fiber_cables.fiber_cable_id')
+            ->where('pop_device_id', (int)$request)
+            ->select('fiber_cables.name as name','fiber_cables.id as id')
+            ->groupBy('fiber_cables.name','fiber_cables.id')
+            ->orderby('fiber_cables.name')
+            ->get();
+           return response()->json($fiberCables, 200);
+        }
+        return response()->json([], 200);
+    }
     // public function getDNByOLT($request)
     // {
     //     if ($request && is_numeric($request)) {

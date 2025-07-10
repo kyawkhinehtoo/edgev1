@@ -30,17 +30,34 @@
                       }}
                     </p>
                   </div>
-                
                   <div class="col-span-1 sm:col-span-1">
+                    <label for="city" class="block text-sm font-medium text-gray-700"><span
+                        class="text-red-500">*</span>
+                      City </label>
+                    <div class="mt-1 flex rounded-md shadow-sm" v-if="cities.length !== 0">
+                      <multiselect deselect-label="Selected already" :options="cities" track-by="id" label="name"
+                        v-model="form.city" placeholder="Select City" :allow-empty="false" 
+                        @update:modelValue="form.city_id = $event?.id"
+                       
+                       required>
+                      </multiselect>
+                    </div>
+                    <p v-show="$page.props.errors.city_id" class="mt-2 text-sm text-red-500">{{
+                      $page.props.errors.city_id }}</p>
+                  </div>
+                  <div class="col-span-1 sm:col-span-2">
                     <label for="township" class="block text-sm font-medium text-gray-700"><span
                         class="text-red-500">*</span>
                       Township </label>
-                    <div class="mt-1 flex rounded-md shadow-sm" v-if="townships.length !== 0">
-                      <multiselect deselect-label="Selected already" :options="townships" track-by="id" label="name"
+                    <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredTownships?.length !== 0">
+                      <multiselect deselect-label="Selected already" :options="filteredTownships" track-by="id" label="name"
                         v-model="form.township" placeholder="Select Township" :allow-empty="false" 
                        required>
                       </multiselect>
                     </div>
+                    
+                      <div class="mt-1 border-gray-200 border p-2 rounded-md text-gray-600" v-else>Please Select City First</div>
+                    
                     <p v-show="$page.props.errors.township_id" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.township_id }}</p>
                   </div>
@@ -323,7 +340,6 @@ export default {
   },
   props: {
     packages: Object,
-    townships: Object,
     projects: Object,
     status_list: Object,
     subcoms: Object,
@@ -339,16 +355,19 @@ export default {
     installationServices: Object,
     portSharingServices: Object,
     maintenanceServices: Object,
+    cities: Object,
   },
   setup(props) {
 
     let res_packages = ref("");
-    
+    const filteredTownships = ref([]);
 
     const form = useForm({
       id: null,
       name: "",
       phone_1: "",
+      city: "",
+      city_id: "",
       address: "",
       latitude: "",
       longitude: "",
@@ -374,7 +393,29 @@ export default {
       form.reset();
     }
 
-    
+   
+     const getTownshipByCityId = async (cityId) => {
+      if (!cityId) {
+        filteredTownships.value = [];
+        form.township = '';
+        return;
+      }
+      try {
+        const response = await fetch(`/getTownshipByCityId/${cityId}`);
+        const data = await response.json();
+        filteredTownships.value = data || [];
+        console.log('fetch Township Data');
+      } catch (error) {
+        console.error("Failed to fetch Township Data", error);
+      }
+    };
+    watch(
+      () => form.city,
+      (newCity) => {
+        getTownshipByCityId(newCity?.id);
+        form.township = ''; // Reset township when city changes
+      }
+    );
 
     function submit() {
       form._method = "POST";
@@ -421,7 +462,7 @@ export default {
   
 
     });
-    return { form, submit, resetForm, isNumber, checkPerm,   res_packages };
+    return { form, submit, resetForm, isNumber, checkPerm, res_packages, filteredTownships, getTownshipByCityId };
   },
 };
 </script>

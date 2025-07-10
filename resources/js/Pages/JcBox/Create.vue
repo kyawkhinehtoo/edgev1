@@ -4,6 +4,7 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 
 const form = useForm({
   name: '',
+  type: 'jc',
   location: '',
   status: ''
 })
@@ -21,7 +22,7 @@ const submit = () => {
   <AppLayout title="Create JC Box">
     <template #header>
       <h2 class="font-semibold text-xl text-white leading-tight">
-        Create JC Box
+        Create Connection Node
       </h2>
     </template>
 
@@ -39,7 +40,32 @@ const submit = () => {
                 />
                 <div v-if="form.errors.name" class="text-red-500 text-sm mt-1">{{ form.errors.name }}</div>
               </div>
-
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Node Type</label>
+                <div class="mt-1 space-y-2">
+                  <div class="flex items-center">
+                    <input
+                      type="radio"
+                      id="jc"
+                      value="jc"
+                      v-model="form.type"
+                      class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                    />
+                    <label for="jc" class="ml-2 text-sm text-gray-700">JC Box</label>
+                  </div>
+                  <div class="flex items-center">
+                    <input
+                      type="radio"
+                      id="cabinet"
+                      value="cabinet"
+                      v-model="form.type"
+                      class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                    />
+                    <label for="cabinet" class="ml-2 text-sm text-gray-700">Cabinet</label>
+                  </div>
+                </div>
+                <div v-if="form.errors.type" class="text-red-500 text-sm mt-1">{{ form.errors.type }}</div>
+              </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Location (Latitude,Longitude)</label>
                 <input

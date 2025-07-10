@@ -2,14 +2,23 @@
 import { useForm, Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Multiselect from "@suadelabs/vue3-multiselect";
-
+import { computed,ref,watch,onMounted } from 'vue';
 const props = defineProps({
   coreAssignment: Object,
   fiberCables: Array,
-  jcBoxes: Array
+  jcBoxes: Array,
+  pops: Object,
+  pop_id: {
+    type: Number,
+    required: true
+  },
+  pop_device: {
+    type: Object,
+    required: true
+  }
 })
-
-
+const popDevices = ref([]);
+const feederCables = ref([]);
 const colors = [
   { id: 'blue', name: 'Blue' },
   { id: 'orange', name: 'Orange' },
@@ -57,8 +66,58 @@ const form = useForm({
   jc: props.jcBoxes?.find(jc => jc.id === props.coreAssignment.jc_id),
   jc_id: props.coreAssignment.jc_id,
   status: status?.find(status => status.id === props.coreAssignment.status),
-  status_id: props.coreAssignment.status
-})
+  status_id: props.coreAssignment.status,
+  pop: props.pops?.find(pop => pop.id === props.pop_id),
+  pop_id: props.pop_id,
+  pop_device: props.pop_device,
+  pop_device_id: props.pop_device.pop_device_id,
+});
+
+const fetchPopDevices = async () => {
+      if (!form.pop_id) {
+        popDevices.value = [];
+        return;
+      }
+      try {
+        const response = await fetch(`/getOLTByPOP/${form.pop_id}`);
+        const data = await response.json();
+        popDevices.value = data || [];
+        console.log('fetch POP Devices');
+      } catch (error) {
+        console.error("Failed to fetch POP devices", error);
+      }
+    };
+    const fetchFeeders = async () => {
+      console.log('pop_device_id',form.pop_device_id);
+      if (!form.pop_device_id) {
+        feederCables.value = [];
+        return;
+      }
+      try {
+        const response = await fetch(`/getFeederByOLT/${form.pop_id}`);
+        const data = await response.json();
+        feederCables.value = data || [];
+        console.log('fetch Feeder Cables');
+      } catch (error) {
+        console.error("Failed to fetch Feeder Cables", error);
+      }
+    };
+    const changePopDevice = (popDevice) => {
+      fetchFeeders();
+        form.source = null;
+        form.source_id = null;
+        form.source_color = null;
+        form.source_color_id = null;
+        form.source_port = null;
+        form.source_port_id = null;
+    };
+    const changePop = (pop) => {
+      fetchPopDevices();
+      form.pop_device = null;
+      form.pop_device_id = null;
+    };
+   
+   
 const submit = () => {
   form.put(route('core-assignments.update', props.coreAssignment.id), {
     onSuccess: (page) => {
@@ -70,6 +129,15 @@ const submit = () => {
     }
   })
 }
+onMounted(() => {
+   fetchPopDevices();
+   form.source = props.fiberCables?.find(cable => cable.id === props.coreAssignment.source_id);
+   form.source_id =  props.coreAssignment.source_id;
+   fetchFeeders();
+  
+ 
+
+});
 </script>
 
 <template>
@@ -82,16 +150,36 @@ const submit = () => {
 
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+        <div class="bg-white  shadow-xl sm:rounded-lg p-6">
           <form @submit.prevent="submit">
             <div class="grid grid-cols-1 gap-6">
               <div class="grid grid-cols-3 gap-4">
                 <div>
+                  <label class="block text-sm font-medium text-gray-700">Source POP</label>
+                  <multiselect deselect-label="Selected already" :options="pops" track-by="id"
+                  label="site_name" v-model="form.pop" :allow-empty="false" :multiple="false" tabindex="1" 
+                  @update:modelValue="(event) => { form.pop_id = event?.id; changePop(event); }"  v-if="pops?.length > 0">
+                </multiselect>
+                 <span class="border-gray-200 border p-2 rounded-sm text-gray-600" v-else>No POP Site</span>
+                  <div v-if="form.errors.pop_id" class="text-red-500 text-sm mt-1">{{ form.errors.pop_id }}</div>
+                </div>
+                <div >
+                  <label class="block text-sm font-medium text-gray-700">Source OLT (Pop Devices)</label>
+                  <multiselect deselect-label="Selected already" :options="popDevices" track-by="id"
+                  label="device_name" v-model="form.pop_device" :allow-empty="false" :multiple="false" tabindex="1" 
+                  @update:modelValue="{ form.pop_device_id = $event?.id; changePopDevice(event); }" v-if="popDevices?.length > 0">
+                </multiselect>
+                 <div class="border-gray-200 border p-2 rounded-sm text-gray-600" v-else>Please Select Pop Site</div>
+                  <div v-if="form.errors.pop_device_id" class="text-red-500 text-sm mt-1">{{ form.errors.pop_device_id }}</div>
+                </div>
+                <div>
                   <label class="block text-sm font-medium text-gray-700">Source Cable</label>
-                  <multiselect deselect-label="Selected already" :options="fiberCables" track-by="id"
-                    label="name" v-model="form.source" :allow-empty="false" :multiple="false" tabindex="1"
-                    @update:modelValue="form.source_id = $event?.id">
-                  </multiselect>
+                 
+                  <multiselect deselect-label="Selected already" :options="feederCables" track-by="id"
+                  label="name" v-model="form.source" :allow-empty="false" :multiple="false" tabindex="1" 
+                  @update:modelValue="form.source_id = $event?.id" v-if="feederCables?.length > 0">
+                </multiselect>
+                <div class="border-gray-200 border p-2 rounded-sm text-gray-600" v-else>Please Select OLT</div>
                   <div v-if="form.errors.source_id" class="text-red-500 text-sm mt-1">{{ form.errors.source_id }}</div>
                 </div>
 

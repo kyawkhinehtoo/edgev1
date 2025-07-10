@@ -176,6 +176,7 @@ class PopController extends Controller
         
         return response()->json($pops);
     }
+  
     public function destroy(Request $request, $id)
     {
         if ($request->has('id')) {

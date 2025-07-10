@@ -28,10 +28,10 @@ const search = () => {
 </script>
 
 <template>
-  <AppLayout title="JC Boxes">
+  <AppLayout title="Connection Nodes">
     <template #header>
       <h2 class="font-semibold text-xl text-white leading-tight">
-        JC Boxes
+        Connection Nodes
       </h2>
     </template>
 
@@ -50,7 +50,18 @@ const search = () => {
                 placeholder="Search by name"
               />
             </div>
-            
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Node Type</label>
+              <select
+                v-model="form.type"
+                @change="search"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="">Select type</option>
+                <option value="jc">JC</option>
+                <option value="cabinet">Cabinet</option>
+              </select>
+            </div>
         
 
             <div>
@@ -66,12 +77,12 @@ const search = () => {
           </div>
 
           <div class="flex justify-between mb-6">
-            <h3 class="text-lg font-medium">JC Box List</h3>
+            <h3 class="text-lg font-medium">Connection Node List</h3>
             <Link
               :href="route('jc-boxes.create')"
               class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Add New JC Box
+              Add New Connection Node
             </Link>
           </div>
 
@@ -79,6 +90,7 @@ const search = () => {
             <thead>
               <tr>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -87,6 +99,7 @@ const search = () => {
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="jcBox in jcBoxes.data" :key="jcBox.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ jcBox.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap uppercase">{{ jcBox.type }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ jcBox.location }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ jcBox.status }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -110,7 +123,7 @@ const search = () => {
             </tbody>
           </table>
           <span v-if="jcBoxes.total" class="block mt-4 text-xs text-gray-600">
-            {{ jcBoxes.data.length }} JC Boxs in Current Page. Total Number of JC Boxs: {{ jcBoxes.total }}
+            {{ jcBoxes.data.length }} Nodes in Current Page. Total Number of Node: {{ jcBoxes.total }}
           </span>
   
           <pagination class="mt-6" v-if="jcBoxes.links" :links="jcBoxes.links" />

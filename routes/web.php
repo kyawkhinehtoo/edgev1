@@ -155,6 +155,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::get('/getDNInfo/{id}',[PortController::class,'getDNInfo']);
 	Route::get('/getOLTByPOP/{id}',[PortController::class,'getOLTByPOP']);
 	Route::get('/getDNByOLT/{id}',[PortController::class,'getDNByOLT']);
+	Route::get('/getFeederByOLT/{id}',[PortController::class,'getFeederByOLT']);
 	Route::get('/incidentOverdue',[IncidentAlertController::class,'getOverdue']);
 	Route::get('/incidentRemain',[IncidentAlertController::class,'getRemain']);
 	Route::get('/getTask/{id}',[IncidentController::class,'getTask']);
@@ -381,7 +382,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 
 	Route::get('/getDnSplitterByOLT/{id}', [PortController::class, 'getDnSplitterByOLT']);
 	Route::get('/getAvailablePortBySplitterId/{id}', [PortController::class, 'getAvailablePortBySplitterId']);
-
+	Route::get('/getTownshipByCityId/{cityId}', [CustomerController::class, 'getTownshipByCityId'])->name('township.by-city');
 	Route::resource('smtp-settings', SmtpSettingController::class);
 	Route::resource('activities', ActivityController::class);
 

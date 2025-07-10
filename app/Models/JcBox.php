@@ -9,6 +9,7 @@ class JcBox extends Model
     protected $fillable = [
         'name',
         'location',
+        'type',
         'status'
     ];
 

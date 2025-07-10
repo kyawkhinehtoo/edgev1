@@ -252,7 +252,7 @@ export default {
             { name: "ODB-Detail", route: "odb-fiber-cables.index", icon: "fas fa-network-wired mr-2" ,show : true},
             { name: "Fiber Core", route: "fiber-cables.index", icon: "fas fa-network-wired mr-2",show : true },
            
-            { name: "JC Box List", route: "jc-boxes.index", icon: "fas fa-square mr-2" ,show : true},
+            { name: "Connection Node", route: "jc-boxes.index", icon: "fas fa-link mr-2" ,show : true},
             { name: "Core Assignment", route: "core-assignments.index", icon: "fas fa-equals mr-2",show : true },
             { name: "Distribution Node", route: "dn-boxes.index", icon: "fas fa-tv mr-2",show : true },
             { name: "DN Splitter", route: "dn-splitters.index", icon: "fas fa-network-wired mr-2" ,show : true},

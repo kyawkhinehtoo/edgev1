@@ -59,6 +59,9 @@ class Customer extends Model
         'way_list_date',
         'supervisor_id',
         'assigned_by',
+        'city_id',
+        'pppoe_username',
+        'pppoe_password',
         'created_at',
         'updated_at',
         'deleted',
@@ -78,6 +81,8 @@ class Customer extends Model
         'subcom_assign_date' => 'datetime:Y-m-d H:i:s',
         'way_list_date' => 'datetime:Y-m-d',
         'service_termination_date' => 'datetime:Y-m-d',
+        'pppoe_username' => 'string',
+        'pppoe_password' => 'string',
     ];
 
     protected $dates = [
@@ -168,9 +173,7 @@ class Customer extends Model
         'phone_2',
         'subcom_id',
         'partner_id',
-
         'isp_id',
-
         'gpon_ontid',
         'port_balance',
         'fc_used',
@@ -232,5 +235,10 @@ class Customer extends Model
     public function supervisor()
     {
         return $this->belongsTo(User::class,'supervisor_id');
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class, 'city_id');
     }
 }

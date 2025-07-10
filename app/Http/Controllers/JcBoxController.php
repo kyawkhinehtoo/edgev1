@@ -15,6 +15,9 @@ class JcBoxController extends Controller
         if ($request->filled('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
         }
+        if ($request->filled('type')) {
+            $query->where('type', 'like', '%' . $request->type . '%');
+        }
 
         if ($request->filled('status')) {
             $query->where('status', 'like', '%' . $request->status . '%');
@@ -37,6 +40,7 @@ class JcBoxController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'type' => 'required|string|in:jc,cabinet', // Add 'type' validation rule
             'location' => ['required', 'string', 'max:255', 'regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'],
             'status' => 'required|string|max:255'
         ]);
@@ -58,6 +62,7 @@ class JcBoxController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'type' => 'required|string|in:jc,cabinet',
             'location' => ['required', 'string', 'max:255', 'regex:/^-?\d+(\.\d+)?,-?\d+(\.\d+)?$/'],
             'status' => 'required|string|max:255'
         ]);

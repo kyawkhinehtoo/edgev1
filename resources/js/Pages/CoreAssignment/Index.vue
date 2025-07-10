@@ -78,7 +78,7 @@ const deleteCoreAssignment = (id) => {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700">JC Box</label>
+              <label class="block text-sm font-medium text-gray-700">Connection Node</label>
               <multiselect deselect-label="Selected already" :options="jcBoxes" track-by="id"
               label="name" v-model="form.jc" :allow-empty="true" :multiple="false" tabindex="2"
               @update:modelValue="form.jc_id = $event?.id" >
@@ -108,7 +108,7 @@ const deleteCoreAssignment = (id) => {
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source Details</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination Cable</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination Details</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">JC Box</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Connection Node</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
