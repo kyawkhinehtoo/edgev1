@@ -6,7 +6,7 @@
 
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+        <div class="bg-white shadow-xl sm:rounded-lg p-6">
           <div class="flex justify-between mb-6">
             <div class="flex items-center flex-1">
               <div class="w-1/3">
@@ -36,9 +36,9 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="isp in isps.data" :key="isp.id">
-                <td class="px-6 py-4 whitespace-nowrap">{{ isp.name }}</td>
+                <td class="px-6 py-4 whitespace-warp">{{ isp.name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ isp.short_code }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ isp.contact_person }}</td>
+                <td class="px-6 py-4 whitespace-warp">{{ isp.contact_person }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ isp.phone }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ isp.service_type }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
