@@ -561,7 +561,7 @@ class CustomerController extends Controller
             $customer->order_remark = $request->order_remark ?? '';
             $customer->deleted = 0;
             $customer->bandwidth = $request->bandwidth ?? 0;
-
+            $customer->city_id = $request->city_id ?? null;
             $customer->save();
 
             $customerAddress = new CustomerAddress();
@@ -642,11 +642,11 @@ class CustomerController extends Controller
         $user = User::find(Auth::user()->id);
         switch ($user->user_type) {
             case 'partner':
-                $partner = Partner::find($user->partner_id)->first();
+                $partner = Partner::find($user->partner_id);
                 return $partner && $partner->customer_status ? $partner->customer_status : [];
                 break;
             case 'isp':
-                $isp = Isp::find($user->isp_id)->first();
+                $isp = Isp::find($user->isp_id);
                 return $isp && $isp->customer_status ? $isp->customer_status : [];
                 break;
             case 'internal':

@@ -75,6 +75,6 @@ class Status extends Model
     // Relations ...
     public function customer()
     {
-        return $this->hasOne(Customer::class);
+        return $this->hasOne(Customer::class, 'status_id');
     }
 }
