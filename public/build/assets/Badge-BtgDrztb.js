@@ -1,1 +1,0 @@
-import{o as e,d as r,t as a,n as o}from"./app-BJW5LC8R.js";const s={__name:"Badge",props:{color:{type:String,required:!0},text:{type:String,required:!0}},setup(t){return(c,n)=>(e(),r("span",{class:o(`bg-${t.color}-100 text-${t.color}-800 text-sm font-medium px-2.5 py-0.5 rounded-sm dark:bg-${t.color}-700 dark:text-${t.color}-300 capitalize`)},a(t.text),3))}};export{s as _};

@@ -52,6 +52,7 @@
                     <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredTownships?.length !== 0">
                       <multiselect deselect-label="Selected already" :options="filteredTownships" track-by="id" label="name"
                         v-model="form.township" placeholder="Select Township" :allow-empty="false" 
+                        @update:modelValue="form.township_id = $event?.id"
                        required>
                       </multiselect>
                     </div>
@@ -386,6 +387,7 @@ export default {
       maintenance_service_id: "",
       bandwidth: "",
       bundles: "",
+      township_id: "",
       service_type: "FTTH",
     });
 
