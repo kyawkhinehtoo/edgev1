@@ -82,7 +82,7 @@ class CustomerController extends Controller
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
             })
-            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+            ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
@@ -114,7 +114,7 @@ class CustomerController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+            ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
@@ -140,7 +140,7 @@ class CustomerController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+            ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
@@ -166,7 +166,7 @@ class CustomerController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+            ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->when($user->user_type, function ($query, $user_type) use ($user) {
@@ -334,7 +334,7 @@ class CustomerController extends Controller
                     $q->where('installation_timeline', '=', $sh_installation_timeline);
                 });
             })
-            ->when($user->role->installation_supervisor, function ($query) use ($user) {
+            ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->when($request->sort, function ($query, $sort) use ($request) {

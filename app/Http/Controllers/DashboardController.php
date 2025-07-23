@@ -35,7 +35,7 @@ class DashboardController extends Controller
            ->when($user->role?->limit_region, function ($query) use ($user) {
                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
           ->where('customer_addresses.is_current',1)
@@ -52,7 +52,7 @@ class DashboardController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
            ->where('customer_addresses.is_current',1)
@@ -66,7 +66,7 @@ class DashboardController extends Controller
                 return $query->where('customers.deleted', '=', 0)
                     ->orwherenull('customers.deleted');
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->when($user->role?->limit_region, function ($query) use ($user) {
@@ -86,7 +86,7 @@ class DashboardController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
           ->where('customer_addresses.is_current',1)
@@ -102,7 +102,7 @@ class DashboardController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                 return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
           ->where('customer_addresses.is_current',1)
@@ -118,7 +118,7 @@ class DashboardController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
           ->where('customer_addresses.is_current',1)
@@ -137,7 +137,7 @@ class DashboardController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                  return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
           ->where('customer_addresses.is_current',1)
@@ -156,7 +156,7 @@ class DashboardController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                  return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
           ->where('customer_addresses.is_current',1)
@@ -175,7 +175,7 @@ class DashboardController extends Controller
             ->when($user->role?->limit_region, function ($query) use ($user) {
                  return $query->whereIn('customer_addresses.township_id', $user->role?->townships->pluck('id'));
             })
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
           ->where('customer_addresses.is_current',1)
@@ -198,7 +198,7 @@ class DashboardController extends Controller
             ->groupBy('port_sharing_services.name')
             ->orderBy('port_sharing_services.name', 'DESC')
             ->where('customer_addresses.is_current',1)
-             ->when($user->role->installation_supervisor, function ($query) use ($user) {
+             ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->get();
@@ -220,7 +220,7 @@ class DashboardController extends Controller
             ->groupBy('port_sharing_services.name')
             ->orderBy('port_sharing_services.name', 'DESC')
           ->where('customer_addresses.is_current',1)
-           ->when($user->role->installation_supervisor, function ($query) use ($user) {
+           ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->get();
@@ -242,7 +242,7 @@ class DashboardController extends Controller
             ->groupBy('port_sharing_services.name')
             ->orderBy('port_sharing_services.name', 'DESC')
           ->where('customer_addresses.is_current',1)
-           ->when($user->role->installation_supervisor, function ($query) use ($user) {
+           ->when($user->role?->installation_supervisor, function ($query) use ($user) {
                 $query->where('customers.supervisor_id', $user->id);
             })
             ->get();
