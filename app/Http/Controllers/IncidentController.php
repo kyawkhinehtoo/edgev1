@@ -83,7 +83,7 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role->incident_supervisor, function($query) use ($user){
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
                 $query->where('incidents.supervisor_id',$user->id);
              })
             ->whereNotIn('incidents.status',[3,4])
@@ -103,7 +103,7 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role->incident_supervisor, function($query) use ($user){
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
                 $query->where('incidents.supervisor_id',$user->id);
              })
              ->whereNotIn('incidents.status',[3,4])
@@ -123,7 +123,7 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role->incident_supervisor, function($query) use ($user){
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
                 $query->where('incidents.supervisor_id',$user->id);
              })
             ->whereNotIn('incidents.status',[3,4])
@@ -191,7 +191,7 @@ class IncidentController extends Controller
             ->when($request->status, function ($query, $status) use ($user){
                  $query->where('incidents.status', '=', $status);
             }, function ($query) use ($user) {
-                if($user->role->incident_supervisor == 1){
+                if($user->role?->incident_supervisor == 1){
                    return $query->whereRaw('incidents.status in (2,5,6)');
                 }
                 if($user->role->incident_oss == 1){
@@ -223,7 +223,7 @@ class IncidentController extends Controller
                 $query->whereBetween('incidents.date', [$from, $to]);
                 }
             })
-            ->when($user->role->incident_supervisor, function($query) use ($user){
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
                $query->where('incidents.supervisor_id',$user->id);
             })
             ->when($orderby, function ($query, $sort) {
@@ -277,7 +277,7 @@ class IncidentController extends Controller
             }, function ($query) {
                 $query->orderBy('incidents.id', 'DESC');
             })
-            ->when($user->role->incident_supervisor, function($query) use ($user){
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
                 $query->where('incidents.supervisor_id',$user->id);
              })
             ->select(

@@ -78,7 +78,7 @@ class IncidentTaskController extends Controller
             ->when($user->user_type=='subcon', function ($query) use ($id){
                 $query->where('assigned', $id);
             })
-            ->when($user->role->incident_supervisor, function($query) use ($user){
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
                 $query->where('i.supervisor_id',$user->id);
              })
             ->whereIn('i.status',[1,2,3,5])
