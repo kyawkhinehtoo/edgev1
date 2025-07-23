@@ -194,7 +194,7 @@ class IncidentController extends Controller
                 if($user->role?->incident_supervisor == 1){
                    return $query->whereRaw('incidents.status in (2,5,6)');
                 }
-                if($user->role->incident_oss == 1){
+                if($user->role?->incident_oss == 1){
                 return $query->whereRaw('incidents.status in (1,5)');
                 }
                 return $query->whereRaw('incidents.status in (1,2,3,5,6)');
@@ -701,7 +701,7 @@ class IncidentController extends Controller
                 $incident->resolved_time = $request->resolved_time;
 
             if (isset($request->supervisor_id)){
-                if($user->role->incident_oss == 1 ){
+                if($user->role?->incident_oss == 1 ){
                     $incident->supervisor_id = $request->supervisor_id;
                     $incident->assigned_by = $user->id;
                 }
@@ -839,7 +839,7 @@ class IncidentController extends Controller
                 if (isset($request->resolved_time) && $request->status == 5)
                     $incident->resolved_time = $request->resolved_time;
                 if (isset($request->supervisor_id)){
-                    if($user->role->incident_oss == 1 ){
+                    if($user->role?->incident_oss == 1 ){
                         $incident->supervisor_id = $request->supervisor_id;
                         $incident->assigned_by = $user->id;
                     }
