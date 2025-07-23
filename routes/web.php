@@ -182,6 +182,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::post('/exportExcel',[ExcelController::class,'exportExcel'])->name('exportExcel');
 
 	Route::get('/home', [HomeController::class, 'index'])->name('home');
+	Route::get('/getTownshipByCityId/{cityId}', [CustomerController::class, 'getTownshipByCityId'])->name('township.by-city');
 	});
 
 
@@ -382,7 +383,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 
 	Route::get('/getDnSplitterByOLT/{id}', [PortController::class, 'getDnSplitterByOLT']);
 	Route::get('/getAvailablePortBySplitterId/{id}', [PortController::class, 'getAvailablePortBySplitterId']);
-	Route::get('/getTownshipByCityId/{cityId}', [CustomerController::class, 'getTownshipByCityId'])->name('township.by-city');
+	
 	Route::resource('smtp-settings', SmtpSettingController::class);
 	Route::resource('activities', ActivityController::class);
 
