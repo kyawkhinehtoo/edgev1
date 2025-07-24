@@ -334,7 +334,7 @@
                       <!-- end of person incharge -->
 
                       <!-- supervisor  -->
-                       <template v-if="user.role.incident_oss">
+                       <template v-if="user.role?.incident_oss">
                         <div class="py-2 col-span-1 sm:col-span-1" >
                           <div class="mt-1 flex">
                             <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign Supervisor : </label>
