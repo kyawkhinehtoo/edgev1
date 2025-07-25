@@ -708,6 +708,7 @@ class CustomerController extends Controller
             ->join('role_township', 'roles.id', '=', 'role_township.role_id')
             ->select('users.name as name', 'users.id as id')
             // ->where($customer->currentAddress.township,'=', 'role_township.township_id')
+            ->where('role_township.township_id', '=', $customer->currentAddress->township->id)
             ->where('roles.installation_supervisor', 1)
             ->groupBy('users.id', 'users.name')
             ->get();

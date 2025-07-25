@@ -50,15 +50,15 @@
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Township</p>
-                                <p class="mt-1">{{ customer?.township?.name }}</p>
+                                <p class="mt-1">{{ customer?.current_address?.township?.name }}</p>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Address</p>
-                                <p class="mt-1">{{ customer.address }}</p>
+                                <p class="mt-1">{{ customer?.current_address?.address }}</p>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-500">Location</p>
-                                <p class="mt-1">{{ customer.location }}</p>
+                                <p class="mt-1">{{ customer?.current_address?.location }}</p>
                             </div>
                          
                             <div>
@@ -137,6 +137,16 @@
                             <div>
                                 <p class="text-sm font-medium text-gray-500">SN Port No.</p>
                                 <p class="mt-1">SN Port {{ snPort?.port_number }}</p>
+                            </div>
+
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">PPPOE User Name</p>
+                                <p class="mt-1">{{ customer.pppoe_username??'NA' }}</p>
+                            </div>
+                           
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">PPPOE Password</p>
+                                <p class="mt-1"> {{ customer.pppoe_password??'NA' }}</p>
                             </div>
 
 
