@@ -10,7 +10,7 @@
     <!-- Sidebar Navigation -->
     <nav :class="[
       'sm:h-screen overflow-y-auto sm:fixed sm:top-0 sm:left-0 transition-all duration-300 md:overflow-y-auto md:overflow-hidden scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-200',
-      isCollapsed ? 'sm:w-20 z-20' : 'sm:w-64',
+      isCollapsed ? 'sm:w-20 z-10' : 'sm:w-64',
       'dark:bg-gray-900 p-4 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-200'
     ]">
     
@@ -152,19 +152,21 @@
   </div>
 </template>
 <script>
-import { ref } from 'vue';
 import JetNavLink from "@/Jetstream/NavLink.vue";
+import { ref } from 'vue';
+
 import ExpandableMenu from "@/Components/ExpandableMenu.vue";
 import { Head } from "@inertiajs/vue3";
 import JetDropdown from "@/Jetstream/Dropdown.vue";
 import JetDropdownLink from "@/Jetstream/DropdownLink.vue";
 export default {
   components: {
-    JetNavLink,
+  
     ExpandableMenu,
     Head,
     JetDropdown,
     JetDropdownLink,
+    JetNavLink,
   },
   
   provide() {

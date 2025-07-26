@@ -9,8 +9,8 @@
 
         <div class="min-h-screen bg-gray-100">
             <nav class="bg-white border-b border-gray-100">
-              <div class="h-1 m-0 p-0" style="background: linear-gradient(to right, #076E9AFF 35%, #0495ABCC 65%);"></div>
-              <div class="h-1 mt-0 p-0" style="background: linear-gradient(to right, #CF970BCC 20%, #D65B09FF 80%);"></div>
+              <div class="h-1 m-0 p-0" style="background: linear-gradient(to right, #59D103CC 35%, #50B309CC 65%);"></div>
+              <div class="h-1 mt-0 p-0" style="background: linear-gradient(to right, #000E51FF 20%, #112480FF 80%);"></div>
                 <!-- Primary Navigation Menu -->
                 <div class="mx-auto px-4 sm:px-6 lg:px-8 py-2" >
                    
@@ -293,24 +293,26 @@
 </template>
 
 <script>
+import { Head } from "@inertiajs/vue3";
 import JetApplicationMark from '@/Jetstream/ApplicationMark'
 import JetApplicationLogo from '@/Jetstream/ApplicationLogo'
 import JetBanner from '@/Jetstream/Banner'
 import JetDropdown from '@/Jetstream/Dropdown'
 import JetDropdownLink from '@/Jetstream/DropdownLink'
-import JetNavLink from '@/Jetstream/NavLink'
+import JetNavLink from "@/Jetstream/NavLink.vue";
 import JetResponsiveNavLink from '@/Jetstream/ResponsiveNavLink'
-import { Head } from "@inertiajs/vue3";
+
 export default {
     components: {
         JetApplicationMark,
         JetBanner,
         JetDropdown,
         JetDropdownLink,
-        JetNavLink,
+       
         JetResponsiveNavLink,
         JetApplicationLogo,
-        Head
+        Head,
+         JetNavLink,
     },
 
     data() {

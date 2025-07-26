@@ -22,28 +22,46 @@ class DetectIsp
     public function handle(Request $request, Closure $next): Response
     {
         $domain = $request->getHost(); // Get current domain
-        $isp = Isp::findByDomain($domain);
-        $partner = Partner::findByDomain($domain);
+       // $isp = Isp::findByDomain($domain);
+       // $partner = Partner::findByDomain($domain);
         if(auth()->id()){
-            $user = User::find(auth()->id());
-            $subcon = Subcom::where('id', $user?->subcom_id)->first();
-            if($subcon){
+          
+          switch (auth()->user()->user_type) {
+            
+            case 'isp':
+                $isp = Isp::find(auth()->user()->isp_id);
+            //    $isp = Isp::findByDomain($domain);
+                Inertia::share('login_type', 'isp');
+                Inertia::share('isp', $isp);
+                break;
+            case 'partner':
+                $partner = Partner::find(auth()->user()->partner_id);
+                Inertia::share('login_type', 'partner');
+                Inertia::share('isp', $partner);
+                break;
+            case 'subcon':
+                $subcom = Subcom::find(auth()->user()->subcom_id);
                 Inertia::share('login_type', 'subcon');
-                return $next($request);
-            }
+                Inertia::share('subcon', $subcom);
+                break;
+            default:
+                Inertia::share('login_type', 'internal');
+                break;
+          }
         }
        
-        if($isp){
-            Inertia::share('login_type', 'isp');
-            Inertia::share('isp', $isp);
-            return $next($request);
-        }else if($partner){
-            Inertia::share('login_type', 'partner');
-            Inertia::share('partner', $partner);
-            return $next($request);
-        }else {
-            Inertia::share('login_type', 'internal');
-        }
+        // if($isp){
+        //     Inertia::share('login_type', 'isp');
+        //     Inertia::share('isp', $isp);
+        //     return $next($request);
+        // }else if($partner){
+        //     Inertia::share('login_type', 'partner');
+        //     Inertia::share('partner', $partner);
+        //     return $next($request);
+        // }else {
+        //     Inertia::share('login_type', 'internal');
+        // }
+         Inertia::share('login_type', 'internal');
         return $next($request);
         
     }

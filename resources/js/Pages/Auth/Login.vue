@@ -43,7 +43,7 @@ const submit = () => {
         <template #logo>
             <span class="flex flex-col align-middle uppercase text-gray-400 gap-4">
                 <span v-if="$page.props.login_type === 'internal'">
-                    <img v-if="$page.props.logo_small" :src="`/storage/${$page.props.logo_small}`" alt="Logo" class="w-32" />
+                    <img v-if="$page.props.logo_large" :src="`/storage/${$page.props.logo_large}`" alt="Logo" class="w-64" />
                   </span>
                   <span v-else-if="$page.props.login_type === 'isp'" class="flex items-center gap-4 ">
                     <img v-if="$page.props.logo_small" :src="`/storage/${$page.props.logo_small}`" alt="Logo" class="w-20" />

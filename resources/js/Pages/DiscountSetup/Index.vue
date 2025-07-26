@@ -80,7 +80,7 @@
           </div>
 
         </div>
-        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg" v-if="discounts.data">
+        <div class="bg-white  shadow-xl sm:rounded-lg" v-if="discounts.data">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -158,6 +158,11 @@
                           <input type="text" v-model="form.name" name="name" id="name"
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             placeholder="Name" required />
+                        </div>
+                       
+                         <div class="py-2 text-red-600" v-if=" $page.props.errors?.name">
+                          
+                           {{ $page.props.errors.name }}
                         </div>
                       </div>
                       <div class="py-2">
