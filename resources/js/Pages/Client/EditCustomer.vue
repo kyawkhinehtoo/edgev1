@@ -405,7 +405,8 @@
                           <label for="pop_device_id" class="block text-sm font-medium text-gray-700"> Choose OLT</label>
                           <div class="mt-1 flex rounded-md shadow-sm">
                             <multiselect deselect-label="Selected already" :options="popDevices" track-by="id"
-                              label="device_name" v-model="form.pop_device_id" :allow-empty="false">
+                              label="device_name" v-model="form.pop_device_id" :allow-empty="false" 
+                              :disabled="checkPerm('partner_id')" >
                             </multiselect>
                           </div>
                         </div>
