@@ -539,7 +539,7 @@
 
                         <hr class="my-4 md:min-w-full" />
                         <h6 class="md:min-w-full text-indigo-700 text-xs uppercase font-bold block pt-1 no-underline">
-                          Installation Information</h6>
+                          Team Assign Information</h6>
 
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-4">
                           <div class="col-span-1 sm:col-span-1">
@@ -583,6 +583,13 @@
                             <p v-show="$page.props.errors.way_list_date" class="mt-2 text-sm text-red-500">{{
                               $page.props.errors.way_list_date }}</p>
                           </div>
+                        </div>
+                        <hr class="my-4 md:min-w-full" />
+                        <h6 class="md:min-w-full text-indigo-700 text-xs uppercase font-bold block pt-1 no-underline">
+                          Installation Information</h6>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-4">
+                          
                           <div class="col-span-1 sm:col-span-1">
                             <label for="installation_date" class="block text-sm font-medium text-gray-700"> Actual
                               Installed

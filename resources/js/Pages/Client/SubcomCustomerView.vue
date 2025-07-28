@@ -158,6 +158,7 @@
                             Installation Information</h6>
                         <!-- Editable Fields -->
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
+                            
                             <div class="col-span-1">
                                 <label class="block text-sm font-medium text-gray-700"><span
                                         class="text-red-500">*</span>
