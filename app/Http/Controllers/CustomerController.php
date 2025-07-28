@@ -358,7 +358,7 @@ class CustomerController extends Controller
                 }
             }, function ($query) {
                 // Default sorting if no sort parameter is provided
-                $query->orderBy('customers.id', 'desc');
+                $query->orderBy('updated_at', 'desc');
             })
             ->select('customers.*', 'customer_addresses.address as address', 'customer_addresses.location as location', 'customer_addresses.township_id as township_id', 'townships.name as township_name')
 
