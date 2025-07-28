@@ -380,7 +380,7 @@
                           <label for="pop_site" class="block text-sm font-medium text-gray-700">Choose POP Site </label>
                           <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredPops.length !== 0">
                             <multiselect deselect-label="Selected already" :options="filteredPops" track-by="id"
-                              label="site_name" v-model="form.pop_id" :allow-empty="false">
+                              label="site_name" v-model="form.pop_id" :allow-empty="false" :disabled="checkPerm('partner_id')">
                             </multiselect>
                           </div>
                           <div v-else class="text-sm text-gray-500 mt-1">
