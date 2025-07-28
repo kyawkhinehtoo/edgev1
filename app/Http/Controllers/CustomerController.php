@@ -554,14 +554,30 @@ class CustomerController extends Controller
             $customer->created_by = Auth::user()->id;
             $customer->service_type = $request->service_type ?? '';
             $customer->port_sharing_service_id = $selectedService ? $selectedService->id : null;
-            if ($request->service_type == 'ftth') {
+            
+            if ($request->service_type == 'FTTH') {
+          
                 $customer->installation_service_id = $request->installation_service_id ?? null;
             }
+   
+       
             $customer->maintenance_service_id = $request->maintenance_service_id ?? null;
             $customer->order_remark = $request->order_remark ?? '';
             $customer->deleted = 0;
             $customer->bandwidth = $request->bandwidth ?? 0;
             $customer->city_id = $request->city_id ?? null;
+               if (!empty($request->bundles)) {
+               
+                        $bundle_list = $request->bundles;
+                        $customer->bundle = '';
+                        foreach ($bundle_list as $key => $value) {
+
+                            if ($key !== array_key_last($bundle_list))
+                                $customer->bundle .= $value['id'] . ',';
+                            else
+                                $customer->bundle .= $value['id'];
+                        }
+                    }
             $customer->save();
 
             $customerAddress = new CustomerAddress();
@@ -571,6 +587,7 @@ class CustomerController extends Controller
             $customerAddress->township_id = isset($request->township['id']) ? $request->township['id'] : null;
             $customerAddress->type = 'new_installation';
             $customerAddress->is_current = 1;
+            
             $customerAddress->save();
 
             DB::commit();

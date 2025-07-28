@@ -65,7 +65,10 @@
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="cities.length !== 0">
                           <multiselect deselect-label="Selected already" :options="cities" track-by="id" label="name"
                             v-model="form.city" placeholder="Select City" :allow-empty="false"
-                            @update:modelValue="form.city_id = $event?.id" required>
+                            @update:modelValue="form.city_id = $event?.id" required
+                            :disabled="checkPerm('city_id')"
+                            >
+
                           </multiselect>
                         </div>
                         <p v-show="$page.props.errors.city_id" class="mt-2 text-sm text-red-500">{{
@@ -78,7 +81,9 @@
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredTownships.length !== 0">
                           <multiselect deselect-label="Selected already" :options="filteredTownships" track-by="id"
                             label="name" v-model="form.township" placeholder="Select Township" :allow-empty="false"
-                            @update:modelValue="form.township_id = $event?.id" required>
+                            @update:modelValue="form.township_id = $event?.id" required
+                            :disabled="checkPerm('city_id')"
+                            >
                           </multiselect>
                         </div>
                         <p v-show="$page.props.errors.township_id" class="mt-2 text-sm text-red-500">{{
@@ -112,7 +117,7 @@
                           </span>
                           <input type="text" v-model="form.latitude" name="latitude" id="latitude"
                             class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            v-on:keypress="isNumber(event)" />
+                            v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')"/>
                         </div>
                         <p v-show="$page.props.errors.latitude" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.latitude }}</p>
@@ -126,7 +131,7 @@
                           </span>
                           <input type="text" v-model="form.longitude" name="longitude" id="longitude"
                             class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            v-on:keypress="isNumber(event)" />
+                            v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')"/>
                         </div>
                         <p v-show="$page.props.errors.longitude" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.longitude }}</p>
@@ -143,7 +148,7 @@
                           </span>
                           <textarea v-model="form.address" name="address" id="address"
                             class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            required />
+                            required :disabled="checkPerm('city_id')"/>
                         </div>
                         <p v-show="$page.props.errors.address" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.address }}</p>
@@ -313,19 +318,7 @@
                           $page.props.errors.order_remark }}</p>
                       </div>
 
-                      <div class="col-span-1 sm:col-span-1">
-                        <label for="order_remark" class="block text-sm font-medium text-gray-700"> Assign Supervisor
-                        </label>
-                        <div class="mt-1 flex rounded-md shadow-sm">
-                          <multiselect deselect-label="Selected already" :options="supervisors" track-by="id"
-                            label="name" v-model="form.supervisor" :allow-empty="false"
-                            @update:modelValue="form.supervisor_id = $event?.id" :disabled="checkPerm('supervisor_id')"
-                            :class="text - xs">
-                          </multiselect>
-                        </div>
-                        <p v-show="$page.props.errors.order_remark" class="mt-2 text-sm text-red-500">{{
-                          $page.props.errors.order_remark }}</p>
-                      </div>
+                      
 
                       <div class="col-span-1 sm:col-span-1" v-if="$page.props.login_type == 'isp'">
                         <label for="isp" class="block text-sm font-medium text-gray-700"> Installation Date </label>
@@ -520,6 +513,19 @@
                           <p v-show="$page.props.errors.service_activation_date" class="mt-2 text-sm text-red-500">{{
                             $page.props.errors.service_activation_date }}</p>
                         </div>
+                        <div class="col-span-1 sm:col-span-1">
+                        <label for="supervisor_id" class="block text-sm font-medium text-gray-700"> Assign Supervisor
+                        </label>
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                          <multiselect deselect-label="Selected already" :options="supervisors" track-by="id"
+                            label="name" v-model="form.supervisor" :allow-empty="false"
+                            @update:modelValue="form.supervisor_id = $event?.id" :disabled="checkPerm('supervisor_id')"
+                            :class="text - xs">
+                          </multiselect>
+                        </div>
+                        <p v-show="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.supervisor_id }}</p>
+                      </div>
                         <!-- <div class="text-sm text-gray-600 mt-2  col-span-4" v-if="dnInfo">
                           GPON INFO : {{ dnInfo }}
 
