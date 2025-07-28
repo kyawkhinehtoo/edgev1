@@ -275,7 +275,36 @@
                  
                
                  
-                 
+                 <div class="col-span-1 sm:col-span-1">
+                          <label for="pppoe_username" class="block text-sm font-medium text-gray-700"> PPPOE
+                            Account</label>
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <span
+                              class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                              <i class="fas fa-tools"></i>
+                            </span>
+                            <input v-model="form.pppoe_username" type="text" name="pppoe_username" id="pppoe_username"
+                              class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              placeholder="Enter PPPOE Account" :disabled="checkPerm('pppoe_username')" />
+                            <p v-show="$page.props.errors.pppoe_username" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.pppoe_username }}</p>
+                          </div>
+                        </div>
+                        <div class="col-span-1 sm:col-span-1">
+                          <label for="pppoe_password" class="block text-sm font-medium text-gray-700"> PPPOE
+                            Password</label>
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <span
+                              class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                              <i class="fas fa-tools"></i>
+                            </span>
+                            <input v-model="form.pppoe_password" type="text" name="pppoe_password" id="pppoe_password"
+                              class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              placeholder="Enter PPPOE Password" :disabled="checkPerm('pppoe_password')" />
+                            <p v-show="$page.props.errors.pppoe_password" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.pppoe_password }}</p>
+                          </div>
+                        </div>
 
                   
                   <div class="col-span-1 sm:col-span-2">
@@ -389,6 +418,8 @@ export default {
       bundles: "",
       township_id: "",
       service_type: "FTTH",
+      pppoe_username: "",
+      pppoe_password: "",
     });
 
     function resetForm() {

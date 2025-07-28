@@ -386,7 +386,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	
 	Route::resource('smtp-settings', SmtpSettingController::class);
 	Route::resource('activities', ActivityController::class);
-
+	Route::get('/sn/nearby', [SnSplitterController::class, 'nearby'])->name('sn.nearby');
 	Route::get('/send-dynamic-email', function (DynamicMailService $mailService) {
     $data = ['name' => 'Kyaw Khine Htoo'];
     $mailService->send('kkhmailbox@gmail.com', new MyTestMail($data));

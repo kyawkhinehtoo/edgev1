@@ -554,7 +554,8 @@ class CustomerController extends Controller
             $customer->created_by = Auth::user()->id;
             $customer->service_type = $request->service_type ?? '';
             $customer->port_sharing_service_id = $selectedService ? $selectedService->id : null;
-            
+            $customer->pppoe_username = $request->pppoe_username ?? '';
+            $customer->pppoe_password = $request->pppoe_password ?? '';
             if ($request->service_type == 'FTTH') {
           
                 $customer->installation_service_id = $request->installation_service_id ?? null;

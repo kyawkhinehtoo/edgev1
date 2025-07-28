@@ -205,6 +205,12 @@
                                 type="checkbox" v-model="form.installation_oss" />
                               Installation OSS
                             </label>
+                            <label class="inline-flex ml-2 text-sm">
+                              <input
+                                class="text-gray-500 text-sm w-6 h-6 mr-2 focus:ring-gray-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                type="checkbox" v-model="form.check_sn" />
+                              Check Nearby SN
+                            </label>
                           
                           
                           
@@ -512,6 +518,7 @@ export default {
       form.incident_supervisor = null;
       form.incident_oss = null;
       form.service_request = null;
+      form.check_sn = null;
       form.townships = [];
     }
     function submit() {
@@ -592,6 +599,7 @@ export default {
       form.product_catalog = (data.product_catalog)? true : false;
       form.smtp_setting = (data.smtp_setting)? true : false;
       form.service_request = (data.service_request)? true : false;
+      form.check_sn = (data.check_sn)? true : false;
       form.customer_status = data.customer_status;
       form.townships = data.townships || [];
       editMode.value = true;

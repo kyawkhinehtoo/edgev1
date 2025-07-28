@@ -351,7 +351,7 @@
                       <hr class="my-4 md:min-w-full" />
                       <h6 class="md:min-w-full text-indigo-700 text-xs uppercase font-bold block pt-1 no-underline">
                         ODN Information</h6>
-
+                        
                       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-4">
                         <div class="col-span-1 sm:col-span-1">
                           <label for="isp" class="block text-sm font-medium text-gray-700"> Customer ID </label>
@@ -376,19 +376,7 @@
                             $page.props.errors.isp_id
                           }}</p>
                         </div>
-                        <div class="col-span-1 sm:col-span-1">
-                          <label for="partner" class="block text-sm font-medium text-gray-700"> Partner </label>
-                          <div class="mt-1 flex rounded-md shadow-sm" v-if="partners.length !== 0">
-                            <multiselect deselect-label="Selected already" :options="partners" track-by="id"
-                              label="name" v-model="form.partner_id" :allow-empty="true"
-                              :disabled="checkPerm('partner_id')">
-                            </multiselect>
-                          </div>
-                          <p v-show="$page.props.errors.partner_id" class="mt-2 text-sm text-red-500">{{
-                            $page.props.errors.partner_id
-                          }}</p>
-                        </div>
-                        <div class="col-span-1 sm:col-span-1">
+                         <div class="col-span-1 sm:col-span-1">
                           <label for="pop_site" class="block text-sm font-medium text-gray-700">Choose POP Site </label>
                           <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredPops.length !== 0">
                             <multiselect deselect-label="Selected already" :options="filteredPops" track-by="id"
@@ -399,6 +387,19 @@
                             Please select a township first to view available POPs
                           </div>
                         </div>
+                        <div class="col-span-1 sm:col-span-1">
+                          <label for="partner" class="block text-sm font-medium text-gray-700"> Partner </label>
+                          <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredPartners?.length !== 0">
+                            <multiselect deselect-label="Selected already" :options="filteredPartners" track-by="id"
+                              label="name" v-model="form.partner_id" :allow-empty="true"
+                              :disabled="checkPerm('partner_id')">
+                            </multiselect>
+                          </div>
+                          <p v-show="$page.props.errors.partner_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.partner_id
+                          }}</p>
+                        </div>
+                       
                         <div class="col-span-1 sm:col-span-1">
                           <label for="pop_device_id" class="block text-sm font-medium text-gray-700"> Choose OLT</label>
                           <div class="mt-1 flex rounded-md shadow-sm">
@@ -1270,7 +1271,16 @@ export default {
         // form.gpon_port = null;
         form.gpon_ontid = null;
         form.port_balance = null;
-
+          // Filter partners by pop_device_id
+        if (form.pop_id && form.pop_id.partner_id) {
+          console.log('Filtering partners by pop', form.pop_id.partner_id);
+          filteredPartners.value = props.partners.filter(p => p.id === form.pop_id.partner_id);
+          form.partner_id = form.pop_id.partner_id;
+        } else {
+          console.log('Resetting partners to all partners');
+          filteredPartners.value = props.partners;
+          form.partner_id = null;
+        }
       }
     );
     watch(
@@ -1518,7 +1528,8 @@ export default {
       installationApproval,
       isOptionDisabled,
       filteredInstallationServices,
-      filteredMaintenanceServices
+      filteredMaintenanceServices,
+      filteredPartners
     };
   },
 };

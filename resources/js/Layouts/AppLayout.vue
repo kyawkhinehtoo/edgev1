@@ -271,6 +271,7 @@ export default {
           links: [
             { name: "Dashboard", route: "dashboard", icon: "fas fa-tv mr-2" , show : true},
             { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2",show : true },
+            { name: "Nearby SN ", route: "sn.nearby", icon: "fas fa-circle-info mr-2" ,show: this.$page.props?.role?.check_sn == 1 },
             { name: "Service Request", route: "servicerequest.index", icon: "fas fa-tasks mr-2", show: this.$page.props?.role?.service_request == 1 },
             { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600" ,show : true},
           ],
@@ -333,6 +334,7 @@ export default {
             // { name: "IP Usages Report", route: "publicIpReport", icon: "fas fa-server mr-2" },
             { name: "DN SN Report", route: "dnSnReport", icon: "fas fa-tower-broadcast mr-2" ,show : true},
             { name: "Activity Log", route: "activity-log.index", icon: "fas fa-circle-info mr-2" ,show : true},
+          
           ],
         },
       ],

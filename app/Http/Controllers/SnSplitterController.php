@@ -5,13 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\SnSplitter;
 use App\Models\SnBox;
 use App\Models\FiberCable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+
 
 class SnSplitterController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        $user->load('role');
+        if (!$user->role->dn_panel) {
+            abort(403, 'Unauthorized access.');
+        }
         $snSplitters = SnSplitter::with(['snBox', 'fiberCable'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
@@ -132,5 +139,32 @@ class SnSplitterController extends Controller
         
         return redirect()->route('sn-splitters.index')
             ->with('message', 'SN Splitter deleted successfully.');
+    }
+
+    public function nearby(Request $request)
+    {
+        $user = Auth::user();
+        $user->load('role');
+        if (!$user->role->check_sn) {
+              abort(403, 'Unauthorized access.');
+        }
+        $location = $request->input('location');
+        $radius = $request->input('radius', 10); // default 10km
+        if (!$location) {
+            return Inertia::render('SnSplitter/Nearby', [
+                'splitters' => [],
+                'location' => null,
+                'radius' => $radius,
+                'error' => 'Location is required.'
+            ]);
+        }
+        $perPage = $request->input('per_page', 10);
+        $splitters = \App\Models\SnSplitter::nearby($location, $radius)->paginate($perPage);
+        return Inertia::render('SnSplitter/Nearby', [
+            'splitters' => $splitters,
+            'location' => $location,
+            'radius' => $radius,
+            'error' => null
+        ]);
     }
 }

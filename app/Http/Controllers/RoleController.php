@@ -82,6 +82,7 @@ class RoleController extends Controller
             'product_catalog' => 'nullable|boolean',
             'smtp_setting' => 'nullable|boolean',
             'service_request' => 'nullable|boolean',
+            'check_sn' => 'nullable|boolean',
             'townships' => 'nullable|array',
         ]);
 
@@ -133,6 +134,7 @@ class RoleController extends Controller
             'product_catalog' => 'nullable|boolean',
             'smtp_setting' => 'nullable|boolean',
             'service_request' => 'nullable|boolean',
+            'check_sn' => 'nullable|boolean',
             'townships' => 'nullable|array',
         ]);
 

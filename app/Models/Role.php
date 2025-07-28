@@ -70,6 +70,7 @@ class Role extends Model
         'installation_oss',
         'incident_oss',
         'service_request',
+        'check_sn',
         'created_at',
         'updated_at'
     ];
