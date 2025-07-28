@@ -1087,6 +1087,7 @@ class CustomerController extends Controller
             ]);
             $customerAddress->township_id = isset($request->township_id) ? $request->township_id : null;
             $customerAddress->location = ($request->latitude ?? '') . ',' . ($request->longitude ?? '');
+            $customerAddress->actual_location = ($request->actual_latitude ?? '') . ',' . ($request->actual_longitude ?? '');
             $customerAddress->address = $request->address ?? '';
             $customerAddress->type = $customerAddress->type ?? 'new_installation';
             $customerAddress->is_current = 1;

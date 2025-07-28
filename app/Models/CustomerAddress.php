@@ -12,6 +12,7 @@ class CustomerAddress extends Model
         'customer_id',
         'township_id',
         'location',
+        'actual_location',
         'address',
         'is_current',
         'type',

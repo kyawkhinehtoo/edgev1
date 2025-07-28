@@ -654,12 +654,39 @@
                                 $page.props.errors.onu_power }}</p>
                             </div>
                           </div>
+                          <div class="col-span-1 sm:col-span-1">
+                          <label for="actual_latitude" class="block text-sm font-medium text-gray-700">Actual Latitude </label>
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <span
+                              class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                              <i class="fas fa-location-arrow"></i>
+                            </span>
+                            <input type="text" v-model="form.actual_latitude" name="actual_latitude" id="actual_latitude"
+                              class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')"/>
+                          </div>
+                          <p v-show="$page.props.errors.actual_latitude" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.actual_latitude }}</p>
+                        </div>
+                        <div class="col-span-1 sm:col-span-1">
+                          <label for="actual_longitude" class="block text-sm font-medium text-gray-700">Actual Longitude </label>
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <span
+                              class="z-10 leading-snug font-normal  text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                              <i class="fas fa-location-arrow"></i>
+                            </span>
+                            <input type="text" v-model="form.actual_longitude" name="actual_longitude" id="actual_longitude"
+                              class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')"/>
+                          </div>
+                          <p v-show="$page.props.errors.actual_longitude" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.actual_longitude }}</p>
+                        </div>
 
 
 
 
-
-                          <div class="col-span-1 sm:col-span-4">
+                          <div class="col-span-1 sm:col-span-2">
                             <label for="installation_remark" class="block text-sm font-medium text-gray-700">
                               Installation
                               Remark </label>
@@ -901,6 +928,7 @@ export default {
     let pop_devices = ref("");
     let pppoe_auto = ref(false);
     let lat_long = '';
+    let actual_lat_long = '';
     const bundle = ref(null);
     // const dnInfo = ref(null);
     const textContent = ref(null);
@@ -941,7 +969,9 @@ export default {
     if (props.customer.current_address?.location) {
       lat_long = props.customer.current_address.location.split(",", 2);
     }
-
+    if (props.customer.current_address?.actual_location) {
+      actual_lat_long = props.customer.current_address.actual_location.split(",", 2);
+    }
     let tab = ref(1);
     let selected_id = ref("");
     const popDevices = ref([]);
@@ -959,6 +989,8 @@ export default {
       address: props.customer.current_address?.address,
       latitude: (lat_long[0]) ? lat_long[0] : '',
       longitude: (lat_long[1]) ? lat_long[1] : '',
+      actual_latitude: (actual_lat_long[0]) ? actual_lat_long[0] : '',
+      actual_longitude: (actual_lat_long[1]) ? actual_lat_long[1] : '',
       order_date: props.customer.order_date,
       order_remark: props.customer.order_remark,
       installation_date: props.customer.installation_date,

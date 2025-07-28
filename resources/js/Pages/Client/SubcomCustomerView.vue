@@ -157,7 +157,7 @@
                         <h6 class="md:min-w-full text-indigo-700 text-xs uppercase font-bold block pt-1 no-underline">
                             Installation Information</h6>
                         <!-- Editable Fields -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-6 mt-6">
                             
                             <div class="col-span-1">
                                 <label class="block text-sm font-medium text-gray-700"><span
@@ -166,7 +166,10 @@
                                 <div class="mt-1 flex rounded-md shadow-sm" v-if="installationStatus.length !== 0">
                                     <multiselect deselect-label="Selected already" :options="installationStatus"
                                         track-by="id" label="name" v-model="form.installation_status"
-                                        :allow-empty="false" :multiple="false" :taggable="false"></multiselect>
+                                        :allow-empty="false" :multiple="false" :taggable="false">
+                                     <template v-slot:singleLabel="{ option }"><strong>{{ option.name }}
+                                 </strong></template>
+                                    </multiselect>
                                 </div>
                                 <p v-show="$page.props.errors.installation_status" class="mt-2 text-sm text-red-500">{{
                                     $page.props.errors.installation_status }}</p>
@@ -196,7 +199,7 @@
                                 <p v-show="$page.props.errors.fiber_distance" class="mt-2 text-sm text-red-500">{{
                                     $page.props.errors.fiber_distance }}</p>
                             </div>
-                            <div class="col-span-1">
+                            <!-- <div class="col-span-1">
                                 <label class="block text-sm font-medium text-gray-700">Devices</label>
                                 <multiselect deselect-label="Selected already" :options="bundle_equiptments"
                                     track-by="id" label="name" v-model="form.bundles" :allow-empty="false"
@@ -204,7 +207,7 @@
                                 </multiselect>
                                 <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
                                     $page.props.errors.bundles }}</p>
-                            </div>
+                            </div> -->
                             <div class="col-span-1">
                                 <label class="block text-sm font-medium text-gray-700">ONU Serial</label>
                                 <input type="text" v-model="form.onu_serial"
@@ -219,7 +222,35 @@
                                 <p v-show="$page.props.errors.onu_power" class="mt-2 text-sm text-red-500">{{
                                     $page.props.errors.onu_power }}</p>
                             </div>
-                            <div class="col-span-1 sm:col-span-2">
+                            <div class="col-span-1 sm:col-span-1">
+                          <label for="actual_latitude" class="block text-sm font-medium text-gray-700">Actual Latitude </label>
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <span
+                              class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                              <i class="fas fa-location-arrow"></i>
+                            </span>
+                            <input type="text" v-model="form.actual_latitude" name="actual_latitude" id="actual_latitude"
+                              class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              v-on:keypress="isNumber(event)" />
+                          </div>
+                          <p v-show="$page.props.errors.actual_latitude" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.actual_latitude }}</p>
+                        </div>
+                        <div class="col-span-1 sm:col-span-1">
+                          <label for="actual_longitude" class="block text-sm font-medium text-gray-700">Actual Longitude </label>
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <span
+                              class="z-10 leading-snug font-normal  text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                              <i class="fas fa-location-arrow"></i>
+                            </span>
+                            <input type="text" v-model="form.actual_longitude" name="actual_longitude" id="actual_longitude"
+                              class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              v-on:keypress="isNumber(event)" />
+                          </div>
+                          <p v-show="$page.props.errors.actual_longitude" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.actual_longitude }}</p>
+                        </div>
+                            <div class="col-span-1 sm:col-span-4">
                                 <label class="block text-sm font-medium text-gray-700">Installation Remark</label>
                                 <textarea v-model="form.installation_remark"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></textarea>
@@ -334,6 +365,10 @@ export default {
         function tabClick(val) {
             tab.value = val;
         }
+        let actual_lat_long = '';
+         if (props.customer.current_address?.actual_location) {
+            actual_lat_long = props.customer.current_address.actual_location.split(",", 2);
+        }
         // Initialize the form with checklist fields
         const form = useForm({
             installation_status: null,
@@ -351,6 +386,8 @@ export default {
             end_meter_txt: props.customer.end_meter_txt,
             end_meter_image: null,
             installation_remark: props.customer.installation_remark,
+            actual_latitude: (actual_lat_long[0]) ? actual_lat_long[0] : '',
+            actual_longitude: (actual_lat_long[1]) ? actual_lat_long[1] : '',
             // Add dynamic checklist form fields
             ...Object.fromEntries(
                 props.subconCheckList ?
@@ -363,14 +400,11 @@ export default {
         });
 
         const installationStatus = ref([
-            { id: 'team_assigned', name: 'Team Assigned' },
-            { id: 'cable_done', name: 'Cable Done' },
-            { id: 'config_done', name: 'Config Done' },
-            { id: 'completed', name: 'Completed' },
+            { id: 'team_assigned', name: 'Team Assigned' ,'$isDisabled': true},
+            { id: 'installation_start', name: 'Installation Start' },
+            { id: 'installation_complete', name: 'Installation Complete' },
             { id: 'customer_cancel', name: 'Customer Cancel' },
-            { id: 'pending_odb_issue', name: 'Pending ODB Issue' },
-            { id: 'pending_port_full', name: 'Pending Port Full' },
-            { id: 'pending_reappointment', name: 'Pending Reappointment' },
+            { id: 'port_full', name: 'Port Full' },
         ]);
         onMounted(() => {
             form.installation_status = props.customer.installation_status ?
