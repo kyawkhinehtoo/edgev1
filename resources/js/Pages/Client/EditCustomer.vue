@@ -391,7 +391,8 @@
                           <label for="partner" class="block text-sm font-medium text-gray-700"> Partner </label>
                           <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredPartners?.length !== 0">
                             <multiselect deselect-label="Selected already" :options="filteredPartners" track-by="id"
-                              label="name" v-model="form.partner_id" :allow-empty="true"
+                              label="name" v-model="form.partner" :allow-empty="true"
+                              @update:modelValue="form.partner_id = $event?.id"
                               :disabled="checkPerm('partner_id')">
                             </multiselect>
                           </div>
@@ -900,6 +901,7 @@ export default {
     const snName = ref(null);
     const snPort = ref(null);
     const filteredPartners = ref([]);
+    filteredPartners.value = props.customer.partner_id? props.partners.filter(partner => partner.id === props.customer.partner_id) : [];
     const filteredPops = ref([]);
     const filteredTownships = ref([]);
     const checklistImagePreviews = ref({});
@@ -980,7 +982,8 @@ export default {
       pop_device_id: props.snPort?.pop_device,
       dn_id: props.snPort?.dn_splitter,
       sn_id: props.snPort?.sn_splitter,
-      partner_id: props.customer.partner,
+      partner_id: props.customer.partner_id,
+      partner: props.customer?.partner,
       isp_id: props.customer.isp,
       way_list_date: props.customer.way_list_date,
       installation_status: '',
@@ -1430,6 +1433,20 @@ export default {
         fetchSNs();
 
       }
+   
+      // else{
+      //   if (form.pop_id && form.pop_id.partner_id) {
+      //     console.log('Filtering partners by pop', form.pop_id.partner_id);
+      //     filteredPartners.value = props.partners.filter(p => p.id === form.pop_id.partner_id);
+      //     form.partner_id = form.pop_id.partner_id;
+        
+      //   } else {
+      //     console.log('Resetting partners to all partners');
+      //     filteredPartners.value = props.partners;
+      //     form.partner_id = null;
+      //   }
+      // }
+      
       // if (props.customer.pop_device_id && dnInfo.value && props.customer.sn_id) {
       //   gponInfo.value = `${dnInfo.value}`;
       // }

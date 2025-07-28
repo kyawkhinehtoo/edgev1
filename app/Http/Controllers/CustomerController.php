@@ -923,8 +923,7 @@ class CustomerController extends Controller
                 }
                 if ($value == 'partner_id') {
                     if (isset($request->partner_id)){
-                        $partner_id  =  $request->partner_id ? json_decode($request->partner_id)?->id : null;
-                        $customer->$value = $partner_id;
+                       $customer->$value =  $request->partner_id;
                     }
                       continue;   
                 }
