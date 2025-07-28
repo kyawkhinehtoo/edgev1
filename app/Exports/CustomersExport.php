@@ -58,138 +58,148 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
             ->get()
             ->toArray();
             $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
-        $mycustomer =   Customer::with('package','township','isp','status','subcon')
-                        ->leftJoin('sn_ports', 'sn_ports.customer_id', '=', 'customers.id')
-                        ->where(function ($query) {
-                            return $query->where('customers.deleted', '=', 0)
-                                ->orWhereNull('customers.deleted');
-                        })
-                        ->when($user->role?->limit_region, function ($query) use ($user) {
-                            return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
-                        })
-                        ->when($user->user_type, function ($query, $user_type) use ($user) {
-                            if($user_type == 'partner') {
-                                $query->where('customers.partner_id', '=', $user->partner_id);
-                            }
-                            if($user_type == 'isp') {
-                                $query->where('customers.isp_id', '=', $user->isp_id);
-                            }
-                            if($user_type == 'subcon') {
-                                $query->where('customers.subcom_id', '=', $user->subcom_id);
-                            }
-                    
-                        })
-                        ->when($request->keyword, function ($query, $search = null) {
-                            $query->where(function ($query) use ($search) {
-                                $query->where('customers.name', 'LIKE', '%' . $search . '%')
-                                    ->orWhere('customers.ftth_id', 'LIKE', '%' . $search . '%');
-                            });
-                        })->when($request->general, function ($query, $general) {
-                            $query->where(function ($query) use ($general) {
-                                $query->where('customers.name', 'LIKE', '%' . $general . '%')
-                                    ->orWhere('customers.ftth_id', 'LIKE', '%' . $general . '%')
-                                    ->orWhere('customers.phone_1', 'LIKE', '%' . $general . '%');
-                            });
-                        })
-                        ->when($request->installation, function ($query, $installation) {
-                            $startDate = Carbon::parse($installation[0])->format('Y-m-d');
-                            $endDate = Carbon::parse($installation[1])->format('Y-m-d');
-                            $query->whereBetween('customers.installation_date', [$startDate, $endDate]);
-                        })
-                        ->when($request->order, function ($query, $order) {
-                            $startDate = Carbon::parse($order[0])->format('Y-m-d');
-                            $endDate = Carbon::parse($order[1])->format('Y-m-d');
-                            $query->whereBetween('customers.order_date',  [$startDate, $endDate]);
-                        })
-                        ->when($request->prefer, function ($query, $prefer) {
-                            $startDate = Carbon::parse($prefer[0])->format('Y-m-d');
-                            $endDate = Carbon::parse($prefer[1])->format('Y-m-d');
-                            $query->whereBetween('customers.prefer_install_date', [$startDate, $endDate]);
-                        })
-                        ->when($request->dn, function ($query, $dn_2) {
-                            $query->where('sn_ports.dn_splitter_id', '=', $dn_2['id']);
-                        })
-                        ->when($request->sn, function ($query, $sn) {
-                            $query->where('sn_ports.sn_splitter_id', '=', $sn['id']);
-                        })
-                        ->when($request->pop, function ($query, $pop) {
-                            $query->where('sn_ports.pop_id', '=', $pop['id']);
-                        })
-                        ->when($request->pop_device, function ($query, $pop_device) {
-                            $query->where('sn_ports.pop_device_id', '=', $pop_device['id']);
-                        })
-                        ->when($request->package, function ($query, $package) use ($all_packages) {
-                            if ($package == 'empty') {
-                                $query->whereNotIn('customers.package_id', $all_packages);
-                            } else {
-                                $query->where('customers.package_id', '=', $package);
-                            }
-                        })
-                        ->when($request->package_speed, function ($query, $package_speed) {
-                            $speed_type =  explode("|", $package_speed);
-                            $speed = $speed_type[0];
-                            $type = $speed_type[1];
-                            $query->whereHas('package', function($q) use ($speed, $type) {
-                                $q->where('speed', '=', $speed);
-                                $q->where('type', '=', $type);
-                            });
-                        })
-                        ->when($request->township, function ($query, $township) use ($all_township) {
-                            if ($township == 'empty') {
-                                $query->whereNotIn('customers.township_id', $all_township);
-                            } else {
-                                $query->where('customers.township_id', '=', $township);
-                            }
-                        })
-                        ->when($request->status, function ($query, $status) {
-                            $query->where('customers.status_id', '=', $status);
-                        })
-                        ->when($request->sh_isp, function ($query, $sh_isp) {
-                            $query->where('customers.isp_id', '=', $sh_isp['id']);
-                        })
-                        ->when($request->partner, function ($query, $partner) {
-                            $query->where('customers.partner_id', '=', $partner['id']);
-                        })
-                        ->when($request->status_type, function ($query, $status_type) {
-                            $query->whereHas('status', function($q) use ($status_type) {
-                                $q->where('type', '=', $status_type);
-                            });
-                        })
-                        ->when($request->order, function ($query, $order) {
-                            $query->whereBetween('customers.order_date', $order);
-                        })
-                        ->when($request->installation, function ($query, $installation) {
-                            $query->whereBetween('customers.installation_date', $installation);
-                        })
+      
+        $mycustomer =  Customer::with('package', 'currentAddress.township', 'isp', 'status')
+            ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
+            ->join('townships', 'townships.id', 'customer_addresses.township_id')
+            ->leftjoin('sn_ports', 'customers.id', '=', 'sn_ports.customer_id')
+            ->where(function ($query) {
+                return $query->where('customers.deleted', '=', 0)
+                    ->orWhereNull('customers.deleted');
+            })
+            // ->when($user->role?->limit_region, function ($query) use ($user) {
+            //     return $query->whereIn('customers.township_id', $user->role?->townships->pluck('id'));
+            // })
+            ->when($user->role?->limit_region, function ($query) use ($user) {
+                $query->whereHas('currentAddress', function ($q) use ($user) {
+                    $q->whereIn('township_id', $user->role?->townships->pluck('id'));
+                });
+            })
+            ->when($user->user_type, function ($query, $user_type) use ($user) {
 
-                        // ->when($request->sh_vlan, function ($query, $vlan) {
-                        //     $query->where('customers.vlan', $vlan);
-                        // })
+                if ($user_type == 'partner') {
+                    $query->where('customers.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
+                if ($user_type == 'subcon') {
+                    $query->where('customers.subcom_id', '=', $user->subcom_id);
+                }
+            })
+            ->when($request->keyword, function ($query, $search = null) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('customers.name', 'LIKE', '%' . $search . '%')
+                        ->orWhere('customers.isp_ftth_id', 'LIKE', '%' . $search . '%')
+                        ->orWhere('customers.ftth_id', 'LIKE', '%' . $search . '%');
+                });
+            })->when($request->general, function ($query, $general) {
+                $query->where(function ($query) use ($general) {
+                    $query->where('customers.name', 'LIKE', '%' . $general . '%')
+                        ->orWhere('customers.ftth_id', 'LIKE', '%' . $general . '%')
+                        ->orWhere('customers.isp_ftth_id', 'LIKE', '%' . $general . '%')
+                        ->orWhere('customers.phone_1', 'LIKE', '%' . $general . '%');
+                });
+            })
+            ->when($request->installation, function ($query, $installation) {
+                $startDate = Carbon::parse($installation[0])->format('Y-m-d');
+                $endDate = Carbon::parse($installation[1])->format('Y-m-d');
+                $query->whereBetween('customers.installation_date', [$startDate, $endDate]);
+            })
+            ->when($request->order, function ($query, $order) {
+                $startDate = Carbon::parse($order[0])->format('Y-m-d');
+                $endDate = Carbon::parse($order[1])->format('Y-m-d');
+                $query->whereBetween('customers.order_date',  [$startDate, $endDate]);
+            })
+            ->when($request->prefer, function ($query, $prefer) {
+                $startDate = Carbon::parse($prefer[0])->format('Y-m-d');
+                $endDate = Carbon::parse($prefer[1])->format('Y-m-d');
+                $query->whereBetween('customers.prefer_install_date', [$startDate, $endDate]);
+            })
+            ->when($request->dn, function ($query, $dn_2) {
+                $query->where('sn_ports.dn_splitter_id', '=', $dn_2['id']);
+            })
+            ->when($request->sn, function ($query, $sn) {
+                $query->where('sn_ports.sn_splitter_id', '=', $sn['id']);
+            })
+            ->when($request->pop, function ($query, $pop) {
+                $query->where('sn_ports.pop_id', '=', $pop['id']);
+            })
+            ->when($request->pop_device, function ($query, $pop_device) {
+                $query->where('sn_ports.pop_device_id', '=', $pop_device['id']);
+            })
+            ->when($request->package, function ($query, $package) use ($all_packages) {
+                if ($package == 'empty') {
+                    $query->whereNotIn('customers.package_id', $all_packages);
+                } else {
+                    $query->where('customers.package_id', '=', $package);
+                }
+            })
+            ->when($request->package_speed, function ($query, $package_speed) {
+                $speed_type =  explode("|", $package_speed);
+                $speed = $speed_type[0];
+                $type = $speed_type[1];
+                $query->whereHas('package', function ($q) use ($speed, $type) {
+                    $q->where('speed', '=', $speed);
+                    $q->where('type', '=', $type);
+                });
+            })
+            ->when($request->township, function ($query, $township) use ($all_township) {
+                if ($township == 'empty') {
+                    $query->whereDoesntHave('currentAddress', function ($q) use ($all_township) {
+                        $q->whereIn('township_id', $all_township);
+                    });
+                } else {
+                    $query->whereHas('currentAddress', function ($q) use ($township) {
+                        $q->where('township_id', $township);
+                    });
+                }
+            })
+            ->when($request->status, function ($query, $status) {
+                $query->where('customers.status_id', '=', $status);
+            })
+            ->when($request->sh_isp, function ($query, $sh_isp) {
+                $query->where('customers.isp_id', '=', $sh_isp['id']);
+            })
+            ->when($request->partner, function ($query, $partner) {
+                $query->where('customers.partner_id', '=', $partner['id']);
+            })
+            ->when($request->status_type, function ($query, $status_type) {
+                $query->whereHas('status', function ($q) use ($status_type) {
+                    $q->where('type', '=', $status_type);
+                });
+            })
+            ->when($request->order, function ($query, $order) {
+                $query->whereBetween('customers.order_date', $order);
+            })
+            ->when($request->installation, function ($query, $installation) {
+                $query->whereBetween('customers.installation_date', $installation);
+            })
+            ->when($request->sh_onu_serial, function ($query, $sh_onu_serial) {
+                $query->where('customers.onu_serial', $sh_onu_serial);
+            })
+            ->when($request->sh_installation_team, function ($query, $sh_installation_team) {
+                $query->where('customers.subcom_id', $sh_installation_team['id']);
+            })
 
-                        ->when($request->sh_onu_serial, function ($query, $sh_onu_serial) {
-                            $query->where('customers.onu_serial', $sh_onu_serial);
-                        })
-                        ->when($request->sh_installation_team, function ($query, $sh_installation_team) {
-                            $query->where('customers.subcom_id', $sh_installation_team['id']);
-                        })
-                        
-                        ->when($request->assign_date, function ($query, $assign_date) {
-                            $startDate = Carbon::parse($assign_date[0])->format('Y-m-d');
-                            $endDate = Carbon::parse($assign_date[1])->format('Y-m-d');
-                            $query->whereBetween('customers.subcom_assign_date', [$startDate, $endDate]);
+            ->when($request->assign_date, function ($query, $assign_date) {
+                $startDate = Carbon::parse($assign_date[0])->format('Y-m-d');
+                $endDate = Carbon::parse($assign_date[1])->format('Y-m-d');
+                $query->whereBetween('customers.subcom_assign_date', [$startDate, $endDate]);
+            })
+            ->when($request->installation_status, function ($query, $sh_installation_status) {
 
-                        })
-                        ->when($request->installation_status, function ($query, $sh_installation_status) {
-
-                            $query->where('customers.installation_status', $sh_installation_status);
-                        })
-                        ->when($request->sh_installation_timeline, function ($query, $sh_installation_timeline) {
-                            $query->whereHas('package', function($q) use ($sh_installation_timeline) {
-                                $q->where('installation_timeline', '=', $sh_installation_timeline);
-                            });
-                            
-                        })
-                        ->select('customers.*');
+                $query->where('customers.installation_status', $sh_installation_status);
+            })
+            ->when($request->sh_installation_timeline, function ($query, $sh_installation_timeline) {
+                $query->whereHas('package', function ($q) use ($sh_installation_timeline) {
+                    $q->where('installation_timeline', '=', $sh_installation_timeline);
+                });
+            })
+            ->when($user->role?->installation_supervisor, function ($query) use ($user) {
+                $query->where('customers.supervisor_id', $user->id);
+            })
+                        ->select('customers.*', 'customer_addresses.address as address', 'customer_addresses.location as location', 'customer_addresses.township_id as township_id', 'townships.name as township_name');
         return $mycustomer;
     }
     public function headings(): array
@@ -203,6 +213,7 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
             'Address',
             'Lat Long',
             'Township',
+            'Bandwidth',
             'Package',
           
 
@@ -271,7 +282,8 @@ class CustomersExport implements FromQuery, WithColumnFormatting, WithMapping, W
             ($mycustomer->phone_1) ? $mycustomer->phone_1 : null,
             $mycustomer->address,
             $mycustomer->location,
-            $mycustomer->township?->name,
+            $mycustomer->township_name,
+            $mycustomer->bandwidth,
             $mycustomer->package?->name,
             $mycustomer->subcon?->name,
             ($mycustomer->order_date) ? Date::stringToExcel($mycustomer->order_date) : null,
