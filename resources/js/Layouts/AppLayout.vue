@@ -4,6 +4,7 @@
     <Head>
       <title>{{ ($page.props.isp)?$page.props.isp.name + ' |' :"" }} {{ $page.props.application_name }}</title>
       <meta name="description" content="ISP Manager OSS BSS SYSTEM" />
+     
       <link rel="icon" type="image/png" href="/storage/logos/favicon.png" />
     </Head>
 
@@ -15,7 +16,7 @@
     ]">
     
       <div class="w-full flex justify-between items-center shadow-none shadow-gray-300 shadow-left">
-   
+       
         <a href="javascript:void(0)" class="text-gray-400 flex items-center w-full">
          
           <span v-if="$page.props.login_type === 'isp'">

@@ -33,16 +33,19 @@ class DetectIsp
             //    $isp = Isp::findByDomain($domain);
                 Inertia::share('login_type', 'isp');
                 Inertia::share('isp', $isp);
+                 return $next($request);
                 break;
             case 'partner':
                 $partner = Partner::find(auth()->user()->partner_id);
                 Inertia::share('login_type', 'partner');
                 Inertia::share('isp', $partner);
+                 return $next($request);
                 break;
             case 'subcon':
                 $subcom = Subcom::find(auth()->user()->subcom_id);
                 Inertia::share('login_type', 'subcon');
                 Inertia::share('subcon', $subcom);
+                 return $next($request);
                 break;
             default:
                 Inertia::share('login_type', 'internal');
