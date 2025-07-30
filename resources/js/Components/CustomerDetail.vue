@@ -35,13 +35,22 @@
                 target="_blank">{{ customer_detail[0].location }}</a>
             </td>
           </tr>
+          <tr class="otd:bg-white even:bg-gray-50 dark:otd:bg-gray-900/50 dark:even:bg-gray-950"
+            v-if="customer_detail[0].location">
+            <td class="p-2.5 text-sm font-medium text-gray-500">Actual Location</td>
+            <td class="p-2.5 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
+              <a :href="'https://www.google.com/maps/search/?api=1&query=' + customer_detail[0].actual_location"
+                target="_blank">{{ customer_detail[0].actual_location }}</a>
+            </td>
+          </tr>
           <tr class="otd:bg-white even:bg-gray-50 dark:otd:bg-gray-900/50 dark:even:bg-gray-950">
             <td class="p-2.5 text-sm font-medium text-gray-500">Applied Mbps</td>
             <td class="p-2.5 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
               {{ customer_detail[0].bandwidth }} Mbps
             </td>
           </tr>
-          <tr class="otd:bg-white even:bg-gray-50 dark:otd:bg-gray-900/50 dark:even:bg-gray-950"
+          <template v-if="user?.user_type != 'isp'">
+            <tr class="otd:bg-white even:bg-gray-50 dark:otd:bg-gray-900/50 dark:even:bg-gray-950"
             v-if="customer_detail[0].dn_splitter_name">
             <td class="p-2.5 text-sm font-medium text-gray-500">DN Box Name</td>
             <td class="p-2.5 text-sm text-gray-900 sm:mt-0 sm:col-span-3">
@@ -126,7 +135,11 @@
 
             </td>
           </tr>
+            </template>
+
           </template>
+          
+      
           </tbody>
 
         </table>
@@ -139,7 +152,7 @@
 import { ref, onMounted } from "vue";
 export default {
   name: "CustomerDetail",
-  props: ["data"],
+  props: ["data","user"],
   setup(props) {
     const customer_detail = ref("");
     const getLog = async () => {

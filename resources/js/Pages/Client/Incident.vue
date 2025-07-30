@@ -825,7 +825,7 @@
                     </keep-alive>
                   </div>
                   <div class="p-4" :class="[tab == 4 ? '' : 'hidden']">
-                    <keep-alive><customer-detail :data="selected_id" :key="page_update" v-if="tab == 4" /></keep-alive>
+                    <keep-alive><customer-detail :data="selected_id" :user="user" :key="page_update" v-if="tab == 4" /></keep-alive>
                   </div>
 
                   <div class="p-4" :class="[tab == 5 ? '' : 'hidden']">
@@ -1256,6 +1256,7 @@ export default {
               icon: "success",
               title: page.props.flash.message,
             });
+            closeModal();
           },
           onError: (errors) => {
             loading.value = false;
