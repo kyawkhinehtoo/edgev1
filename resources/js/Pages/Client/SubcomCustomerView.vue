@@ -568,6 +568,7 @@ export default {
                         icon: "success",
                         title: page.props.flash.message,
                     });
+                    clostModel();
                 },
             });
         };

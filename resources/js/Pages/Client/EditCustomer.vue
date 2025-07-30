@@ -1189,6 +1189,7 @@ export default {
             icon: "success",
             title: page.props.flash.message,
           });
+          clostModel();
         },
         onError: (errors) => {
           console.error("Error submitting form:", errors);
