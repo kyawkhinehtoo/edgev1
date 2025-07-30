@@ -413,9 +413,17 @@ class IncidentController extends Controller
     }
     public function getCustomerFile($id)
     {
+        $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
         if ($id) {
-
-            $files = DB::table('file_uploads')
+        if($user->user_type == 'subcon'){
+           $files = FileUpload::with('user')
+                ->where('file_uploads.customer_id', '=', $id)
+                ->where('file_uploads.created_by', '=', $user->id)
+                ->orderBy('file_uploads.id', 'DESC')
+                ->get();
+            return response()->json($files, 200);
+        }
+            $files = FileUpload::with('user')
                 ->where('file_uploads.customer_id', '=', $id)
                 ->orderBy('file_uploads.id', 'DESC')
                 ->get();

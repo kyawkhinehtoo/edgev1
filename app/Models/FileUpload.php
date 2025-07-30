@@ -12,6 +12,19 @@ class FileUpload extends Model
         'name',
         'incident_id',
         'customer_id',
-        'path'
+        'path',
+        'created_by',
     ];    
+    public function incident()
+    {
+        return $this->belongsTo(Incident::class, 'incident_id');
+    }
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

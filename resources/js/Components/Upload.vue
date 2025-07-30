@@ -92,7 +92,7 @@ export default {
     }
     onUpdated(() => {
       if (typeof form.file !== 'undefined' && form.file != null) {
-        console.log("hello");
+    
         let file_type = form.file.type;
         if (file_type.includes('pdf')) {
           fa.value = "file-pdf";
@@ -105,6 +105,9 @@ export default {
         }
         if (file_type.includes('image')) {
           fa.value = "file-image";
+        }
+        if (file_type.includes('kml')) {
+          fa.value = "file-map";
         }
       }
 

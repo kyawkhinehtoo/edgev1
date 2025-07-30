@@ -1573,9 +1573,9 @@ export default {
   
     const filteredChecklists = computed(() => {
       if (!selectedGroupId.value) return null;
-      return props.subconCheckList.filter(
-        (checklist) => checklist.group_id === selectedGroupId.value
-      );
+      const group = props.checkListSummary.find(g => g.id === selectedGroupId.value);
+      if (!group || group.total === group.remaining) return null;
+      return props.subconCheckList.filter(checklist => checklist.group_id === selectedGroupId.value);
     });
     onMounted(() => {
 

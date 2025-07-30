@@ -18,6 +18,10 @@
                         <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                             :class="[tab == 2 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
                                 @click="tabClick(2)" preserve-state>Attachment</a></li>
+                       
+                                <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                            :class="[tab == 3 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
+                                @click="tabClick(3)" preserve-state>KMZ Files</a></li>
 
 
                     </ul>
@@ -456,7 +460,18 @@
 
 
                 </div>
+                 <div  class="bg-white overflow-hidden shadow-xl sm:rounded-lg sm:rounded-t-none p-6" :class="[tab == 3 ? '' : 'hidden']">
+                 
+                    <h6 class="md:min-w-full text-indigo-700 text-xs uppercase font-bold block pt-1 no-underline">
+                      Customer
+                      KMZ</h6>
+                    <hr class="my-4 md:min-w-full" />
+                    <keep-alive>
+                      <customer-file :data="customer.id" :permission="true"  v-if="tab == 3" />
+                    </keep-alive>
 
+                 
+                </div>
 
             </div>
         </div>
@@ -470,13 +485,15 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import ImageUploader from '@/Components/ImageUploader.vue';
 import Multiselect from "@suadelabs/vue3-multiselect";
 import SNPorts from "./DnsnReport.vue";
+import CustomerFile from "@/Components/CustomerFile";
 export default {
     name: "EditCustomer",
     components: {
         AppLayout,
         Multiselect,
         Link,
-        ImageUploader
+        ImageUploader,
+        CustomerFile
     },
     props: {
         customer: Object,

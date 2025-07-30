@@ -12,27 +12,38 @@
     <h2 class="text-center text-gray-600 text-sm font-semibold mt-2">Loading...</h2>
   </div>
   <div v-if="file_list && !add">
-    <table class="min-w-full divide-y divide-gray-200 table-auto">
-      <thead class="bg-gray-50 w-full flex block table text-left">
+    <div class="overflow-x-auto rounded shadow">
+      <table class="min-w-full divide-y divide-gray-200 table-auto">
+      <thead class="bg-gray-50">
         <tr>
-
-          <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12">ID</th>
-          <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-full">File</th>
-          <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider w-1/12"> Action
-          </th>
+        <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">#</th>
+        <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">File</th>
+        <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">Created By</th>
+        <th class="px-4 py-2 text-xs font-semibold  text-gray-600 uppercase text-right">Action</th>
         </tr>
       </thead>
-      <tbody
-        class="bg-white divide-y divide-gray-200 text-sm max-h-64  w-full overflow-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-white block text-left">
-        <tr v-for="(row, index) in file_list" v-bind:key="row.id" class="flex">
-          <td class="px-6 py-3 whitespace-nowrap tracking-wider w-1/12">{{ index + 1 }}</td>
-          <td class="px-6 py-3 whitespace-nowrap tracking-wider w-full"><a :href="row.path" target="_blank"><i
-                class="fas fa-paperclip text-indigo-600"></i></a> {{ row.name }} </td>
-          <td class="px-6 py-3 whitespace-nowrap tracking-wider text-right w-1/12 mr-4"><a href="#"
-              @click="deleteFile(row)" class="text-red-600"><i class="fa fa-trash"></i></a></td>
+      <tbody class="bg-white divide-y divide-gray-100">
+        <tr v-for="(row, index) in file_list" :key="row.id" class="hover:bg-gray-50 transition">
+        <td class="px-4 py-2 whitespace-nowrap">{{ index + 1 }}</td>
+        <td class="px-4 py-2 whitespace-nowrap flex items-center gap-2">
+          <a :href="row.path" target="_blank" class="text-indigo-600 hover:underline">
+          <i class="fas fa-paperclip mr-1"></i>
+          {{ row.name }}
+          </a>
+        </td>
+        <td class="px-4 py-2 whitespace-nowrap">{{ row.user?.name }}</td>
+        <td class="px-4 py-2 whitespace-nowrap text-right">
+          <button @click="deleteFile(row)" class="text-red-600 hover:text-red-800 transition" title="Delete">
+          <i class="fa fa-trash"></i>
+          </button>
+        </td>
+        </tr>
+        <tr v-if="file_list.length === 0">
+        <td colspan="4" class="px-4 py-6 text-center text-gray-400">No files found.</td>
         </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
   <div v-if="add">
     <upload :data="incident_id" @status="checkUpload" />

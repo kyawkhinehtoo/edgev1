@@ -8,14 +8,28 @@ use App\Models\FileUpload;
 class FileController extends Controller
 {
     public function upload(Request $request){
+       
         
-        $request->validate([
-            'name' => 'required',
-           'file' => 'required|mimes:jpg,jpeg,png,csv,txt,xlx,xls,pdf|max:2048'
-        ]);
+      $request->validate([
+    'name' => 'required',
+    'file' => [
+        'required',
+        'file',
+        'max:20480', // 20MB
+        function ($attribute, $value, $fail) {
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'csv', 'txt', 'xls', 'xlsx', 'pdf', 'kml', 'kmz'];
+            $ext = strtolower($value->getClientOriginalExtension());
+
+            if (!in_array($ext, $allowedExtensions)) {
+                $fail("The $attribute must be a file of type: " . implode(', ', $allowedExtensions));
+            }
+        },
+    ],
+]);
 
         $fileUpload = new FileUpload;
-
+        $user = auth()->user();
+    
         if($request->file()) {
             
             $file_name = time().'_'.$request->file->getClientOriginalName();
@@ -28,6 +42,7 @@ class FileController extends Controller
             }
             $fileUpload->name = $request->name;
             $fileUpload->path = '/storage/' . $file_path;
+            $fileUpload->created_by = $user->id; // Set the user who uploaded
             $fileUpload->save();
 
             return redirect()->back()->with('message', 'File Uploaded Successfully.');
