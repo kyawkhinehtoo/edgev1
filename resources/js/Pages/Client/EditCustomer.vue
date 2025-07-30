@@ -955,19 +955,19 @@
                           </div>
                           <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                             <span class="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
-                              <button type="submit" @click="submit"
+                              <button type="button" @click="installationApproval"
                                 class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
                                 v-show="!form.id">
                                 Save
                               </button>
-                              <button type="submit" @click="installationApproval"
+                              <button type="button" @click="installationApproval"
                                 class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
                                 v-show="form.id">
                                 Update
                               </button>
                             </span>
                             <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
-                              <button @click="clostModel" type="button"
+                              <button @click="closeModel" type="button"
                                 class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
                                 Cancel
                               </button>
@@ -1182,14 +1182,20 @@ export default {
       showFullView.value = false;
       selectedImageId.value = null;
     }
+      const selectedGroupId = ref(null);
+    const closeModel = () => {
+      console.log("close model");
+      selectedGroupId.value = null;
+    }
     function installationApproval() {
+      console.log("installationApproval");
       router.post("/installationApproval/" + form.id, form2, {
         onSuccess: (page) => {
           Toast.fire({
             icon: "success",
             title: page.props.flash.message,
           });
-          clostModel();
+          closeModel();
         },
         onError: (errors) => {
           console.error("Error submitting form:", errors);
@@ -1565,10 +1571,7 @@ export default {
       );
     });
 
-    const selectedGroupId = ref(null);
-    const clostModel = () => {
-      selectedGroupId.value = null;
-    }
+  
     const filteredChecklists = computed(() => {
       if (!selectedGroupId.value) return null;
       return props.subconCheckList.filter(
@@ -1719,7 +1722,7 @@ export default {
       filteredPartners,
       selectedGroupId,
       filteredChecklists,
-      clostModel
+      closeModel
     };
   },
 };
