@@ -31,6 +31,7 @@ use App\Models\SnPort;
 use App\Models\SnSplitter;
 use App\Models\Subcom;
 use App\Models\SubconChecklist;
+use App\Models\SubconChecklistsGroup;
 use App\Models\SubconChecklistValue;
 use App\Models\SubconChecklistValueHistory;
 use Carbon\Carbon;
@@ -750,7 +751,7 @@ class CustomerController extends Controller
 
         // Get existing checklist values for this customer
         $checklistValues = SubconChecklistValue::where('customer_id', $id)->get();
-
+        $checkListSummary = $this->checklistSummary($id,'installation');
         // Format checklist values and images for easy access in the frontend
         $formattedValues = [];
         $checklistImages = [];
@@ -776,6 +777,7 @@ class CustomerController extends Controller
                 'customer' => $customer,
                 'bundle_equiptments' => $bundle_equiptments,
                 'subconCheckList' => $subconCheckList,
+                'checkListSummary' => $checkListSummary,
                 'snPort' => $snPort
             ]);
         }
@@ -826,10 +828,55 @@ class CustomerController extends Controller
                 'snPort' => $snPort,
                 'supervisors' => $supervisors,
                 'cities' => $cities,
+                'checkListSummary' => $checkListSummary,
             ]
         );
     }
+    public function checklistSummary($customerId,$service_type)
+    {
+        $groups = SubconChecklistsGroup::with(['checklists' => function ($query) use ($service_type) {
+            $query->where('service_type', $service_type);
+        }, 'checklists.values' => function ($query) use ($customerId) {
+            $query->where('customer_id', $customerId);
+        }])->get();
 
+        $result = $groups->map(function ($group) {
+            $total = 0;
+            $approved = 0;
+            $requested = 0;
+            $rejected = 0;
+            $remaining = 0;
+
+            foreach ($group->checklists as $checklist) {
+                $total++;
+                $value = $checklist->values->first(); // one per checklist per task/customer
+
+                if (!$value) {
+                    $remaining++;
+                } elseif ($value->status === 'requested') {
+                    $requested++;
+                } elseif ($value->status === 'approved') {
+                    $approved++;
+                } elseif ($value->status === 'declined') {
+                    $rejected++;
+                } else {
+                    $remaining++;
+                }
+            }
+
+            return [
+                'id' => $group->id,
+                'group_name' => $group->name,
+                'total' => $total,
+                'requested' => $requested,
+                'approved' => $approved,
+                'rejected' => $rejected,
+                'remaining' => $remaining,
+            ];
+        });
+
+        return $result;
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -1301,14 +1348,21 @@ class CustomerController extends Controller
 
         // Add validation rules for each checklist field
         foreach ($checklistFields as $checklistId => $fields) {
+            $title = $fields['title'] ?? null;
+
             if (isset($fields['title'])) {
-                $validationRules[$fields['title']] = 'nullable|string';
+            $validationRules[$fields['title']] = 'nullable|string';
             }
             if (isset($fields['attachment'])) {
-                $validationRules[$fields['attachment']] = 'nullable|image|max:10240';
+            $validationRules[$fields['attachment']] = 'nullable|image|max:10240';
             }
             if (isset($fields['status'])) {
+            // If title is present and not empty in request, status is required
+            if ($title && !empty($request->$title)) {
+                $validationRules[$fields['status']] = 'required|string|in:requested,approved,declined';
+            } else {
                 $validationRules[$fields['status']] = 'nullable|string|in:requested,approved,declined';
+            }
             }
         }
 

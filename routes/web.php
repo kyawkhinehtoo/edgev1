@@ -63,7 +63,7 @@ use App\Http\Controllers\SubconChecklistController;
 use App\Http\Controllers\SubRootCauseController;
 use App\Http\Controllers\DiscountSetupController;
 use App\Http\Controllers\SmtpSettingController;
-
+use App\Http\Controllers\SubconChecklistsGroupController;
 use App\Services\DynamicMailService;
 use App\Mail\MyTestMail;
 
@@ -375,6 +375,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::resource('odbs', OdbController::class);
 
 	Route::resource('subcon-checklists', SubconChecklistController::class);
+	Route::resource('subcon-checklists-group', SubconChecklistsGroupController::class);
 
 	Route::resource('root-causes', RootCauseController::class);
 	Route::resource('sub-root-causes', SubRootCauseController::class);

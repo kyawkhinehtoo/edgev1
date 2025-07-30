@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SubconChecklist;
+use App\Models\SubconChecklistsGroup;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -21,7 +22,7 @@ class SubconChecklistController extends Controller
     }
     public function index()
     {
-        $checklists = SubconChecklist::orderBy('name')->get();
+        $checklists = SubconChecklist::with('group')->orderBy('name')->get();
         
         return Inertia::render('SubconChecklist/Index', [
             'checklists' => $checklists
@@ -33,7 +34,10 @@ class SubconChecklistController extends Controller
      */
     public function create()
     {
-        return Inertia::render('SubconChecklist/Create');
+        $groups = SubconChecklistsGroup::orderBy('name')->get();
+        return Inertia::render('SubconChecklist/Create', [
+            'groups' => $groups
+        ]);
     }
 
     /**
@@ -47,6 +51,7 @@ class SubconChecklistController extends Controller
             'service_type' => 'required|in:installation,maintenance',
             'remarks' => 'required|string',
             'status' => 'required|string|max:255',
+            'group_id' => 'required|exists:subcon_checklists_group,id',
         ]);
 
         SubconChecklist::create($validated);
@@ -70,8 +75,10 @@ class SubconChecklistController extends Controller
      */
     public function edit(SubconChecklist $subconChecklist)
     {
+        $groups = SubconChecklistsGroup::orderBy('name')->get();
         return Inertia::render('SubconChecklist/Edit', [
-            'checklist' => $subconChecklist
+            'checklist' => $subconChecklist,
+            'groups' => $groups
         ]);
     }
 
@@ -86,6 +93,7 @@ class SubconChecklistController extends Controller
             'service_type' => 'required|in:installation,maintenance',
             'remarks' => 'required|string',
             'status' => 'required|string|max:255',
+            'group_id' => 'required|exists:subcon_checklists_group,id',
         ]);
 
         $subconChecklist->update($validated);

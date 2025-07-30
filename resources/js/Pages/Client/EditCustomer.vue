@@ -65,9 +65,7 @@
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="cities.length !== 0">
                           <multiselect deselect-label="Selected already" :options="cities" track-by="id" label="name"
                             v-model="form.city" placeholder="Select City" :allow-empty="false"
-                            @update:modelValue="form.city_id = $event?.id" required
-                            :disabled="checkPerm('city_id')"
-                            >
+                            @update:modelValue="form.city_id = $event?.id" required :disabled="checkPerm('city_id')">
 
                           </multiselect>
                         </div>
@@ -82,8 +80,7 @@
                           <multiselect deselect-label="Selected already" :options="filteredTownships" track-by="id"
                             label="name" v-model="form.township" placeholder="Select Township" :allow-empty="false"
                             @update:modelValue="form.township_id = $event?.id" required
-                            :disabled="checkPerm('city_id')"
-                            >
+                            :disabled="checkPerm('city_id')">
                           </multiselect>
                         </div>
                         <p v-show="$page.props.errors.township_id" class="mt-2 text-sm text-red-500">{{
@@ -117,7 +114,7 @@
                           </span>
                           <input type="text" v-model="form.latitude" name="latitude" id="latitude"
                             class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')"/>
+                            v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')" />
                         </div>
                         <p v-show="$page.props.errors.latitude" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.latitude }}</p>
@@ -131,7 +128,7 @@
                           </span>
                           <input type="text" v-model="form.longitude" name="longitude" id="longitude"
                             class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')"/>
+                            v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')" />
                         </div>
                         <p v-show="$page.props.errors.longitude" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.longitude }}</p>
@@ -148,7 +145,7 @@
                           </span>
                           <textarea v-model="form.address" name="address" id="address"
                             class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            required :disabled="checkPerm('city_id')"/>
+                            required :disabled="checkPerm('city_id')" />
                         </div>
                         <p v-show="$page.props.errors.address" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.address }}</p>
@@ -167,7 +164,7 @@
                         </span>
                         <label id="ftth_id"
                           class="pl-10 mt-2  flex-1 block w-full rounded-md sm:text-sm border-gray-300">{{
-                          form.ftth_id }}</label>
+                            form.ftth_id }}</label>
 
                       </div>
                       <div class="col-span-1 sm:col-span-1 w-full">
@@ -270,7 +267,9 @@
                             :disabled="checkPerm('installation_service_id')">
                           </multiselect>
                         </div>
-                        <div class="mt-1 border-gray-200 border p-2 rounded-md text-gray-600" v-else>No Installation Service</div>
+                        <div class="mt-1 border-gray-200 border p-2 rounded-md text-gray-600" v-else>No Installation
+                          Service
+                        </div>
                         <p v-show="$page.props.errors.installation_service_id" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.installation_service_id }}</p>
                       </div>
@@ -292,8 +291,8 @@
                             class="text-red-500">*</span>
                           Maintenance </label>
                         <div class="mt-1 flex rounded-md shadow-sm " v-if="filteredMaintenanceServices?.length > 0">
-                          <multiselect deselect-label="Selected already" :options="filteredMaintenanceServices" track-by="id"
-                            label="name" v-model="form.maintenance_service" :allow-empty="false"
+                          <multiselect deselect-label="Selected already" :options="filteredMaintenanceServices"
+                            track-by="id" label="name" v-model="form.maintenance_service" :allow-empty="false"
                             @update:modelValue="form.maintenance_service_id = $event?.id"
                             :disabled="checkPerm('maintenance_service_id')" :class="text - xs">
                           </multiselect>
@@ -318,7 +317,7 @@
                           $page.props.errors.order_remark }}</p>
                       </div>
 
-                      
+
 
                       <div class="col-span-1 sm:col-span-1" v-if="$page.props.login_type == 'isp'">
                         <label for="isp" class="block text-sm font-medium text-gray-700"> Installation Date </label>
@@ -328,7 +327,7 @@
                         </span>
                         <label id="installation_date"
                           class="pl-10 mt-2  flex-1 block w-full rounded-md sm:text-sm border-gray-300"> {{
-                            form.installation_date??"NA" }}</label>
+                            form.installation_date ?? "NA" }}</label>
 
                       </div>
 
@@ -341,7 +340,7 @@
                         </span>
                         <label id="service_activation_date"
                           class="pl-10 mt-2  flex-1 block w-full rounded-md sm:text-sm border-gray-300">{{
-                            form.service_activation_date??"NA" }}</label>
+                            form.service_activation_date ?? "NA" }}</label>
 
                       </div>
 
@@ -351,7 +350,7 @@
                       <hr class="my-4 md:min-w-full" />
                       <h6 class="md:min-w-full text-indigo-700 text-xs uppercase font-bold block pt-1 no-underline">
                         ODN Information</h6>
-                        
+
                       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-4">
                         <div class="col-span-1 sm:col-span-1">
                           <label for="isp" class="block text-sm font-medium text-gray-700"> Customer ID </label>
@@ -376,11 +375,12 @@
                             $page.props.errors.isp_id
                           }}</p>
                         </div>
-                         <div class="col-span-1 sm:col-span-1">
+                        <div class="col-span-1 sm:col-span-1">
                           <label for="pop_site" class="block text-sm font-medium text-gray-700">Choose POP Site </label>
                           <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredPops.length !== 0">
                             <multiselect deselect-label="Selected already" :options="filteredPops" track-by="id"
-                              label="site_name" v-model="form.pop_id" :allow-empty="false" :disabled="checkPerm('partner_id')">
+                              label="site_name" v-model="form.pop_id" :allow-empty="false"
+                              :disabled="checkPerm('partner_id')">
                             </multiselect>
                           </div>
                           <div v-else class="text-sm text-gray-500 mt-1">
@@ -392,21 +392,20 @@
                           <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredPartners?.length !== 0">
                             <multiselect deselect-label="Selected already" :options="filteredPartners" track-by="id"
                               label="name" v-model="form.partner" :allow-empty="true"
-                              @update:modelValue="form.partner_id = $event?.id"
-                              :disabled="checkPerm('partner_id')">
+                              @update:modelValue="form.partner_id = $event?.id" :disabled="checkPerm('partner_id')">
                             </multiselect>
                           </div>
                           <p v-show="$page.props.errors.partner_id" class="mt-2 text-sm text-red-500">{{
                             $page.props.errors.partner_id
                           }}</p>
                         </div>
-                       
+
                         <div class="col-span-1 sm:col-span-1">
                           <label for="pop_device_id" class="block text-sm font-medium text-gray-700"> Choose OLT</label>
                           <div class="mt-1 flex rounded-md shadow-sm">
                             <multiselect deselect-label="Selected already" :options="popDevices" track-by="id"
-                              label="device_name" v-model="form.pop_device_id" :allow-empty="false" 
-                              :disabled="checkPerm('partner_id')" >
+                              label="device_name" v-model="form.pop_device_id" :allow-empty="false"
+                              :disabled="checkPerm('partner_id')">
                             </multiselect>
                           </div>
                         </div>
@@ -517,18 +516,18 @@
                             $page.props.errors.service_activation_date }}</p>
                         </div>
                         <div class="col-span-1 sm:col-span-1">
-                        <label for="supervisor_id" class="block text-sm font-medium text-gray-700"> Assign Supervisor
-                        </label>
-                        <div class="mt-1 flex rounded-md shadow-sm">
-                          <multiselect deselect-label="Selected already" :options="supervisors" track-by="id"
-                            label="name" v-model="form.supervisor" :allow-empty="false"
-                            @update:modelValue="form.supervisor_id = $event?.id" :disabled="checkPerm('supervisor_id')"
-                            :class="text - xs">
-                          </multiselect>
+                          <label for="supervisor_id" class="block text-sm font-medium text-gray-700"> Assign Supervisor
+                          </label>
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <multiselect deselect-label="Selected already" :options="supervisors" track-by="id"
+                              label="name" v-model="form.supervisor" :allow-empty="false"
+                              @update:modelValue="form.supervisor_id = $event?.id"
+                              :disabled="checkPerm('supervisor_id')" :class="text - xs">
+                            </multiselect>
+                          </div>
+                          <p v-show="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.supervisor_id }}</p>
                         </div>
-                        <p v-show="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
-                          $page.props.errors.supervisor_id }}</p>
-                      </div>
                         <!-- <div class="text-sm text-gray-600 mt-2  col-span-4" v-if="dnInfo">
                           GPON INFO : {{ dnInfo }}
 
@@ -589,7 +588,7 @@
                           Installation Information</h6>
 
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-4">
-                          
+
                           <div class="col-span-1 sm:col-span-1">
                             <label for="installation_date" class="block text-sm font-medium text-gray-700"> Actual
                               Installed
@@ -655,33 +654,38 @@
                             </div>
                           </div>
                           <div class="col-span-1 sm:col-span-1">
-                          <label for="actual_latitude" class="block text-sm font-medium text-gray-700">Actual Latitude </label>
-                          <div class="mt-1 flex rounded-md shadow-sm">
-                            <span
-                              class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
-                              <i class="fas fa-location-arrow"></i>
-                            </span>
-                            <input type="text" v-model="form.actual_latitude" name="actual_latitude" id="actual_latitude"
-                              class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                              v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')"/>
+                            <label for="actual_latitude" class="block text-sm font-medium text-gray-700">Actual Latitude
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <span
+                                class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                                <i class="fas fa-location-arrow"></i>
+                              </span>
+                              <input type="text" v-model="form.actual_latitude" name="actual_latitude"
+                                id="actual_latitude"
+                                class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                                v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')" />
+                            </div>
+                            <p v-show="$page.props.errors.actual_latitude" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.actual_latitude }}</p>
                           </div>
-                          <p v-show="$page.props.errors.actual_latitude" class="mt-2 text-sm text-red-500">{{
-                            $page.props.errors.actual_latitude }}</p>
-                        </div>
-                        <div class="col-span-1 sm:col-span-1">
-                          <label for="actual_longitude" class="block text-sm font-medium text-gray-700">Actual Longitude </label>
-                          <div class="mt-1 flex rounded-md shadow-sm">
-                            <span
-                              class="z-10 leading-snug font-normal  text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
-                              <i class="fas fa-location-arrow"></i>
-                            </span>
-                            <input type="text" v-model="form.actual_longitude" name="actual_longitude" id="actual_longitude"
-                              class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                              v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')"/>
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="actual_longitude" class="block text-sm font-medium text-gray-700">Actual
+                              Longitude
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <span
+                                class="z-10 leading-snug font-normal  text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                                <i class="fas fa-location-arrow"></i>
+                              </span>
+                              <input type="text" v-model="form.actual_longitude" name="actual_longitude"
+                                id="actual_longitude"
+                                class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                                v-on:keypress="isNumber(event)" :disabled="checkPerm('city_id')" />
+                            </div>
+                            <p v-show="$page.props.errors.actual_longitude" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.actual_longitude }}</p>
                           </div>
-                          <p v-show="$page.props.errors.actual_longitude" class="mt-2 text-sm text-red-500">{{
-                            $page.props.errors.actual_longitude }}</p>
-                        </div>
 
 
 
@@ -794,74 +798,187 @@
                       Installation Information
                     </h6>
                     <hr class="my-4 md:min-w-full" />
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div v-for="(checklist, index) in subconCheckList" :key="checklist.id" class="mt-6 sm:mt-0">
-                        <label class="block text-sm font-medium text-gray-700">
-                          {{ checklist.name }}
-                        </label>
-                        <input type="text" v-model="form2[`checklist_${checklist.id}_title`]"
-                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                          v-if="form2[`checklist_${checklist.id}_title`]" disabled />
-                        <span v-else>No Data</span>
-                        <div class="mt-2" v-if="checklist.has_attachment && customer.checklist_images[checklist.id]">
-                          <div>
-                            <!-- Thumbnail image -->
-                            <img class="h-40 w-40 object-cover cursor-pointer"
-                              :src="customer.checklist_images && customer.checklist_images[checklist.id] ? `/storage/${customer.checklist_images[checklist.id]}` : null"
-                              @click="openFullView(checklist.id)" alt="">
+                    <div class="overflow-x-auto rounded-lg shadow mb-6 mt-4">
+                      <table class="min-w-full divide-y divide-gray-200 bg-white">
+                        <thead class="bg-indigo-50">
+                          <tr>
+                            <th
+                              class="px-4 py-3 text-left text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                              Group Name</th>
+                            <th
+                              class="px-4 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                              Total</th>
+                            <th
+                              class="px-4 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                              Requested</th>
+                            <th
+                              class="px-4 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                              Rejected</th>
+                            <th
+                              class="px-4 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                              Approved</th>
+                            <th
+                              class="px-4 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                              Remaining</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="group in checkListSummary" :key="group.group_name"
+                            @click="selectedGroupId = group.id"
+                            :class="['cursor-pointer transition-colors', selectedGroupId === group.id ? 'bg-indigo-100' : 'hover:bg-gray-50']">
+                            <td class="px-4 py-2 text-blue-600 underline font-medium">{{ group.group_name }}
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                              <span v-if="group.total > 0"
+                                class="px-2 py-1 rounded-xl bg-yellow-100 text-yellow-700 text-xs font-semibold">{{
+                                  group.total }}</span>
+                              <span v-else class="text-gray-400">{{ group.total }}</span>
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                              <span v-if="group.requested > 0"
+                                class="px-2 py-1 rounded-xl bg-indigo-100 text-indigo-700 text-xs font-semibold">{{
+                                  group.requested }}</span>
+                              <span v-else class="text-gray-400">{{ group.requested }}</span>
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                              <span v-if="group.rejected > 0"
+                                class="px-2 py-1 rounded-xl bg-red-100 text-red-700 text-xs font-semibold">{{
+                                  group.rejected }}</span>
+                              <span v-else class="text-gray-400">{{ group.rejected }}</span>
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                              <span v-if="group.approved > 0"
+                                class="px-2 py-1 rounded-xl bg-green-100 text-green-700 text-xs font-semibold">{{
+                                  group.approved }}</span>
+                              <span v-else class="text-gray-400">{{ group.approved }}</span>
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                              <span v-if="group.remaining > 0"
+                                class="px-2 py-1 rounded-xl bg-gray-100 text-gray-700 text-xs font-semibold">{{
+                                  group.remaining }}</span>
+                              <span v-else class="text-gray-400">{{ group.remaining }}</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
 
-                            <!-- Full view modal -->
-                            <div v-if="showFullView && selectedImageId === checklist.id"
-                              class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-                              @click="closeFullView">
-                              <div class="relative">
-                                <img class="max-h-[90vh] max-w-[90vw]"
-                                  :src="customer.checklist_images && customer.checklist_images[checklist.id] ? `/storage/${customer.checklist_images[checklist.id]}` : null"
-                                  alt="">
-                                <button
-                                  class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center"
-                                  @click="closeFullView">
-                                  <span class="text-xl">&times;</span>
-                                </button>
+                    </div>
+                    <div ref="showModal" class="fixed z-10 inset-0 overflow-y-auto ease-out duration-400"
+                      v-if="filteredChecklists">
+                      <div
+                        class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                        <div class="fixed inset-0 transition-opacity">
+                          <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+                        </div>
+                        <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>
+                        <div
+                          class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-7xl sm:w-full"
+                          role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+
+                          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="">
+                              <div v-if="selectedGroupId" class="mt-2 text-sm text-indigo-600 font-semibold">
+                                Showing details for: <span class="underline">{{checkListSummary.find(g => g.id
+                                  === selectedGroupId)?.group_name}}</span>
+                              </div>
+                              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div v-for="(checklist, index) in filteredChecklists" :key="checklist.id"
+                                  class="mt-6 sm:mt-0">
+                                  <label class="block text-sm font-medium text-gray-700">
+                                    {{ checklist.name }}
+                                  </label>
+                                  <input type="text" v-model="form2[`checklist_${checklist.id}_title`]"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    v-if="form2[`checklist_${checklist.id}_title`]" disabled />
+                                  <span v-else>No Data</span>
+                                  <div class="mt-2"
+                                    v-if="checklist.has_attachment && customer.checklist_images[checklist.id]">
+                                    <div>
+                                      <!-- Thumbnail image -->
+                                      <img class="h-40 w-40 object-cover cursor-pointer"
+                                        :src="customer.checklist_images && customer.checklist_images[checklist.id] ? `/storage/${customer.checklist_images[checklist.id]}` : null"
+                                        @click="openFullView(checklist.id)" alt="">
+
+                                      <!-- Full view modal -->
+                                      <div v-if="showFullView && selectedImageId === checklist.id"
+                                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                                        @click="closeFullView">
+                                        <div class="relative">
+                                          <img class="max-h-[90vh] max-w-[90vw]"
+                                            :src="customer.checklist_images && customer.checklist_images[checklist.id] ? `/storage/${customer.checklist_images[checklist.id]}` : null"
+                                            alt="">
+                                          <button
+                                            class="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center"
+                                            @click="closeFullView">
+                                            <span class="text-xl">&times;</span>
+                                          </button>
+                                        </div>
+                                      </div>
+                                      <!--full view modal-->
+                                    </div>
+                                  </div>
+                                  <div class="mt-2" v-if="form2[`checklist_${checklist.id}_title`]">
+                                    <div class="py-2">
+                                      <label for="status" class="block text-md font-medium text-gray-700"> Status
+                                      </label>
+                                      <div class="mt-2 flex">
+
+                                        <label class="flex-auto items-center"> <input type="radio"
+                                            class="form-radio h-5 w-5 text-yellow-600"
+                                            :name="form2[`checklist_${checklist.id}`]"
+                                            v-model="form2[`checklist_${checklist.id}_status`]"
+                                            value="requested" /><span
+                                            class="ml-2 text-gray-700 text-sm">Request</span></label>
+                                        <label class="flex-auto items-center"> <input type="radio"
+                                            class="form-radio h-5 w-5 text-red-600"
+                                            :name="form2[`checklist_${checklist.id}`]"
+                                            v-model="form2[`checklist_${checklist.id}_status`]" value="declined" /><span
+                                            class="ml-2 text-gray-700 text-sm">Declined</span></label>
+                                        <label class="flex-auto items-center"> <input type="radio"
+                                            class="form-radio h-5 w-5 text-green-600"
+                                            :name="form2[`checklist_${checklist.id}`]"
+                                            v-model="form2[`checklist_${checklist.id}_status`]" value="approved" /><span
+                                            class="ml-2 text-gray-700 text-sm">Approved</span></label>
+                                      </div>
+                                    </div>
+
+                                  </div>
+
+                                  <p v-show="$page.props.errors[`checklist_${checklist.id}_attachment`]"
+                                    class="mt-2 text-sm text-red-500">
+                                    {{ $page.props.errors[`checklist_${checklist.id}_attachment`] }}
+                                  </p>
+                                </div>
+
                               </div>
                             </div>
-                            <!--full view modal-->
                           </div>
-                        </div>
-                        <div class="mt-2" v-if="form2[`checklist_${checklist.id}_title`]">
-                          <div class="py-2">
-                            <label for="status" class="block text-md font-medium text-gray-700"> Status
-                            </label>
-                            <div class="mt-2 flex">
-
-                              <label class="flex-auto items-center"> <input type="radio"
-                                  class="form-radio h-5 w-5 text-yellow-600" :name="form2[`checklist_${checklist.id}`]"
-                                  v-model="form2[`checklist_${checklist.id}_status`]" value="requested" /><span
-                                  class="ml-2 text-gray-700 text-sm">Request</span></label>
-                              <label class="flex-auto items-center"> <input type="radio"
-                                  class="form-radio h-5 w-5 text-red-600" :name="form2[`checklist_${checklist.id}`]"
-                                  v-model="form2[`checklist_${checklist.id}_status`]" value="declined" /><span
-                                  class="ml-2 text-gray-700 text-sm">Declined</span></label>
-                              <label class="flex-auto items-center"> <input type="radio"
-                                  class="form-radio h-5 w-5 text-green-600" :name="form2[`checklist_${checklist.id}`]"
-                                  v-model="form2[`checklist_${checklist.id}_status`]" value="approved" /><span
-                                  class="ml-2 text-gray-700 text-sm">Approved</span></label>
-                            </div>
+                          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <span class="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
+                              <button type="submit" @click="submit"
+                                class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
+                                v-show="!form.id">
+                                Save
+                              </button>
+                              <button type="submit" @click="installationApproval"
+                                class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
+                                v-show="form.id">
+                                Update
+                              </button>
+                            </span>
+                            <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
+                              <button @click="clostModel" type="button"
+                                class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
+                                Cancel
+                              </button>
+                            </span>
                           </div>
 
                         </div>
-
-                        <p v-show="$page.props.errors[`checklist_${checklist.id}_attachment`]"
-                          class="mt-2 text-sm text-red-500">
-                          {{ $page.props.errors[`checklist_${checklist.id}_attachment`] }}
-                        </p>
                       </div>
                     </div>
-                    <div class="text-right">
-                      <button type="button" @click="installationApproval"
-                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
-
-                    </div>
+                  
+                   
 
                   </div>
                 </div>
@@ -919,6 +1036,7 @@ export default {
     maintenanceServices: Object,
     supervisors: Object,
     cities: Object,
+    checkListSummary: Object,
   },
   setup(props) {
     provide('role', props.role);
@@ -937,7 +1055,7 @@ export default {
     const snName = ref(null);
     const snPort = ref(null);
     const filteredPartners = ref([]);
-    filteredPartners.value = props.customer.partner_id? props.partners.filter(partner => partner.id === props.customer.partner_id) : [];
+    filteredPartners.value = props.customer.partner_id ? props.partners.filter(partner => partner.id === props.customer.partner_id) : [];
     const filteredPops = ref([]);
     const filteredTownships = ref([]);
     const checklistImagePreviews = ref({});
@@ -1314,7 +1432,7 @@ export default {
         // form.gpon_port = null;
         form.gpon_ontid = null;
         form.port_balance = null;
-          // Filter partners by pop_device_id
+        // Filter partners by pop_device_id
         if (form.pop_id && form.pop_id.partner_id) {
           console.log('Filtering partners by pop', form.pop_id.partner_id);
           filteredPartners.value = props.partners.filter(p => p.id === form.pop_id.partner_id);
@@ -1422,13 +1540,13 @@ export default {
       }
     };
     const filteredInstallationServices = computed(() => {
-        if (!props.installationServices || !form.service_type) return [];
-    
-        if( props.customer.installation_service?.service_type !== (form.service_type || '').toLowerCase()) {
-          form.installation_service_id = null; // Reset installation service ID when service type changes
-          form.installation_service = null; // Reset installation service when service type changes
-        }
-      
+      if (!props.installationServices || !form.service_type) return [];
+
+      if (props.customer.installation_service?.service_type !== (form.service_type || '').toLowerCase()) {
+        form.installation_service_id = null; // Reset installation service ID when service type changes
+        form.installation_service = null; // Reset installation service when service type changes
+      }
+
       return props.installationServices.filter(s =>
         (s.service_type || '').toLowerCase() === (form.service_type || '').toLowerCase()
       );
@@ -1436,13 +1554,24 @@ export default {
     const filteredMaintenanceServices = computed(() => {
       if (!props.maintenanceServices || !form.service_type) return [];
 
-        if( props.customer.maintenance_service?.service_type !== (form.service_type || '').toLowerCase()) {
-         form.maintenance_service_id = null; // Reset maintenance service ID when service type changes
+      if (props.customer.maintenance_service?.service_type !== (form.service_type || '').toLowerCase()) {
+        form.maintenance_service_id = null; // Reset maintenance service ID when service type changes
         form.maintenance_service = null; // Reset maintenance service when service type changes
-       }
-     
+      }
+
       return props.maintenanceServices.filter(s =>
         (s.service_type || '').toLowerCase() === (form.service_type || '').toLowerCase()
+      );
+    });
+
+    const selectedGroupId = ref(null);
+    const clostModel = () => {
+      selectedGroupId.value = null;
+    }
+    const filteredChecklists = computed(() => {
+      if (!selectedGroupId.value) return null;
+      return props.subconCheckList.filter(
+        (checklist) => checklist.group_id === selectedGroupId.value
       );
     });
     onMounted(() => {
@@ -1473,20 +1602,20 @@ export default {
         fetchSNs();
 
       }
-   
+
       // else{
       //   if (form.pop_id && form.pop_id.partner_id) {
       //     console.log('Filtering partners by pop', form.pop_id.partner_id);
       //     filteredPartners.value = props.partners.filter(p => p.id === form.pop_id.partner_id);
       //     form.partner_id = form.pop_id.partner_id;
-        
+
       //   } else {
       //     console.log('Resetting partners to all partners');
       //     filteredPartners.value = props.partners;
       //     form.partner_id = null;
       //   }
       // }
-      
+
       // if (props.customer.pop_device_id && dnInfo.value && props.customer.sn_id) {
       //   gponInfo.value = `${dnInfo.value}`;
       // }
@@ -1586,7 +1715,10 @@ export default {
       isOptionDisabled,
       filteredInstallationServices,
       filteredMaintenanceServices,
-      filteredPartners
+      filteredPartners,
+      selectedGroupId,
+      filteredChecklists,
+      clostModel
     };
   },
 };

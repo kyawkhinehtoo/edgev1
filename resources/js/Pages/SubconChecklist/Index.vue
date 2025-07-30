@@ -10,11 +10,22 @@ const props = defineProps({
 
 const search = ref('');
 const selectedServiceTypes = ref([]);
+const selectedGroupId = ref('');
 
 // Get unique service types from checklists
 const serviceTypes = computed(() => {
   const types = new Set(props.checklists.map(checklist => checklist.service_type));
   return Array.from(types);
+});
+
+const groupOptions = computed(() => {
+  const groups = {};
+  props.checklists.forEach(c => {
+    if (c.group && c.group.id) {
+      groups[c.group.id] = c.group.name;
+    }
+  });
+  return Object.entries(groups).map(([id, name]) => ({ id, name }));
 });
 
 const filteredChecklists = computed(() => {
@@ -31,6 +42,13 @@ const filteredChecklists = computed(() => {
   if (selectedServiceTypes.value.length > 0) {
     filtered = filtered.filter(checklist => 
       selectedServiceTypes.value.includes(checklist.service_type)
+    );
+  }
+  
+  // Filter by selected group
+  if (selectedGroupId.value) {
+    filtered = filtered.filter(checklist => 
+      checklist.group && String(checklist.group.id) === String(selectedGroupId.value)
     );
   }
   
@@ -53,6 +71,7 @@ const isServiceTypeSelected = (type) => {
 const clearFilters = () => {
   selectedServiceTypes.value = [];
   search.value = '';
+  selectedGroupId.value = '';
 };
 </script>
 
@@ -87,7 +106,14 @@ const clearFilters = () => {
                 class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-            
+            <!-- Group filter -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Group</label>
+              <select v-model="selectedGroupId" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">All Groups</option>
+                <option v-for="group in groupOptions" :key="group.id" :value="group.id">{{ group.name }}</option>
+              </select>
+            </div>
             <!-- Service Type filter -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Service Type</label>
@@ -102,7 +128,7 @@ const clearFilters = () => {
                   {{ type }}
                 </button>
                 <button 
-                  v-if="selectedServiceTypes.length > 0 || search"
+                  v-if="selectedServiceTypes.length > 0 || search || selectedGroupId"
                   @click="clearFilters"
                   class="px-3 py-1 text-xs rounded-full bg-red-100 border border-red-300 text-red-700 hover:bg-red-200"
                 >
@@ -116,6 +142,7 @@ const clearFilters = () => {
             <thead>
               <tr>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Group</th>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Type</th>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attachment</th>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -125,6 +152,7 @@ const clearFilters = () => {
             <tbody class="bg-white divide-y divide-gray-200 text-xs">
               <tr v-for="checklist in filteredChecklists" :key="checklist.id">
                 <td class="px-3 py-4 whitespace-nowrap">{{ checklist.name }}</td>
+                <td class="px-3 py-4 whitespace-nowrap">{{ checklist.group?.name }}</td>
                 <td class="px-3 py-4 whitespace-nowrap">{{ checklist.service_type }}</td>
                 <td class="px-3 py-4 whitespace-nowrap">
                   <Badge :color="checklist.has_attachment ? 'green' : 'gray'" :text="checklist.has_attachment ? 'Required' : 'Not Required'" />

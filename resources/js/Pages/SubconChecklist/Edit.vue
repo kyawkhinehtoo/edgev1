@@ -1,9 +1,12 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { computed } from 'vue'
 
 const props = defineProps({
-  checklist: Object
+  checklist: Object,
+  checkListSummary: Object,
+  groups: Array
 });
 
 const form = useForm({
@@ -11,7 +14,8 @@ const form = useForm({
   has_attachment: props.checklist.has_attachment?true:false,
   service_type: props.checklist.service_type,
   remarks: props.checklist.remarks || '',
-  status: props.checklist.status
+  status: props.checklist.status,
+  group_id: props.checklist.group_id || ''
 });
 
 const submit = () => {
@@ -39,6 +43,21 @@ const submit = () => {
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
           <form @submit.prevent="submit">
             <div class="grid grid-cols-1 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Group</label>
+                <select
+                  v-model="form.group_id"
+                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                >
+                  <option value="" disabled>Select Group</option>
+                  <option v-for="group in props.groups" :key="group.id" :value="group.id">
+                    {{ group.name }}
+                  </option>
+                </select>
+                <div v-if="form.errors.group_id" class="text-red-500 text-sm mt-1">{{ form.errors.group_id }}</div>
+              </div>
+
               <div>
                 <label class="block text-sm font-medium text-gray-700">Name</label>
                 <input

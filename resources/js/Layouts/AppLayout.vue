@@ -195,7 +195,8 @@ export default {
             { name: "Partner Setup", route: "partner.index", icon: "fas fa-user-tag mr-2" ,show : true},
             { name: "ISP Setup", route: "isps.index", icon: "fas fa-user-tag mr-2",show : true },
             { name: "Subcon Setup", route: "subcom.index", icon: "fas fa-handshake mr-2" ,show : true},
-            { name: "Subcon CheckList", route: "subcon-checklists.index", icon: "fas fa-handshake mr-2" ,show : true},
+            { name: "CheckList Group", route: "subcon-checklists-group.index", icon: "fas fa-handshake mr-2" ,show : true},
+            { name: "CheckList", route: "subcon-checklists.index", icon: "fas fa-handshake mr-2" ,show : true},
             { name: "Main RCA Setup", route: "root-causes.index", icon: "fas fa-handshake mr-2" ,show : true},
             { name: "Sub RCA Setup", route: "sub-root-causes.index", icon: "fas fa-handshake mr-2" ,show : true},
             
