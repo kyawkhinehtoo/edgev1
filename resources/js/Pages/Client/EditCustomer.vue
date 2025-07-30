@@ -735,7 +735,7 @@
                       Documents</h6>
                     <hr class="my-4 md:min-w-full" />
                     <keep-alive>
-                      <customer-file :data="form.id" :permission="!checkPerm('order_date')" v-if="tab == 2" />
+                      <customer-file :data="form.id" :permission="user.role?.installation_oss?true:false" v-if="tab == 2" />
                     </keep-alive>
 
                   </div>
@@ -788,6 +788,7 @@
                       <span v-if="form.order_remark">Order Remark : {{ form.order_remark }}</span>
                       <hr />
                       Actual Installation Date - {{ form.installation_date }}<br />
+                      Service Activation Date - {{ form.service_activation_date }}<br />
                       Devices - {{ bundle }}<br />
                       DN - {{ form.dn_id?.name }}<br />
                       SN - {{ form.sn_id?.name }}<br />
@@ -944,23 +945,23 @@
                                             class="form-radio h-5 w-5 text-yellow-600"
                                             :name="form2[`checklist_${checklist.id}`]"
                                             v-model="form2[`checklist_${checklist.id}_status`]"
-                                            value="skip" /><span
+                                            value="skip" :disabled="user.role?.installation_oss" /><span
                                             class="ml-2 text-gray-700 text-sm">Skip</span></label>
                                         <label class="flex-auto items-center"> <input type="radio"
                                             class="form-radio h-5 w-5 text-yellow-600"
                                             :name="form2[`checklist_${checklist.id}`]"
                                             v-model="form2[`checklist_${checklist.id}_status`]"
-                                            value="requested" /><span
+                                            value="requested" :disabled="user.role?.installation_oss"  /><span
                                             class="ml-2 text-gray-700 text-sm">Request</span></label>
                                         <label class="flex-auto items-center"> <input type="radio"
                                             class="form-radio h-5 w-5 text-red-600"
                                             :name="form2[`checklist_${checklist.id}`]"
-                                            v-model="form2[`checklist_${checklist.id}_status`]" value="declined" /><span
+                                            v-model="form2[`checklist_${checklist.id}_status`]" value="declined" :disabled="user.role?.installation_oss"  /><span
                                             class="ml-2 text-gray-700 text-sm">Declined</span></label>
                                         <label class="flex-auto items-center"> <input type="radio"
                                             class="form-radio h-5 w-5 text-green-600"
                                             :name="form2[`checklist_${checklist.id}`]"
-                                            v-model="form2[`checklist_${checklist.id}_status`]" value="approved" /><span
+                                            v-model="form2[`checklist_${checklist.id}_status`]" value="approved" :disabled="user.role?.installation_oss" /><span
                                             class="ml-2 text-gray-700 text-sm">Approved</span></label>
                                       </div>
                                     </div>
