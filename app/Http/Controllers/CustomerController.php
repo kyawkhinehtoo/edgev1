@@ -1408,7 +1408,12 @@ class CustomerController extends Controller
         $customer->onu_serial = $request->onu_serial;
         $customer->onu_power = $request->onu_power;
         $customer->installation_remark = $request->installation_remark;
-
+         $customerAddress = CustomerAddress::firstOrNew([
+                'customer_id' => $customer->id,
+                'is_current' => 1
+            ]);
+             $customerAddress->actual_location = ($request->actual_latitude ?? '') . ',' . ($request->actual_longitude ?? '');
+             $customerAddress->save();
 
         if (!empty($request->bundles)) {
             $customer->bundle = '';
