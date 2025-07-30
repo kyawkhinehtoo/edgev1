@@ -46,7 +46,7 @@ class IncidentController extends Controller
             $read_permission = true;
             $write_permission = true;
             $task_write = false;
-        } else if ($user->user_type == 'partner') {
+        } else if ($user->user_type == 'partner' ) {
             $read_permission = true;
             $write_permission = false;
             $task_write = false;
@@ -54,6 +54,11 @@ class IncidentController extends Controller
             $read_permission = true;
             $write_permission = false;
             $task_write = true;
+        } else if ($user->user_type == 'internal') {
+           
+            $read_permission = true;
+            $write_permission = true;
+            $task_write = $user->role?->incident_supervisor?? false;
         } else {
             $permission =  DB::table('roles')
                 ->join('users', 'users.role_id', '=', 'roles.id')
