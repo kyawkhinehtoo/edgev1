@@ -568,6 +568,7 @@ export default {
             { id: 'installation_start', name: 'Installation Start' },
             { id: 'installation_complete', name: 'Installation Complete' },
             { id: 'photo_upload_complete', name: 'Photo Upload Complete' },
+            { id: 'photo_upload_rejected', name: 'Photo Upload Rejected' ,'$isDisabled': true },
             { id: 'supervisor_approved', name: 'Supervisor Approved', '$isDisabled': true },
             { id: 'customer_cancel', name: 'Customer Cancel' },
             { id: 'port_full', name: 'Port Full' },
