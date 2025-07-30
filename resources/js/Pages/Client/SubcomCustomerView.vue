@@ -211,21 +211,21 @@
                                     $page.props.errors.bundles }}</p>
                             </div> -->
                         <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-700">ONU Serial</label>
+                            <label class="block text-sm font-medium text-gray-700"><span class="text-red-500">*</span> ONU Serial </label>
                             <input type="text" v-model="form.onu_serial"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
                             <p v-show="$page.props.errors.onu_serial" class="mt-2 text-sm text-red-500">{{
                                 $page.props.errors.onu_serial }}</p>
                         </div>
                         <div class="col-span-1">
-                            <label class="block text-sm font-medium text-gray-700">ONU Power</label>
+                            <label class="block text-sm font-medium text-gray-700"><span class="text-red-500">*</span> ONU Power</label>
                             <input type="text" v-model="form.onu_power"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" />
                             <p v-show="$page.props.errors.onu_power" class="mt-2 text-sm text-red-500">{{
                                 $page.props.errors.onu_power }}</p>
                         </div>
                         <div class="col-span-1 sm:col-span-1">
-                            <label for="actual_latitude" class="block text-sm font-medium text-gray-700">Actual Latitude
+                            <label for="actual_latitude" class="block text-sm font-medium text-gray-700"><span class="text-red-500">*</span> Actual Latitude
                             </label>
                             <div class="mt-1 flex rounded-md shadow-sm">
                                 <span
@@ -241,7 +241,7 @@
                                 $page.props.errors.actual_latitude }}</p>
                         </div>
                         <div class="col-span-1 sm:col-span-1">
-                            <label for="actual_longitude" class="block text-sm font-medium text-gray-700">Actual
+                            <label for="actual_longitude" class="block text-sm font-medium text-gray-700"><span class="text-red-500">*</span> Actual
                                 Longitude
                             </label>
                             <div class="mt-1 flex rounded-md shadow-sm">

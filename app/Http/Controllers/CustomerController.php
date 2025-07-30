@@ -1377,6 +1377,18 @@ class CustomerController extends Controller
             }
             }
         }
+          
+        if($request->installation_status['name'] == 'Installation Completed' || $request->installation_status['name'] == 'Photo Upload Complete') {
+            $validationRules['installation_date'] = 'required|date';
+            $validationRules['way_list_date'] = 'required';
+            $validationRules['fiber_distance'] = 'required';
+            $validationRules['onu_serial'] = 'required';
+            $validationRules['onu_power'] = 'required';
+            $validationRules['actual_latitude'] = 'required';
+            $validationRules['actual_longitude'] = 'required';
+        } else {
+            $validationRules['installation_date'] = 'nullable|date';
+        }
 
         $validator = Validator::make($request->all(), $validationRules);
 
