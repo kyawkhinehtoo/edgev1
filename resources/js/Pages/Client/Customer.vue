@@ -127,6 +127,7 @@
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Package</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Township</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase" v-if="$page.props.user.user_type != 'isp'">Installation Status</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th class="px-3 py-3">
                   <a @click="goAll" class="cursor-pointer text-gray-200 hover:text-gray-500">
@@ -146,6 +147,15 @@
                 <td class="px-3 py-3 text-xs font-medium">{{ row.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.bandwidth }} Mbps</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.current_address?.township.name }}</td>
+                <td class="px-3 py-3 text-xs font-medium" v-if="$page.props.user.user_type != 'isp'">
+                  {{ 
+                    row.installation_status 
+                      ? row.installation_status.split('_')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ') 
+                      : '' 
+                  }}
+                </td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.status.name }}</td>
                 <td class="px-3 py-3 text-right">
                   <Link :href="route('customer.edit', row?.id)" method="get" as="button" class="text-indigo-400 hover:text-indigo-600 mr-2">

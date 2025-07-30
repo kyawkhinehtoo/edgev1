@@ -1,1 +1,0 @@
-import{o as t,d as e,t as o,s as n}from"./app-DXv_oQA9.js";const l={class:"block font-medium text-sm text-gray-700 dark:text-gray-300"},r={key:0},c={key:1},u={__name:"InputLabel",props:{value:String},setup(s){return(a,_)=>(t(),e("label",l,[s.value?(t(),e("span",r,o(s.value),1)):(t(),e("span",c,[n(a.$slots,"default")]))]))}};export{u as _};
