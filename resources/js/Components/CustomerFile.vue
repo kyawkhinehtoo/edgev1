@@ -20,7 +20,7 @@
         <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">File</th>
         <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">Type</th>
         <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">Created By</th>
-        <th class="px-4 py-2 text-xs font-semibold  text-gray-600 uppercase text-right">Action</th>
+        <th class="px-4 py-2 text-xs font-semibold  text-gray-600 uppercase text-right"  v-if="permission">Action</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-100">
@@ -32,8 +32,9 @@
           {{ row.name }}
           </a>
         </td>
+        <td class="px-4 py-2 whitespace-nowrap uppercase">{{ row.file_extension }}</td>
         <td class="px-4 py-2 whitespace-nowrap">{{ row.user?.name }}</td>
-        <td class="px-4 py-2 whitespace-nowrap text-right">
+        <td class="px-4 py-2 whitespace-nowrap text-right" v-if="permission">
           <button @click="deleteFile(row)" class="text-red-600 hover:text-red-800 transition" title="Delete">
           <i class="fa fa-trash"></i>
           </button>
