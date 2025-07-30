@@ -411,25 +411,35 @@ class IncidentController extends Controller
             return response()->json($files, 200);
         }
     }
-    public function getCustomerFile($id)
-    {
-        $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
-        if ($id) {
-        if($user->user_type == 'subcon'){
-           $files = FileUpload::with('user')
-                ->where('file_uploads.customer_id', '=', $id)
-                ->where('file_uploads.created_by', '=', $user->id)
-                ->orderBy('file_uploads.id', 'DESC')
-                ->get();
-            return response()->json($files, 200);
+        public function getCustomerFile($id)
+        {
+            $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
+            if ($id) {
+                $query = FileUpload::with('user')
+                    ->where('file_uploads.customer_id', '=', $id);
+
+                if ($user->user_type == 'subcon') {
+                    $query->where('file_uploads.created_by', '=', $user->id);
+                }
+
+                $files = $query->orderBy('file_uploads.id', 'DESC')->get();
+
+                $files = $files->filter(function ($file) use ($user) {
+                    $file_extension = method_exists($file, 'getFileTypeAttribute') ? $file->getFileTypeAttribute() : '';
+                    if ($user->user_type == 'isp' && in_array(strtolower($file_extension), ['kml', 'kmz'])) {
+                        return false;
+                    }
+                    return true;
+                })->values();
+
+                $files->each(function ($file) {
+                    $file->user_name = $file->user ? $file->user->name : 'Unknown';
+                    $file->file_extension = method_exists($file, 'getFileTypeAttribute') ? $file->getFileTypeAttribute() : '';
+                });
+
+                return response()->json($files, 200);
+            }
         }
-            $files = FileUpload::with('user')
-                ->where('file_uploads.customer_id', '=', $id)
-                ->orderBy('file_uploads.id', 'DESC')
-                ->get();
-            return response()->json($files, 200);
-        }
-    }
     public function deleteFile(Request $request, $id)
     {
         if ($request->has('id')) {

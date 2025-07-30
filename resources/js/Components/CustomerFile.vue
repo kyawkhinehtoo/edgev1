@@ -18,6 +18,7 @@
         <tr>
         <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">#</th>
         <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">File</th>
+        <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">Type</th>
         <th class="px-4 py-2 text-xs font-semibold text-left text-gray-600 uppercase">Created By</th>
         <th class="px-4 py-2 text-xs font-semibold  text-gray-600 uppercase text-right">Action</th>
         </tr>

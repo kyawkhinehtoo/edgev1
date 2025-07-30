@@ -718,7 +718,7 @@ class CustomerController extends Controller
                 return abort(403, 'Unauthorized access.');
             }
         }
-        $customer = Customer::with('currentAddress.township','city', 'partner', 'isp', 'snPort', 'snPort.snSplitter', 'snPort.snSplitter.snBox.dnSplitter.fiberCable', 'installationService', 'maintenanceService', 'portSharingService', 'supervisor')
+        $customer = Customer::with('currentAddress.township','status','city', 'partner', 'isp', 'snPort', 'snPort.snSplitter', 'snPort.snSplitter.snBox.dnSplitter.fiberCable', 'installationService', 'maintenanceService', 'portSharingService', 'supervisor')
             ->where(function ($query) {
                 $query->where('deleted', 0)->orWhereNull('deleted');
             })->find($id);

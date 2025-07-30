@@ -27,4 +27,8 @@ class FileUpload extends Model
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+    public function getFileTypeAttribute()
+    {
+        return strtolower(pathinfo($this->path, PATHINFO_EXTENSION));
+    }
 }

@@ -19,9 +19,11 @@
                       preserve-state>Installation</a></li>
                   <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     :class="[tab == 2 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
-                      @click="tabClick(2)" preserve-state>Documents <span
+                      @click="tabClick(2)" preserve-state>Documents 
+                      <!-- <span
                         class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">{{
-                          total_documents }}</span></a></li>
+                          total_documents }}</span> -->
+                        </a></li>
                   <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider "
                     :class="[tab == 6 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
                       @click="tabClick(6)" preserve-state>Text</a></li>
@@ -974,23 +976,26 @@
                               </div>
                             </div>
                           </div>
+                       
                           <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+
+                          
                             <span class="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
                               <button type="button" @click="installationApproval"
                                 class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
-                                v-show="!form.id">
+                                v-show="!form.id" v-if="user.role?.installation_supervisor">
                                 Save
                               </button>
                               <button type="button" @click="installationApproval"
                                 class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
-                                v-show="form.id">
+                                v-show="form.id" v-if="user.role?.installation_supervisor">
                                 Update
                               </button>
                             </span>
                             <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
                               <button @click="closeModel" type="button"
                                 class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
-                                Cancel
+                                Close
                               </button>
                             </span>
                           </div>
@@ -1272,6 +1277,11 @@ export default {
       const my_role = props.user?.role;
       if (my_role) {
         if (my_role?.read_customer) {
+          return true;
+        }
+      }
+      if (props.user.user_type == 'isp'){
+        if(props.customer.status?.type == 'active'){
           return true;
         }
       }
