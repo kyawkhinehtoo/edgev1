@@ -852,7 +852,7 @@ class CustomerController extends Controller
 
         $result = $groups->map(function ($group) use ($showValues) {
             $total = count($group->checklists);
-            $approved = $requested = $rejected = $remaining = 0;
+            $approved = $requested = $rejected = $remaining = $skip = 0;
 
             foreach ($group->checklists as $checklist) {
                 if ($showValues) {
@@ -861,6 +861,8 @@ class CustomerController extends Controller
                         $remaining++;
                     } elseif ($value->status === 'requested') {
                         $requested++;
+                    } elseif ($value->status === 'skip') {
+                        $skip++;
                     } elseif ($value->status === 'approved') {
                         $approved++;
                     } elseif ($value->status === 'declined') {
@@ -880,6 +882,7 @@ class CustomerController extends Controller
                 'requested' => $requested,
                 'approved' => $approved,
                 'rejected' => $rejected,
+                'skip' => $skip,
                 'remaining' => $remaining,
             ];
         });
@@ -1368,9 +1371,9 @@ class CustomerController extends Controller
             if (isset($fields['status'])) {
             // If title is present and not empty in request, status is required
             if ($title && !empty($request->$title)) {
-                $validationRules[$fields['status']] = 'required|string|in:requested,approved,declined';
+                $validationRules[$fields['status']] = 'required|string|in:requested,skip,approved,declined';
             } else {
-                $validationRules[$fields['status']] = 'nullable|string|in:requested,approved,declined';
+                $validationRules[$fields['status']] = 'nullable|string|in:requested,skip,approved,declined';
             }
             }
         }
@@ -1418,7 +1421,7 @@ class CustomerController extends Controller
             }
 
             // Find existing checklist value or create new one
-            if ($title) {
+            if ($title || $status) {
 
 
                 $checklistValue = SubconChecklistValue::updateOrCreate(
@@ -1427,7 +1430,7 @@ class CustomerController extends Controller
                         'customer_id' => $customer->id,
                     ],
                     [
-                        'title' => $title,
+                        'title' => $title??'NA',
                         'status' => $status,
                         'current_actor_user_id' => Auth::id(),
                         'last_status_changed_at' => now(),
@@ -1447,7 +1450,7 @@ class CustomerController extends Controller
                 // Create history record
                 SubconChecklistValueHistory::create([
                     'checklist_value_id' => $checklistValue->id,
-                    'title' => $title,
+                    'title' => $title??'NA',
                     'attachment' => $attachmentPath ?: $checklistValue->attachment,
                     'action' => $status,
                     'actor_id' => Auth::id(),

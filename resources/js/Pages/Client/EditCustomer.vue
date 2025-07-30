@@ -810,6 +810,9 @@
                               Total</th>
                             <th
                               class="px-4 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
+                              Skip</th>
+                            <th
+                              class="px-4 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
                               Requested</th>
                             <th
                               class="px-4 py-3 text-center text-xs font-semibold text-indigo-700 uppercase tracking-wider">
@@ -833,6 +836,12 @@
                                 class="px-2 py-1 rounded-xl bg-yellow-100 text-yellow-700 text-xs font-semibold">{{
                                   group.total }}</span>
                               <span v-else class="text-gray-400">{{ group.total }}</span>
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                              <span v-if="group.skip > 0"
+                                class="px-2 py-1 rounded-xl bg-indigo-100 text-indigo-700 text-xs font-semibold">{{
+                                  group.skip }}</span>
+                              <span v-else class="text-gray-400">{{ group.skip }}</span>
                             </td>
                             <td class="px-4 py-2 text-center">
                               <span v-if="group.requested > 0"
@@ -922,7 +931,12 @@
                                       <label for="status" class="block text-md font-medium text-gray-700"> Status
                                       </label>
                                       <div class="mt-2 flex">
-
+                                         <label class="flex-auto items-center"> <input type="radio"
+                                            class="form-radio h-5 w-5 text-yellow-600"
+                                            :name="form2[`checklist_${checklist.id}`]"
+                                            v-model="form2[`checklist_${checklist.id}_status`]"
+                                            value="skip" /><span
+                                            class="ml-2 text-gray-700 text-sm">Skip</span></label>
                                         <label class="flex-auto items-center"> <input type="radio"
                                             class="form-radio h-5 w-5 text-yellow-600"
                                             :name="form2[`checklist_${checklist.id}`]"
