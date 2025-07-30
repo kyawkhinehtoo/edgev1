@@ -1060,14 +1060,13 @@ export default {
     const filteredTownships = ref([]);
     const checklistImagePreviews = ref({});
     const installationStatus = ref([
-      { id: 'team_assigned', name: 'Team Assigned' },
-      { id: 'cable_done', name: 'Cable Done' },
-      { id: 'config_done', name: 'Config Done' },
-      { id: 'completed', name: 'Completed' },
-      { id: 'customer_cancel', name: 'Customer Cancel' },
-      { id: 'pending_odb_issue', name: 'Pending ODB Issue' },
-      { id: 'pending_port_full', name: 'Pending Port Full' },
-      { id: 'pending_reappointment', name: 'Pending Reappointment' },
+         { id: 'team_assigned', name: 'Team Assigned'},
+            { id: 'installation_start', name: 'Installation Start' },
+            { id: 'installation_complete', name: 'Installation Complete' },
+            { id: 'photo_upload_complete', name: 'Photo Upload Complete' },
+            { id: 'supervisor_approved', name: 'Supervisor Approved' },
+            { id: 'customer_cancel', name: 'Customer Cancel' },
+            { id: 'port_full', name: 'Port Full' },
     ]);
     let statusList = ref(props.allStatus);
     let disableStatus = ref(false);
