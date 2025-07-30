@@ -15,7 +15,7 @@
                       @click="tabClick(1)" preserve-state>General</a></li>
                   <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     :class="[tab == 7 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"
-                    v-if="user.role?.installation_supervisor"><a href="#" @click="tabClick(7)"
+                    v-if="user.role?.installation_supervisor || user.role?.installation_oss"><a href="#" @click="tabClick(7)"
                       preserve-state>Installation</a></li>
                   <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     :class="[tab == 2 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
@@ -780,14 +780,21 @@
                       Fully Address – {{ form.address }}<br />
                       Location – {{ form.latitude }},{{ form.longitude }} <br />
                       Applied Mbps – {{ form.bandwidth }} Mbps<br />
-                      Installation Timeline – {{ form.package?.installation_timeline }} Hrs<br />
+                      Installation Timeline – {{ customer.installation_service?.name }} <br />
+                      Maintenance Timeline – {{ customer.maintenance_service?.name }} <br />
                       Preferred installation date & time – {{ form.prefer_install_date }}<br />
                       <span v-if="form.order_remark">Order Remark : {{ form.order_remark }}</span>
                       <hr />
+                      Actual Installation Date - {{ form.installation_date }}<br />
                       Devices - {{ bundle }}<br />
                       DN - {{ form.dn_id?.name }}<br />
                       SN - {{ form.sn_id?.name }}<br />
                       SN Port - {{ snPort }}<br />
+                      Fiber Distance - {{ form.fiber_distance }} Meter<br />
+                      ONU Serial - {{ form.onu_serial }}<br />  
+                      ONU Power - {{ form.onu_power }} <br />
+                      Installation Remark - {{ form.installation_remark }}<br />
+                      Installation Location – {{ form.actual_latitude }},{{ form.actual_longitude }} <br />
                     </div>
 
                   </div>
