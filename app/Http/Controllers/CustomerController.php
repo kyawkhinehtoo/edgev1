@@ -832,33 +832,42 @@ class CustomerController extends Controller
             ]
         );
     }
-    public function checklistSummary($customerId,$service_type)
+    public function checklistSummary($customerId, $service_type)
     {
-        $groups = SubconChecklistsGroup::with(['checklists' => function ($query) use ($service_type) {
-            $query->where('service_type', $service_type);
-        }, 'checklists.values' => function ($query) use ($customerId) {
-            $query->where('customer_id', $customerId);
-        }])->get();
+        $user = User::with('role')->find(Auth::user()->id);
 
-        $result = $groups->map(function ($group) {
-            $total = 0;
-            $approved = 0;
-            $requested = 0;
-            $rejected = 0;
-            $remaining = 0;
+        $groups = SubconChecklistsGroup::with([
+            'checklists' => function ($query) use ($service_type) {
+                $query->where('service_type', $service_type);
+            },
+            'checklists.values' => function ($query) use ($customerId) {
+                $query->where('customer_id', $customerId);
+            }
+        ])->get();
+
+        $isSupervisor = $user->role?->installation_supervisor ?? false;
+        $customer = $isSupervisor ? Customer::find($customerId) : null;
+        $status = $customer?->installation_status ?? null;
+        $showValues = !$isSupervisor || in_array($status, ['photo_upload_complete', 'supervisor_approved']);
+
+        $result = $groups->map(function ($group) use ($showValues) {
+            $total = count($group->checklists);
+            $approved = $requested = $rejected = $remaining = 0;
 
             foreach ($group->checklists as $checklist) {
-                $total++;
-                $value = $checklist->values->first(); // one per checklist per task/customer
-
-                if (!$value) {
-                    $remaining++;
-                } elseif ($value->status === 'requested') {
-                    $requested++;
-                } elseif ($value->status === 'approved') {
-                    $approved++;
-                } elseif ($value->status === 'declined') {
-                    $rejected++;
+                if ($showValues) {
+                    $value = $checklist->values->first();
+                    if (!$value) {
+                        $remaining++;
+                    } elseif ($value->status === 'requested') {
+                        $requested++;
+                    } elseif ($value->status === 'approved') {
+                        $approved++;
+                    } elseif ($value->status === 'declined') {
+                        $rejected++;
+                    } else {
+                        $remaining++;
+                    }
                 } else {
                     $remaining++;
                 }
