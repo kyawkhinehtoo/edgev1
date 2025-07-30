@@ -504,6 +504,14 @@ class CustomerController extends Controller
             ]);
         }
 
+        $installationService = InstallationService::find($request->installation_service_id);
+        if (!$installationService) {
+            // Manually throw ValidationException with custom message
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'installation_service_id' => 'Invalid Installation value, please check.',
+            ]);
+        }
+
         $maintenanceService = MaintenanceService::find($request->maintenance_service_id);
         if (!$maintenanceService) {
             // Manually throw ValidationException with custom message
@@ -530,7 +538,7 @@ class CustomerController extends Controller
                 }
             }
             //   $max_id = $max_c_id [$request->city_id];
-            $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type, 0, 2) . $selectedService->short_code . $maintenanceService->sla_hours;
+            $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type, 0, 2) . $selectedService->short_code . $installationService->sla_hours;
             $auto_ftth_id = strtoupper($auto_ftth_id);
         } else {
             throw \Illuminate\Validation\ValidationException::withMessages([
