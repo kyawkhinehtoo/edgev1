@@ -1275,6 +1275,7 @@ export default {
               title: page.props.flash.message,
             });
             loading.value = false;
+              closeModal();
           },
           onError: (errors) => {
             loading.value = false;
