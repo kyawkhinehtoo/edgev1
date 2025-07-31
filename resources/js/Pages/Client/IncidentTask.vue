@@ -95,6 +95,7 @@
                     {{ (index += tasks.from) }}</td>
 
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.code }}</td>
+                  <td class="px-6 py-3 whitespace-nowrap">{{ row.edge_code }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.ftth_id }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.description?.substring(0, 50) }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ getName(row.assigned) }}</td>
@@ -197,7 +198,8 @@
                   <label for="ftth_id" class="block text-sm font-bold text-gray-700 md:mt-2 md:mr-2">
                     <i class="fa fa-circle mr-2"
                       :class="{ 'text-yellow-400': form.data?.priority == 'normal', 'text-yellow-600': form.data?.priority == 'high', 'text-red-600': form.data?.priority == 'critical' }"></i>
-                    {{ form.data?.code }}
+                    {{ form.data?.code }} | 
+                    {{ form.data?.edge_code }}
                   </label>
                 </div>
               </div>
@@ -505,6 +507,7 @@ export default {
     const form = reactive({
       id: null,
       code: null,
+      edge_code: null,
       priority: null,
       assigned: null,
       target: null,
@@ -522,6 +525,7 @@ export default {
     function resetForm() {
       form.id = null;
       form.code = null;
+      form.edge_code = null;
       form.priority = null;
       form.assigned = null;
       form.target = null;
@@ -541,6 +545,7 @@ export default {
 
       form.id = data.id;
       form.code = data.code;
+      form.edge_code = data.edge_code;
       form.priority = data.priority;
       form.assigned = props.subcons.filter((x) => x.id == data.assigned)[0];
       form.description = data.description;

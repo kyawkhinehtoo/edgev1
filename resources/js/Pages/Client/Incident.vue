@@ -29,7 +29,7 @@
               <option value="termination">Termination</option>
             </select>
           </div>
-
+<!-- 
           <div class="flex w-full">
             <span
               class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
@@ -42,7 +42,7 @@
               <option v-for="row in noc" v-bind:key="row.id" :value="row.id">{{ row.name }}</option>
 
             </select>
-          </div>
+          </div> -->
           <div class="flex w-full">
             <span
               class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
@@ -78,74 +78,10 @@
               v-if="write_permission" tabindex="7">Ticket<i
                 class="fas fa-plus-circle opacity-75 lg:ml-1 text-sm"></i></button>
           </div>
+          
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-6 gap-6 w-full" v-if="write_permission || read_permission">
-          <!--ticket list -->
-
-          <div class="lg:col-span-4 md:col-span-6">
-
-            <div class="bg-white overflow-auto md:overflow-hidden shadow-xl sm:rounded-lg mt-1" v-if="incidents.data">
-              <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      @click="sortBy('date')">Open Date <i class="fas fa-sort text-gray-400"></i></th>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      @click="sortBy('code')">Ticket <i class="fas fa-sort text-gray-400"></i></th>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      @click="sortBy('ftth_id')">User <i class="fas fa-sort text-gray-400"></i></th>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      @click="sortBy('township_id')">TSP <i class="fas fa-sort text-gray-400"></i></th>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      @click="sortBy('type')">Type <i class="fas fa-sort text-gray-400"></i></th>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      @click="sortBy('incharge')">Created <i class="fas fa-sort text-gray-400"></i></th>
-                    <th scope="col"
-                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200 text-sm">
-                  <tr v-for="(row, index) in incidents.data" v-bind:key="row.id"
-                    :class="[row.id == selected_id ? 'bg-indigo-200' : '']" @click="edit(row)" class="cursor-pointer">
-                    <td class="px-2 py-3 whitespace-nowrap"><i :class="'fa fa-circle text-' + row.color"></i></td>
-                    <td class="px-2 py-3 whitespace-nowrap">{{ (index += incidents.from) }}</td>
-                    <td class="px-2 py-3 whitespace-nowrap">{{ row.date }} {{ row.time }}</td>
-                    <td class="px-2 py-3 whitespace-nowrap">{{ row.code }}</td>
-                    <td class="px-2 py-3 whitespace-nowrap" v-if="row.ftth_id">{{ row.ftth_id }}</td>
-                    <td class="px-2 py-3 whitespace-nowrap" v-if="row.township_short">{{ row.township_short }}</td>
-                    <td class="px-2 py-3 whitespace-nowrap capitalize">{{ row.type.replace("_", " ") }}</td>
-                    <td class="px-2 py-3 whitespace-nowrap">{{ row.incharge.match(/\b\w/g).join("") }}</td>
-                    <td class="px-2 py-3 whitespace-nowrap">{{ getStatus(row.status) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <span v-if="incidents.total" class="w-full block mt-4">
-              <label class="text-xs text-gray-600">{{ incidents.data.length }} Tickets in Current Page. Total Number of
-                Tickets : {{ incidents.total }}</label>
-            </span>
-            <span v-if="incidents.links">
-              <pagination class="mt-4" :links="incidents.links" />
-            </span>
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-1 py-4 flex flex-col items-center"
-              v-if="!incidents.data">
-              <no-data />
-            </div>
-          </div>
-          <!-- end of ticket list -->
-          <!--alarm panel -->
-          <div class="col-span-2">
+         <!--alarm panel -->
+          <div class="max-w-lg ">
             <div class="bg-white rounded-lg w-full mx-auto mt-1 shadow-xl divide-y divide-gray-200 py-2 px-2">
               <div class="grid grid-cols-4 gap-2">
                 <div class="col-span-1 ">
@@ -174,9 +110,79 @@
                 </div>
               </div>
             </div>
-            <incident-alert @show_edit="alert_edit" />
+            <!-- <incident-alert @show_edit="alert_edit" /> -->
           </div>
           <!--end of alarm panel -->
+        <!-- <div class="grid grid-cols-1 md:grid-cols-6 gap-6 w-full" v-if="write_permission || read_permission"> -->
+        <div class=" w-full" v-if="write_permission || read_permission">
+          <!--ticket list -->
+
+          <!-- <div class="lg:col-span-4 md:col-span-6"> -->
+
+            <div class="bg-white overflow-auto md:overflow-hidden shadow-xl sm:rounded-lg mt-1" v-if="incidents.data">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No.</th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      @click="sortBy('date')">Open Date <i class="fas fa-sort text-gray-400"></i></th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      @click="sortBy('code')">Customer Ticket <i class="fas fa-sort text-gray-400"></i></th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      @click="sortBy('edge_code')">EDGE Ticket <i class="fas fa-sort text-gray-400"></i></th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      @click="sortBy('ftth_id')">User <i class="fas fa-sort text-gray-400"></i></th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      @click="sortBy('township_id')">TSP <i class="fas fa-sort text-gray-400"></i></th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      @click="sortBy('type')">Type <i class="fas fa-sort text-gray-400"></i></th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      @click="sortBy('incharge')">Created <i class="fas fa-sort text-gray-400"></i></th>
+                    <th scope="col"
+                      class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 text-sm">
+                  <tr v-for="(row, index) in incidents.data" v-bind:key="row.id"
+                    :class="[row.id == selected_id ? 'bg-indigo-200' : '']" @click="edit(row)" class="cursor-pointer">
+                    <td class="px-2 py-3 whitespace-nowrap"><i :class="'fa fa-circle text-' + row.color"></i></td>
+                    <td class="px-2 py-3 whitespace-nowrap">{{ (index += incidents.from) }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap">{{ row.date }} {{ row.time }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap">{{ row.code }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap">{{ row.edge_code }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap" v-if="row.ftth_id">{{ row.ftth_id }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap" v-if="row.township_short">{{ row.township_short }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap capitalize">{{ row.type.replace("_", " ") }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap">{{ row.incharge.match(/\b\w/g).join("") }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap">{{ getStatus(row.status) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <span v-if="incidents.total" class="w-full block mt-4">
+              <label class="text-xs text-gray-600">{{ incidents.data.length }} Tickets in Current Page. Total Number of
+                Tickets : {{ incidents.total }}</label>
+            </span>
+            <span v-if="incidents.links">
+              <pagination class="mt-4" :links="incidents.links" />
+            </span>
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mt-1 py-4 flex flex-col items-center"
+              v-if="!incidents.data">
+              <no-data />
+            </div>
+          <!-- </div> -->
+          <!-- end of ticket list -->
+         
         </div>
         <div class="flex justify-center" v-else>
           <span class="px-20 py-10 center bg-white inline-flex">
@@ -206,10 +212,16 @@
                     <h2 class="font-semibold text-xl text-gray-800 leading-tight mt-2">Ticket Detail</h2>
                   </div>
                   <div class="flex">
+                     <span
+                      class="border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white  rounded-l-md text-sm shadow outline-none focus:outline-none">
+                      Customer Ticket ID </span>
+                    <input type="text" v-model="form.code" name="code" id="code"
+                      class="mr-2 border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded-r-md text-sm shadow outline-none focus:outline-none"
+                      disabled />
                     <span
                       class="border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white  rounded-l-md text-sm shadow outline-none focus:outline-none">
-                      Ticket ID </span>
-                    <input type="text" v-model="form.code" name="code" id="code"
+                      EDGE Ticket ID </span>
+                    <input type="text" v-model="form.edge_code" name="edge_code" id="edge_code"
                       class="mr-2 border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded-r-md text-sm shadow outline-none focus:outline-none"
                       disabled />
                     <ul class="flex col-span-1">
@@ -965,6 +977,7 @@ export default {
     const form = useForm({
       id: null,
       code: null,
+      edge_code: null,
       priority: null,
       customer_id: null,
       incharge_id: props.team.filter((d) => d.id == props.user.id)[0],
@@ -1050,6 +1063,7 @@ export default {
 
       form.id = data.id;
       form.code = data.code;
+      form.edge_code = data.edge_code;
       form.priority = data.priority;
       form.customer_id = props.customers.filter((d) => d.id == data.customer_id)[0];
       form.incharge_id = props.noc.filter((d) => d.id == data.incharge_id)[0];

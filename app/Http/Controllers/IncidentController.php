@@ -209,6 +209,7 @@ class IncidentController extends Controller
             ->when($request->keyword, function ($query, $search) {
             $query->where(function ($query) use ($search) {
                 $query->where('customers.ftth_id', 'LIKE', '%' . $search . '%')
+                ->orWhere('incidents.edge_code', 'LIKE', '%' . $search . '%')
                 ->orWhere('incidents.code', 'LIKE', '%' . $search . '%');
             });
             })
@@ -276,6 +277,7 @@ class IncidentController extends Controller
             ->when($request->keyword, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('customers.ftth_id', 'LIKE', '%' . $search . '%')
+                        ->orWhere('incidents.edge_code', 'LIKE', '%' . $search . '%')
                         ->orWhere('incidents.code', 'LIKE', '%' . $search . '%');
                 });
             })
@@ -746,6 +748,7 @@ class IncidentController extends Controller
             $incident->relocation_service_id = $request->relocation_service_id?? null;
             $incident->save();
             $incident->code = 'T-' . str_pad($incident->id, 4, "0", STR_PAD_LEFT).'-' . $isp->short_code;
+            $incident->edge_code ='';
             $incident->update();
 
 
@@ -826,7 +829,7 @@ class IncidentController extends Controller
 
                 $incident = Incident::find($request->input('id'));
                 // Check if incident->code matches "T-0015-MGT" or "T-0015"
-                if (preg_match('/^T-\d{4}(-[A-Z]{3})?$/i', $incident->code)){
+                if (!$incident->edge_code){
                    $customer = Customer::find($incident->customer_id);
                    if($customer){
                     $maintenance = MaintenanceService::where('id', $customer->maintenance_service_id)->first();
@@ -835,9 +838,9 @@ class IncidentController extends Controller
                         $today = date('Ymd');
                         $prefix = strtoupper(substr($maintenance->short_code, 0, 2));
                         $pattern = '^T-[A-Z]{2}' . $today . '-([0-9]{4})$';
-                        $maxCode = Incident::where('code', 'REGEXP', $pattern)
-                                            ->orderByDesc('code')
-                                            ->value('code');
+                        $maxCode = Incident::where('edge_code', 'REGEXP', $pattern)
+                                            ->orderByDesc('edge_code')
+                                            ->value('edge_code');
                         $nextNumber = 1;
                         if ($maxCode) {
                             preg_match('/'.$pattern.'/', $maxCode, $matches);
@@ -846,7 +849,7 @@ class IncidentController extends Controller
                             }
                         }
                        
-                        $incident->code = 'T-' . $prefix . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                        $incident->edge_code = 'T-' . $prefix . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
                        
                     }
                    }
@@ -854,7 +857,7 @@ class IncidentController extends Controller
                    
                 }
 
-               // $incident->code = $request->code;
+                $incident->code = $request->code;
                 $incident->customer_id = $request->customer_id['id'];
                 $incident->incharge_id = $request->incharge_id['id'];
                 $incident->type = $request->type;
@@ -988,7 +991,7 @@ class IncidentController extends Controller
     {
         $updatedFields = [];
         $fieldsToCompare = [
-            'code', 'priority', 'date', 'time', 'incharge_id', 'type', 'status', 'description',
+            'code','edge_code', 'priority', 'date', 'time', 'incharge_id', 'type', 'status', 'description',
             'customer_id', 'topic', 'root_cause_id', 'sub_root_cause_id', 'rca_notes',
             'package_id', 'new_township', 'supervisor_id', 'start_date', 'end_date',
             'new_address', 'latitude', 'longitude', 'relocation_service_id'
