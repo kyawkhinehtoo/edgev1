@@ -35,6 +35,8 @@ class IncidentController extends Controller
     public function index(Request $request)
     {
         //Auth::id();
+
+      //  dd($request->date);
         $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
 
         $rootCause = RootCause::with('subRootCauses')->where('is_maintenance',true)->where('is_pending',false)->get();
@@ -136,8 +138,117 @@ class IncidentController extends Controller
             ->whereNotIn('incidents.status',[3,4])
       
             ->count('incidents.id');
-
     
+        $ticketRequest = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
+            ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
+            ->where('incidents.status', '=', '1')
+            ->when($user->user_type, function ($query, $user_type) use ($user) {
+                if ($user_type == 'partner') {
+                    $query->where('customers.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
+            })
+            ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
+                $query->whereIn('tasks.id', $myTasks);
+            })
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
+                $query->where('incidents.supervisor_id',$user->id);
+             })
+            ->when($request->date, function ($query, $date) {
+                
+                if (!empty(trim($date)) && $date !== null && $date != 'null') {
+                    $d = explode(',', $date);
+                    $from = date($d[0]);
+                    $to = date($d[1]);
+                    $query->whereBetween('incidents.date', [$from, $to]);
+                }
+            })
+            ->count();
+        $teamAssign = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
+            ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
+            ->where('incidents.status', '=', '2')
+            ->when($user->user_type, function ($query, $user_type) use ($user) {
+                if ($user_type == 'partner') {
+                    $query->where('customers.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
+            })
+            ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
+                $query->whereIn('tasks.id', $myTasks);
+            })
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
+                $query->where('incidents.supervisor_id',$user->id);
+             })
+            ->when($request->date, function ($query, $date) {
+                if (!empty(trim($date)) && $date !== null && $date != 'null') {
+                    $d = explode(',', $date);
+                    $from = date($d[0]);
+                    $to = date($d[1]);
+                    $query->whereBetween('incidents.date', [$from, $to]);
+                }
+            })
+            ->count();
+         $supervisorAssign = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
+            ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
+            ->where('incidents.status', '=', '6')
+            ->when($user->user_type, function ($query, $user_type) use ($user) {
+                if ($user_type == 'partner') {
+                    $query->where('customers.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
+            })
+            ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
+                $query->whereIn('tasks.id', $myTasks);
+            })
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
+                $query->where('incidents.supervisor_id',$user->id);
+             })
+            ->when($request->date, function ($query, $date) {
+                if (!empty(trim($date)) && $date !== null && $date != 'null') {
+                    $d = explode(',', $date);
+                    $from = date($d[0]);
+                    $to = date($d[1]);
+                    $query->whereBetween('incidents.date', [$from, $to]);
+                }
+            })
+            // , function ($query) {
+            //     // If no date is provided, filter by today
+            //     $today = date('Y-m-d');
+            //     $query->whereDate('incidents.date', $today);
+            // }
+            ->count();
+         $close = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
+            ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
+            ->where('incidents.status', '=', '3')
+            ->when($user->user_type, function ($query, $user_type) use ($user) {
+                if ($user_type == 'partner') {
+                    $query->where('customers.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
+            })
+            ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
+                $query->whereIn('tasks.id', $myTasks);
+            })
+            ->when($user->role?->incident_supervisor, function($query) use ($user){
+                $query->where('incidents.supervisor_id',$user->id);
+             })
+            ->when($request->date, function ($query, $date) {
+                if (!empty(trim($date)) && $date !== null && $date != 'null') {
+                    $d = explode(',', $date);
+                    $from = date($d[0]);
+                    $to = date($d[1]);
+                    $query->whereBetween('incidents.date', [$from, $to]);
+                }
+            })
+            ->count();
         $noc = DB::table('users')
             ->leftjoin('roles', 'users.role_id', '=', 'roles.id')
             //  ->where('roles.name', 'LIKE', '%noc%')
@@ -202,7 +313,7 @@ class IncidentController extends Controller
                    return $query->whereRaw('incidents.status in (2,5,6)');
                 }
                 if($user->role?->incident_oss == 1){
-                return $query->whereRaw('incidents.status in (1,5)');
+                return $query->whereRaw('incidents.status in (1,5,6)');
                 }
                 return $query->whereRaw('incidents.status in (1,2,3,5,6)');
             })
@@ -223,7 +334,7 @@ class IncidentController extends Controller
             $query->where('incidents.priority', '=', $priority);
             })
             ->when($request->date, function ($query, $date) {
-                if(!empty(trim($date)) && $date !== null) {
+                if(!empty(trim($date)) && $date !== null && $date != 'null') {
                  
                 $d = explode(',', $date);
                 $from = date($d[0]);
@@ -269,10 +380,16 @@ class IncidentController extends Controller
                     $query->where('customers.subcom_id', '=', $user->subcom_id);
                 }
             })
-            ->when($request->status, function ($query, $status) {
-                $query->where('incidents.status', '=', $status);
-            }, function ($query) {
-                $query->whereRaw('incidents.status in (1,2,5)');
+            ->when($request->status, function ($query, $status) use ($user){
+                 $query->where('incidents.status', '=', $status);
+            }, function ($query) use ($user) {
+                if($user->role?->incident_supervisor == 1){
+                   return $query->whereRaw('incidents.status in (2,5,6)');
+                }
+                if($user->role?->incident_oss == 1){
+                return $query->whereRaw('incidents.status in (1,5,6)');
+                }
+                return $query->whereRaw('incidents.status in (1,2,3,5,6)');
             })
             ->when($request->keyword, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
@@ -321,6 +438,10 @@ class IncidentController extends Controller
                 'pendingRootCause' => $pendingRootCause,
                 'relocationServices'=> $relocationServices,
                 'supervisors'=> $supervisors,
+                'ticketRequest' => $ticketRequest,
+                'teamAssign' => $teamAssign,
+                'supervisorAssign' => $supervisorAssign,
+                'close' => $close,
             ]
         );
     }
@@ -938,11 +1059,11 @@ class IncidentController extends Controller
     }
     public function getStatus($data)
     {
-        $status = "Open";
+        $status = "Request";
         if ($data == 1) {
-            $status = "Open";
+            $status = "Request";
         } else if ($data == 2) {
-            $status = "Escalated";
+            $status = "Team Assign";
         } else if ($data == 3) {
             $status = "Closed";
         } else if ($data == 4) {
@@ -950,7 +1071,7 @@ class IncidentController extends Controller
         } else if ($data == 5) {
             $status = "Resolved";
         }else if ($data == 6) {
-            $status = "Supervisor Assigned";
+            $status = "Supervisor Assign";
         }
         return $status;
     }

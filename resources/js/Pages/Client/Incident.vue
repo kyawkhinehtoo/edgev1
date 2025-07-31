@@ -53,9 +53,9 @@
               class="relative self-center block w-full pr-12 py-2 rounded-md text-gray-400 text-sm border-gray-300 focus:ring focus:ring-indigo-500 focus:border-indigo-500 focus:ring-opacity-10 focus:outline-none pl-10"
               tabindex="5" @change="changeStatus">
               <option value="0">All Status</option>
-              <option value="1">Open</option>
-              <option value="6">Supervisor Assigned</option>
-              <option value="2">Escalated</option>
+              <option value="1">Request</option>
+              <option value="6">Supervisor Assign</option>
+              <option value="2">Team Assign</option>
               <option value="5">Resolved Open</option>
               <option value="3">Closed</option>
               <option value="4">Deleted</option>
@@ -80,8 +80,10 @@
           </div>
           
         </div>
-         <!--alarm panel -->
-          <div class="max-w-lg ">
+       
+        <div class="mt-2 grid grid-cols-1 md:grid-cols-5 gap-6 w-full">
+            <!--alarm panel -->
+                    <div class="col-span-2" >
             <div class="bg-white rounded-lg w-full mx-auto mt-1 shadow-xl divide-y divide-gray-200 py-2 px-2">
               <div class="grid grid-cols-4 gap-2">
                 <div class="col-span-1 ">
@@ -113,6 +115,47 @@
             <!-- <incident-alert @show_edit="alert_edit" /> -->
           </div>
           <!--end of alarm panel -->
+          <!-- status panel  -->
+           <div class="col-span-3 ">
+            <div class="bg-white rounded-lg w-full mx-auto mt-1 shadow-xl divide-y divide-gray-200 py-2 px-2">
+              <div class="grid grid-cols-5 gap-2">
+                <div class="col-span-1 ">
+                  <label class="block text-sm font-normal text-center">Ticket Request</label>
+                  <button
+                    class="block py-2 px-2 w-full bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:border-green-300 focus:ring focus:ring-green-500 focus:ring-opacity-10 focus:outline-none disabled:opacity-25 transition"
+                    @click="clickStatus(1)">{{ ticketRequest }}</button>
+                </div>
+                <div class="col-span-1" @click="clickStatus('6')">
+                  <label class="block text-sm font-normal text-center">Supervisor Assign</label>
+                  <button
+                    class="block py-2 px-2 w-full bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:border-green-300 focus:ring focus:ring-green-500 focus:ring-opacity-10 focus:outline-none disabled:opacity-25 transition"
+                    @click="clickStatus('6')">{{ supervisorAssign }}</button>
+                </div>
+                <div class="col-span-1" @click="clickStatus('2')">
+                  <label class="block text-sm font-normal text-center">Team Assign</label>
+                  <button
+                    class="block py-2 px-2 w-full bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:border-green-300 focus:ring focus:ring-green-500 focus:ring-opacity-10 focus:outline-none disabled:opacity-25 transition"
+                    @click="clickStatus('2')">{{ teamAssign }}</button>
+                </div>
+                <div class="col-span-1">
+                  <label class="block text-sm font-normal text-center">Close</label>
+                  <button
+                    class="block py-2 px-2 w-full bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:border-green-300 focus:ring focus:ring-green-500 focus:ring-opacity-10 focus:outline-none disabled:opacity-25 transition"
+                    @click="clickStatus('3')">{{ close }}</button>
+                </div>
+                 <div class="col-span-1">
+                  <label class="block text-sm font-normal text-center">All</label>
+                  <button
+                    class="block py-2 px-2 w-full bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:border-green-300 focus:ring focus:ring-green-500 focus:ring-opacity-10 focus:outline-none disabled:opacity-25 transition"
+                    @click="clickStatus('')">{{ ticketRequest + teamAssign + supervisorAssign + close }}</button>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+           <!-- end of status panel -->
+        </div>
+
         <!-- <div class="grid grid-cols-1 md:grid-cols-6 gap-6 w-full" v-if="write_permission || read_permission"> -->
         <div class=" w-full" v-if="write_permission || read_permission">
           <!--ticket list -->
@@ -459,9 +502,9 @@
                           <select v-model="form.status"
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="!write_permission">
-                            <option value="1">Open</option>
-                            <option value="6">Supervisor Assigned</option>
-                            <option value="2" disabled>Escalated</option>
+                            <option value="1">Request</option>
+                            <option value="6">Supervisor Assign</option>
+                            <option value="2" disabled>Team Assign</option>
                             <option value="5" disabled>Resolved Open</option>
                             <option value="3">Closed</option>
                           </select>
@@ -941,6 +984,10 @@ export default {
     pendingRootCause: Object,
     relocationServices: Object,
     supervisors:Object,
+    ticketRequest:Object,
+    teamAssign: Object,
+    supervisorAssign: Object,
+    close: Object,
   },
   setup(props) {
     const search = ref("");
@@ -1131,11 +1178,11 @@ export default {
     }
 
     function getStatus(data) {
-      let status = "Open";
+      let status = "Request";
       if (data == 1) {
-        status = "Open";
+        status = "Request";
       } else if (data == 2) {
-        status = "Escalated";
+        status = "Team Assign";
       } else if (data == 3) {
         status = "Closed";
       } else if (data == 4) {
@@ -1143,7 +1190,7 @@ export default {
       } else if (data == 5) {
         status = "Resolved Open";
       } else if (data == 6) {
-        status = "Supervisor Assigned";
+        status = "Supervisor Assign";
       }
       return status;
     }
@@ -1202,6 +1249,28 @@ export default {
       }
 
       router.get(url, { status: incidentStatus.value }, { preserveState: true });
+    };
+     function clickStatus(value){
+      console.log("clickStatus : " + value);
+      let url = "/incident/";
+      if (search.value != null) {
+        url = url + "?keyword=" + search.value;
+      }
+      if (value != null) {
+        url = url + "&status=" + value;
+      }
+      if (incidentType.value != "default") {
+        url = url + "&type=" + incidentType.value;
+      }
+
+      if (incidentBy.value != "default") {
+        url = url + "&member=" + incidentBy.value;
+      }
+      if (incidentDate.value != "") {
+        url = url + "&date=" + incidentDate.value;
+      }
+
+      router.get(url, { status: value }, { preserveState: false });
     };
     const showPriority = (data) => {
       let url = "/incident";
@@ -1335,7 +1404,7 @@ export default {
 
       priorityColor();
     });
-    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA };
+    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA,clickStatus };
   },
 };
 </script>
