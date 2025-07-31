@@ -58,13 +58,10 @@
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ">
                   </th>
+                 
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ">
-                    ISP Ticket Code
-                  </th>
-                  <th scope="col"
-                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ">
-                    EDGE Ticket Code
+                    EDGE Ticket
                   </th>
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -98,7 +95,7 @@
                       :class="{ 'text-yellow-400': row.priority == 'normal', 'text-yellow-600': row.priority == 'high', 'text-red-600': row.priority == 'critical' }"></i>
                     {{ (index += tasks.from) }}</td>
 
-                  <td class="px-6 py-3 whitespace-nowrap">{{ row.code }}</td>
+                
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.edge_code }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.ftth_id }}</td>
                   <td class="px-6 py-3 whitespace-nowrap">{{ row.description?.substring(0, 50) }}</td>
