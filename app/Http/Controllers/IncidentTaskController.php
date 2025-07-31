@@ -92,6 +92,7 @@ class IncidentTaskController extends Controller
                 'tasks.*',
                 'u1.name as incharge',
                 'i.code',
+                'i.edge_code',
                 'c.ftth_id',
                 'i.priority',
                 'i.type',

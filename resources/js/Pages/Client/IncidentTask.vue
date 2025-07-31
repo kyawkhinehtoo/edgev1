@@ -10,7 +10,7 @@
               <i class="fas fa-search"></i>
             </span>
             <input type="text" placeholder="ID/Description"
-              class="pl-10 pr-12 py-2.5 w-full rounded-lg overflow-hidden text-sm text-gray-700 placeholder-gray-400 transition-colors bg-white border border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-500 focus:ring-opacity-10 focus:outline-none dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-indigo-500 dark:focus:ring-opacity-20"
+              class="pl-10 pr-12 py-2.5 w-full rounded-lg  text-sm text-gray-700 placeholder-gray-400 transition-colors bg-white border border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-500 focus:ring-opacity-10 focus:outline-none dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-indigo-500 dark:focus:ring-opacity-20"
               id="search" tabindex="1" v-model="search" @keyup.enter="searchTask" />
           </div>
           <div class="flex w-full items-center justify-end ">
@@ -60,7 +60,11 @@
                   </th>
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ">
-                    Code
+                    ISP Ticket Code
+                  </th>
+                  <th scope="col"
+                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ">
+                    EDGE Ticket Code
                   </th>
                   <th scope="col"
                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -126,7 +130,7 @@
               </div>
               <div class="text-sm text-gray-600">
                 <label for="details" class="w-full font-bold">
-                  Description
+                  Instruction :
                 </label>
                 <p class="font-sm p-2 capitalize">
                   {{ row.description }}
@@ -302,7 +306,7 @@
               </div>
               <div class="py-2 col-span-1 sm:col-span-1">
                 <div class="flex md:justify-end">
-                  <label for="description" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Description
+                  <label for="description" class="block text-sm font-medium text-gray-700 md:mt-2 md:mr-2"> Instruction
                     :
                   </label>
                 </div>
