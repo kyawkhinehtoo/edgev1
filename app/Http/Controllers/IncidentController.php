@@ -13,6 +13,8 @@ use App\Models\IncidentHistory;
 use App\Models\Task;
 use App\Models\FileUpload;
 use App\Models\InstallationService;
+use App\Models\Isp;
+use App\Models\MaintenanceService;
 use App\Models\RootCause;
 use App\Models\Subcom;
 use App\Models\SubRootCause;
@@ -674,6 +676,13 @@ class IncidentController extends Controller
         if ($request->customer_id['id']) {
             $incident = new Incident();
             // $incident->code = $request->code;
+            $user = User::with('role')->where('id', Auth::id())->first();
+            if($user->user_type != 'isp'){
+                throw new \Exception('You are not allowed to create incident');
+            }
+            $isp = Isp::where('id', $user->isp_id)->first();
+
+
             $incident->customer_id = $request->customer_id['id'];
             $incident->incharge_id = $request->incharge_id['id'];
             $incident->type = $request->type;
@@ -736,7 +745,7 @@ class IncidentController extends Controller
             $incident->description = $request->description;
             $incident->relocation_service_id = $request->relocation_service_id?? null;
             $incident->save();
-            $incident->code = 'T-' . str_pad($incident->id, 4, "0", STR_PAD_LEFT);
+            $incident->code = 'T-' . str_pad($incident->id, 4, "0", STR_PAD_LEFT).'-' . $isp->short_code;
             $incident->update();
 
 
@@ -799,21 +808,53 @@ class IncidentController extends Controller
         if ($request->has('id')) {
             $old_incident = Incident::find($request->input('id'));
 
-            $update = $this->checkUpdate($old_incident, $request->request);
+         //   $update = $this->checkUpdate($old_incident, $request->request);
+            // Compare each relevant field to check for changes
+            
+          //  if ($update) {
+            //     $data = array();
+            //     $data['incident_id'] = $request->input('id');
+            //     $data['action'] = 'Incident Update :' . $update;
+            //     $data['datetime'] = date('Y-m-j h:m:s');
+            //     $data['actor_id'] = Auth::id();
+            //     $this->insertHistory($data);
+            // }
 
-            if ($update) {
-                $data = array();
-                $data['incident_id'] = $request->input('id');
-                $data['action'] = 'Incident Update :' . $update;
-                $data['datetime'] = date('Y-m-j h:m:s');
-                $data['actor_id'] = Auth::id();
-                $this->insertHistory($data);
-            }
+
+         //   if ($update) {
 
 
-            if ($update) {
                 $incident = Incident::find($request->input('id'));
-                $incident->code = $request->code;
+                // Check if incident->code matches "T-0015-MGT" or "T-0015"
+                if (preg_match('/^T-\d{4}(-[A-Z]{3})?$/i', $incident->code)){
+                   $customer = Customer::find($incident->customer_id);
+                   if($customer){
+                    $maintenance = MaintenanceService::where('id', $customer->maintenance_service_id)->first();
+                    if($maintenance && $maintenance->short_code){
+                      
+                        $today = date('Ymd');
+                        $prefix = strtoupper(substr($maintenance->short_code, 0, 2));
+                        $pattern = '^T-[A-Z]{2}' . $today . '-([0-9]{4})$';
+                        $maxCode = Incident::where('code', 'REGEXP', $pattern)
+                                            ->orderByDesc('code')
+                                            ->value('code');
+                        $nextNumber = 1;
+                        if ($maxCode) {
+                            preg_match('/'.$pattern.'/', $maxCode, $matches);
+                            if (isset($matches[1])) {
+                                $nextNumber = intval($matches[1]) + 1;
+                            }
+                        }
+                       
+                        $incident->code = 'T-' . $prefix . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                       
+                    }
+                   }
+                   
+                   
+                }
+
+               // $incident->code = $request->code;
                 $incident->customer_id = $request->customer_id['id'];
                 $incident->incharge_id = $request->incharge_id['id'];
                 $incident->type = $request->type;
@@ -861,7 +902,9 @@ class IncidentController extends Controller
 
                 if (isset($request->resolved_time) && $request->status == 5)
                     $incident->resolved_time = $request->resolved_time;
+            
                 if (isset($request->supervisor_id)){
+                   
                     if($user->role?->incident_oss == 1 ){
                         $incident->supervisor_id = $request->supervisor_id;
                         $incident->assigned_by = $user->id;
@@ -885,7 +928,7 @@ class IncidentController extends Controller
                 // $notificationAction = ($request->status == 4) ? 'deleted' : 'updated';
                 // Send notification to users
                 // Notification::send($notiUsers, new NewIncidentNotification($incident, $notificationMessage, $notificationAction));
-            }
+          //  }
 
             return redirect()->route('incident.index')->with('message', 'Incident Updated Successfully.');
         }
@@ -941,41 +984,35 @@ class IncidentController extends Controller
         }
         return $insert;
     }
-    public function checkUpdate($old, $new)
+    public function checkUpdate($old_incident, $request)
     {
+        $updatedFields = [];
+        $fieldsToCompare = [
+            'code', 'priority', 'date', 'time', 'incharge_id', 'type', 'status', 'description',
+            'customer_id', 'topic', 'root_cause_id', 'sub_root_cause_id', 'rca_notes',
+            'package_id', 'new_township', 'supervisor_id', 'start_date', 'end_date',
+            'new_address', 'latitude', 'longitude', 'relocation_service_id'
+        ];
 
-        $update = null;
-        foreach ($new as $key => $value) {
-            if (isset($old->$key) && !empty($key)) {
-
-                if ($key == "customer_id") {
-                    $update .= ($old->customer_id != $value['id']) ? $key . ':' . $value["name"] . ',' : '';
-                } else if ($key == "incharge_id") {
-                    $update .= ($old->incharge_id != $value['id']) ? $key . ':' . $value["name"] . ',' : '';
-                } else if ($key == "date" || $key == "start_date" || $key == "end_date") {
-                    $update .= (date("Y-m-j", strtotime($old->$key)) != $value) ? $key . ':' . ucwords($value) . ',' : '';
-                } else  if ($key == "time") {
-                    $update .= ($old->$key != strtotime($value)) ? $key . ':' . ucwords($value) . ',' : '';
-                } else if ($key == "status") {
-                    $update .=  ($old->$key != $value) ? $key . ':' . $this->getStatus($value) . ',' : '';
-                } else if ($key == "package_id") {
-                    $update .=  ($old->$key != $value) ? $key . ':' . $value["name"] . ',' : '';
-                } else if ($key == "new_township") {
-                    $update .=  ($old->$key != $value) ? $key . ':' . $value["name"] . ',' : '';
-                } else if ($key == "supervisor") {
-                    $update .=  ($old->$key != $value) ? $key . ':' . $value["name"] . ',' : '';
-                }
-                else {
-                    try {
-                        $update .= ($old->$key != $value) ? $key . ':' . ucwords($value) . ',' : '';
-                    } catch (\Throwable $th) {
-                        dd($key);
-                    }
+        foreach ($fieldsToCompare as $field) {
+            $oldValue = $old_incident->$field;
+            $newValue = null;
+            if ($request->has($field)) {
+                $value = $request->get($field);
+                if (in_array($field, ['customer_id', 'incharge_id', 'package_id', 'new_township', 'supervisor_id'])) {
+                    $newValue = (is_array($value) && isset($value['id'])) ? $value['id'] : $value;
+                } else {
+                    $newValue = $value;
                 }
             }
+            if ($oldValue != $newValue) {
+                $updatedFields[$field] = [
+                    'old' => $oldValue,
+                    'new' => $newValue
+                ];
+            }
         }
-
-        return $update;
+        return $updatedFields;
     }
     public function destroy(Request $request, $id)
     {
