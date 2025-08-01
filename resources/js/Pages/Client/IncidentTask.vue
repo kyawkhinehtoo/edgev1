@@ -501,14 +501,15 @@ export default {
     let task_user = ref("my");
     let subRCA = ref([]);
     let key = ref(1);
-
-     const subconStatus = ref([
+    let superVisor = ref(false);
+    superVisor.value = props.user.role?.incident_supervisor ?? false;
+    const subconStatus = ref([
             { id: '1', name: 'WIP' },
             { id: '3', name: 'Pending' },
             { id: '4', name: 'Photo Upload Complete' },
-            { id: '5', name: 'Photo Upload Rejected' ,'$isDisabled': true },
-            { id: '2', name: 'Supervisor Approved', '$isDisabled': true },
-            { id: '0', name: 'Deleted', '$isDisabled': true },
+            { id: '5', name: 'Photo Upload Rejected' ,'$isDisabled': superVisor.value ? false: true},
+            { id: '2', name: 'Supervisor Approved', '$isDisabled': superVisor.value ? false: true },
+            { id: '0', name: 'Deleted', '$isDisabled': superVisor.value ? false: true },
         ]);
     const formatter = ref({
       date: "YYYY-MM-DD",
