@@ -494,7 +494,7 @@
                       <!-- status -->
                       <div class="py-2 col-span-1 sm:col-span-1">
                         <div class="mt-1 flex">
-                          <label for="first_name" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Status :
+                          <label for="first_name" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Status : <span class="text-red-500">*</span>
                           </label>
                         </div>
                       </div>

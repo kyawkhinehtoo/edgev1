@@ -927,7 +927,8 @@ class IncidentController extends Controller
     }
     public function update(Request $request, $id)
     {
-        Validator::make($request->all(), [
+
+        $validator = Validator::make($request->all(), [
             'code' => ['required'],
             'priority' => ['required'],
             'date' => ['required'],
@@ -943,7 +944,16 @@ class IncidentController extends Controller
             'root_cause_id.required_if' => 'Please mention the RCA before closing the incident.',
             'sub_root_cause_id.required_if' => 'Please mention the sub RCA before closing the incident.',
             'rca_notes.required_if' => 'Please mention the RCA notes before closing the incident.',
-        ])->validate();
+        ]);
+
+        $validator->after(function ($validator) use ($request) {
+            if ($request->supervisor_id && $request->status == 1) {
+                $validator->errors()->add('status', 'Please choose Supervsior Assign');
+            }
+        });
+        $validator->validate();
+
+    
         $user = User::with('role')->where('id', Auth::id())->first();
         if ($request->has('id')) {
             $old_incident = Incident::find($request->input('id'));
