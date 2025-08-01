@@ -505,11 +505,10 @@ export default {
      const subconStatus = ref([
             { id: '1', name: 'WIP' },
             { id: '3', name: 'Pending' },
-            { id: '2', name: 'Completed' },
-            { id: '0', name: 'Deleted' },
             { id: '4', name: 'Photo Upload Complete' },
             { id: '5', name: 'Photo Upload Rejected' ,'$isDisabled': true },
-            { id: '6', name: 'Supervisor Approved', '$isDisabled': true },
+            { id: '2', name: 'Supervisor Approved', '$isDisabled': true },
+            { id: '0', name: 'Deleted', '$isDisabled': true },
         ]);
     const formatter = ref({
       date: "YYYY-MM-DD",

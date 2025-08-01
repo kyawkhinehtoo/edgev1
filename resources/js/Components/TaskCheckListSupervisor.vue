@@ -206,11 +206,10 @@ export default {
     });
 
     const filteredChecklists = computed(() => {
-      if (!selectedGroupId.value) return null;
-      showModal.value = !!selectedGroupId.value;
-      return subconCheckList.value.filter(
-        (checklist) => checklist.group_id === selectedGroupId.value
-      );
+     if (!selectedGroupId.value) return null;
+      const group = checkListSummary.value.find(g => g.id === selectedGroupId.value);
+      if (!group || group.total === group.remaining) return null;
+      return subconCheckList.value.filter(checklist => checklist.group_id === selectedGroupId.value);
     });
 
     function selectGroup(id) {

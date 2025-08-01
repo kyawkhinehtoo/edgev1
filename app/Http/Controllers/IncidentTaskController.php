@@ -87,8 +87,13 @@ class IncidentTaskController extends Controller
              })
             ->whereIn('i.status',[1,2,3,5])
             ->when($request->status, function ($query, $status) {
-                if ($status == 1 || $status == 2 || $status == 3)
+                if ($status == 1){
+                    $query->whereIn('tasks.status', [1,4,5]);
+
+                }else if ($status == 2 || $status == 3 ){
                     $query->where('tasks.status', '=', $status);
+                }
+                   
             }, function ($query) {
                 $query->where('tasks.status', '=', 1);
             })
@@ -177,11 +182,11 @@ class IncidentTaskController extends Controller
                 $query->where('task_id', $taskId);
             }
         ])->get();
-
-        $isSupervisor = $user->role?->oss_supervisor ?? false;
-        $customer = $isSupervisor ? $task->incident?->customer : null;
-        $status = $customer?->installation_status ?? null;
-        $showValues = !$isSupervisor || in_array($status, ['photo_upload_complete', 'supervisor_approved']);
+        
+        $isSupervisor = $user->role?->incident_supervisor ?? false;
+       
+        $status = $task?->status ?? null;
+        $showValues = !$isSupervisor || in_array($status, [2,4,5]);
 
         $result = $groups->map(function ($group) use ($showValues) {
             $total = count($group->checklists);
