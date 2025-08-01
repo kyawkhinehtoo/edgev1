@@ -43,6 +43,19 @@ class IncidentController extends Controller
         $pendingRootCause = RootCause::with('subRootCauses')->where('is_maintenance',true)->where('is_pending',true)->get();
         $subRootCause = SubRootCause::get();
         $relocationServices = InstallationService::where('type', 'relocation')->get();
+        $suspensionTickets = Incident::where('type', 'suspension')
+            ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+             ->when($user->user_type, function ($query, $user_type) use ($user) {
+                if ($user_type == 'partner') {
+                    $query->where('customers.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
+            })
+            ->whereIn('status', [1, 7])
+            ->select('incidents.*')
+            ->get();    
         $read_permission = false;
         $write_permission = false;
         $task_write = true;
@@ -315,7 +328,7 @@ class IncidentController extends Controller
                 if($user->role?->incident_oss == 1){
                 return $query->whereRaw('incidents.status in (1,5,6)');
                 }
-                return $query->whereRaw('incidents.status in (1,2,3,5,6)');
+                return $query->whereRaw('incidents.status in (1,2,3,5,6,7,8)');
             })
             ->when($request->keyword, function ($query, $search) {
             $query->where(function ($query) use ($search) {
@@ -442,6 +455,7 @@ class IncidentController extends Controller
                 'teamAssign' => $teamAssign,
                 'supervisorAssign' => $supervisorAssign,
                 'close' => $close,
+                'suspensionTickets' => $suspensionTickets,
             ]
         );
     }
@@ -830,6 +844,8 @@ class IncidentController extends Controller
                 $incident->start_date = $request->start_date;
             }
 
+           
+            $incident->suspension_incident_id = $request->suspension_incident_id;
 
             $incident->end_date = $request->end_date;
             if (!empty($request->new_township)) {
@@ -869,7 +885,7 @@ class IncidentController extends Controller
             $incident->relocation_service_id = $request->relocation_service_id?? null;
             $incident->save();
             $incident->code = 'T-' . str_pad($incident->id, 4, "0", STR_PAD_LEFT).'-' . $isp->short_code;
-            $incident->edge_code ='';
+            $incident->edge_code =null;
             $incident->update();
 
 
@@ -1072,6 +1088,12 @@ class IncidentController extends Controller
             $status = "Resolved";
         }else if ($data == 6) {
             $status = "Supervisor Assign";
+        }
+        else if ($data == 7) {
+            $status = "Waiting to Suspense";
+        }
+        else if ($data == 8) {
+            $status = "Waiting to Reopen";
         }
         return $status;
     }

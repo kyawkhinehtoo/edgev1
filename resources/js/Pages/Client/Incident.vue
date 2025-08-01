@@ -26,6 +26,7 @@
               <option value="service_complaint">Service Complaint</option>
               <option value="plan_change">Plan Change</option>
               <option value="suspension">Suspension</option>
+              <option value="resume">Reopen</option>
               <option value="termination">Termination</option>
             </select>
           </div>
@@ -422,9 +423,9 @@
                             <option value="default">Please Choose Ticket Type</option>
                             <option value="service_complaint">Service Complaint</option>
                             <option value="relocation">Relocation Request</option>
-
                             <option value="plan_change">Plan Change</option>
                             <option value="suspension">Suspension</option>
+                            <option value="resume">Reopen</option>
                             <option value="termination">Termination</option>
                           </select>
                         </div>
@@ -503,9 +504,11 @@
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="checkDisable()">
                             <option value="1">Request</option>
-                            <option value="6">Supervisor Assign</option>
+                            <option value="6" :disabled="checkDisable()">Supervisor Assign</option>
                             <option value="2" disabled>Team Assign</option>
                             <option value="5" disabled>Resolved Open</option>
+                            <option value="7" disabled>Waiting to Suspend</option>
+                            <option value="8" disabled>Waiting to Reopen</option>
                             <option value="3">Closed</option>
                           </select>
                         </div>
@@ -569,12 +572,11 @@
                       <div class="py-2 col-span-1 sm:col-span-1" v-if="form.type == 'suspension'">
                         <div class="mt-1 flex">
                           <label for="suspense" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Suspense
-                            Period : </label>
+                            From : </label>
                         </div>
                       </div>
                       <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'suspension'">
-                        <div class="grid grid-cols-2 gap-2">
-                          <div class="col-span-1 sm:col-span-1">
+                       
                             <div class="mt-1 flex rounded-md shadow-sm">
                               <span
                                 class="-mt-1 z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
@@ -585,24 +587,28 @@
                             </div>
                             <p v-if="$page.props.errors.start_date" class="mt-2 text-sm text-red-500">{{
                               $page.props.errors.start_date }}</p>
-                          </div>
-                          <div class="col-span-1 sm:col-span-1">
-                            <div class="mt-1 flex rounded-md shadow-sm">
-                              <span
-                                class="-mt-1 z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
-                                <i class="fas fa-play"></i>
-                              </span>
-                              <input type="date" v-model="form.end_date" name="end_date" id="end_date"
-                                class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300" :disabled="checkDisable()" />
-                            </div>
-                            <p v-if="$page.props.errors.end_date" class="mt-2 text-sm text-red-500">{{
-                              $page.props.errors.end_date }}</p>
-                          </div>
-                        </div>
+                          
                       </div>
                       <!-- end of suspension -->
                       <!-- resume -->
-                      <div class="py-2 col-span-1 sm:col-span-1" v-if="form.type == 'resume'">
+                      <template v-if="form.type == 'resume'">
+                        <div class="py-2 col-span-1 sm:col-span-1" >
+                         <div class="mt-1 flex">
+                          <label for="resume" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Suspension Ticket :
+                          </label>
+                        </div>
+                        </div>
+                         <div class="py-2 col-span-4 sm:col-span-4">
+                          <div class="mt-1 flex rounded-md shadow-sm" v-if="suspensionTickets?.length !== 0">
+                            <multiselect deselect-label="Selected already" :options="suspensionTickets" track-by="id" label="edge_code"
+                              v-model="form.suspension_incident" :allow-empty="false" :disabled="checkDisable()"
+                              @update:modelValue="form.suspension_incident_id = $event?.id"></multiselect>
+                          </div>
+                          <p v-if="$page.props.errors.suspension_incident_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.suspension_incident_id }}</p>
+                        </div>
+
+                      <div class="py-2 col-span-1 sm:col-span-1" >
                         <div class="mt-1 flex">
                           <label for="resume" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Resume Date :
                           </label>
@@ -620,6 +626,9 @@
                         <p v-if="$page.props.errors.resume" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.start_date }}</p>
                       </div>
+                      </template>
+
+                      
                       <!-- end of resume -->
                       <!-- termination -->
                       <div class="py-2 col-span-1 sm:col-span-1" v-if="form.type == 'termination'">
@@ -991,6 +1000,7 @@ export default {
     teamAssign: Object,
     supervisorAssign: Object,
     close: Object,
+    suspensionTickets: Object,
   },
   setup(props) {
     const search = ref("");
@@ -1028,6 +1038,8 @@ export default {
       id: null,
       code: null,
       edge_code: null,
+      suspension_incident: null,
+      suspension_incident_id: null,
       priority: null,
       customer_id: null,
       incharge_id: props.team.filter((d) => d.id == props.user.id)[0],
@@ -1136,6 +1148,8 @@ export default {
       form.id = data.id;
       form.code = data.code;
       form.edge_code = data.edge_code;
+      form.suspension_incident = props.suspensionTickets.filter((d) => d.id == data.suspension_incident_id)[0];
+      form.suspension_incident_id = data.suspension_incident_id;
       form.priority = data.priority;
       form.customer_id = props.customers.filter((d) => d.id == data.customer_id)[0];
       form.incharge_id = props.noc.filter((d) => d.id == data.incharge_id)[0];
@@ -1171,6 +1185,9 @@ export default {
       editMode.value = false;
       form.id = "";
       form.code = "";
+      form.edge_code = "";
+      form.suspension_incident = "";
+      form.suspension_incident_id = "";
       form.priority = "normal";
       form.customer_id = "";
       form.incharge_id = props.team.filter((d) => d.id == props.user.id)[0];
@@ -1216,6 +1233,10 @@ export default {
         status = "Resolved Open";
       } else if (data == 6) {
         status = "Supervisor Assign";
+      } else if (data == 7) {
+        status = "Waiting to Suspend";
+      } else if (data == 8) {
+        status = "Waiting to Reopen";
       }
       return status;
     }

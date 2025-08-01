@@ -83,6 +83,7 @@ class Incident extends Model
     protected $casts = [
         'code'=> 'string',
         'edge_code'=> 'string',
+        'suspension_incident_id'=> 'integer',
         'priority'=> 'string',
         'incharge_id'=> 'string',
         'customer_id'=> 'string',
@@ -173,5 +174,9 @@ class Incident extends Model
     public function assignedBy()
     {
         return $this->belongsTo(User::class, 'assigned_by');
+    }
+    public function suspensionIncident()
+    {
+        return $this->belongsTo(Incident::class, 'suspension_incident_id');
     }
 }
