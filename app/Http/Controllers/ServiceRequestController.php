@@ -223,23 +223,55 @@ class ServiceRequestController extends Controller
                     $customer = Customer::find($incident->customer_id);
                     if ($customer) {
                         $maintenance = MaintenanceService::where('id', $customer->maintenance_service_id)->first();
-                        if ($maintenance && $maintenance->short_code) {
+                            if($maintenance && $maintenance->short_code){
+
+                            $prefix_1 = 'RT';
+                            // service_complaint - RT
+                            // plan_change - PC 
+                            // suspension - SS
+                            // resume - RS
+                            // termination - TE
+                            // relocation - RL 
+                            switch ($incident->type) {
+                                case 'service_complaint':
+                                    $prefix_1 = 'RT';
+                                    break;
+                                case 'plan_change':
+                                    $prefix_1 = 'PC';
+                                    break;
+                                case 'suspension':
+                                    $prefix_1 = 'SS';
+                                    break;
+                                case 'resume':
+                                    $prefix_1 = 'RS';
+                                    break;
+                                case 'termination':
+                                    $prefix_1 = 'TE';
+                                    break;
+                                case 'relocation':
+                                    $prefix_1 = 'RL';
+                                    break;
+                                default:
+                                    $prefix_1 = 'RT'; // Default to RT if type is not recognized
+                                    break;
+                            }
 
                             $today = date('Ymd');
-                            $prefix = strtoupper(substr($maintenance->short_code, 0, 2));
-                            $pattern = '^T-[A-Z]{2}' . $today . '-([0-9]{4})$';
+                            $prefix_2 = strtoupper(substr($maintenance->short_code, 0, 2));
+                            $pattern = '^[A-Z]{2}-[A-Z]{2}' . $today . '-([0-9]{4})$';
                             $maxCode = Incident::where('edge_code', 'REGEXP', $pattern)
-                                ->orderByDesc('edge_code')
-                                ->value('edge_code');
+                                                ->orderByDesc('edge_code')
+                                                ->value('edge_code');
                             $nextNumber = 1;
                             if ($maxCode) {
-                                preg_match('/' . $pattern . '/', $maxCode, $matches);
+                                preg_match('/'.$pattern.'/', $maxCode, $matches);
                                 if (isset($matches[1])) {
                                     $nextNumber = intval($matches[1]) + 1;
                                 }
                             }
-
-                            $incident->edge_code = 'T-' . $prefix . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                        
+                            $incident->edge_code = $prefix_1.'-' . $prefix_2 . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                        
                         }
                     }
                 }
