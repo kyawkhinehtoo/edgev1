@@ -331,27 +331,13 @@
               </div>
               <div class="md:py-2 col-span-1 md:col-span-3">
 
-                <div class="flex gap-4">
-                  <label class="inline-flex items-center">
-                    <input type="radio" v-model="form.status" name="status" value="1"
-                      class="form-radio text-yellow-500">
-                    <span class="ml-2">WIP</span>
-                  </label>
-                  <label class="inline-flex items-center">
-                    <input type="radio" v-model="form.status" name="status" value="3" class="form-radio text-red-500">
-                    <span class="ml-2">Pending</span>
-                  </label>
-                  <label class="inline-flex items-center">
-                    <input type="radio" v-model="form.status" name="status" value="2" class="form-radio text-green-500">
-                    <span class="ml-2">Completed</span>
-                  </label>
-                  <label class="inline-flex items-center">
-                    <input type="radio" v-model="form.status" name="status" value="0"
-                      class="form-radio text-indigo-500">
-                    <span class="ml-2">Deleted</span>
-                  </label>
-                </div>
-
+                 <multiselect deselect-label="Selected already" :options="subconStatus" track-by="id"
+                                    label="name" v-model="form.statusData" :allow-empty="false"
+                                    @update:model-value="form.status = $event?.id"
+                                    :multiple="false" :taggable="false">
+                                    <template v-slot:singleLabel="{ option }"><strong>{{ option.name }}
+                                        </strong></template>
+                                </multiselect>
 
                 <p v-if="$page.props.errors.status" class="mt-2 text-sm text-red-500">{{ $page.props.errors.status }}
                 </p>
@@ -514,6 +500,17 @@ export default {
     let search_status = ref(1);
     let task_user = ref("my");
     let subRCA = ref([]);
+    let key = ref(1);
+
+     const subconStatus = ref([
+            { id: '1', name: 'WIP' },
+            { id: '3', name: 'Pending' },
+            { id: '2', name: 'Completed' },
+            { id: '0', name: 'Deleted' },
+            { id: '4', name: 'Photo Upload Complete' },
+            { id: '5', name: 'Photo Upload Rejected' ,'$isDisabled': true },
+            { id: '6', name: 'Supervisor Approved', '$isDisabled': true },
+        ]);
     const formatter = ref({
       date: "YYYY-MM-DD",
       month: "MMM",
@@ -538,6 +535,7 @@ export default {
       root_causes_id: null,
       sub_root_causes_id: null,
       complete_date: null,
+      statusData: null,
     });
     function resetForm() {
       form.id = null;
@@ -556,10 +554,17 @@ export default {
       form.sub_root_causes_id = null;
       form.complete_date = null;
       selected_id.value = null;
+      form.statusData = null;
 
     }
     function editTask(data) {
-
+      // Dynamically disable 'Photo Upload Complete' if remaining > 0
+      subconStatus.value = subconStatus.value.map(option => {
+        if (option.id === '4') {
+          return { ...option, $isDisabled: data.remaining > 0 };
+        }
+        return option;
+      });
       form.id = data.id;
       form.code = data.code;
       form.edge_code = data.edge_code;
@@ -571,6 +576,7 @@ export default {
       form.status = data.status;
       form.target = data.target;
       form.data = data;
+      form.statusData = subconStatus.value.find(s => s.id == String(data.status));
       form.root_causes = data.root_causes_id ? props.pendingRootCause.filter((x) => x.id == data.root_causes_id)[0] : null;
       form.sub_root_causes = null;
       form.root_causes_id = data.root_causes_id;
@@ -663,17 +669,8 @@ export default {
       preserveState = true;
     }
     function getStatus(data) {
-      let status = "WIP";
-      if (data == 0) {
-        status = "Deleted";
-      } else if (data == 1) {
-        status = "WIP";
-      } else if (data == 2) {
-        status = "Completed";
-      } else if (data == 3) {
-        status = "Pending";
-      }
-      return status;
+      const statusObj = subconStatus.value.find(s => s.id == String(data));
+      return statusObj ? statusObj.name : "WIP";
     }
     function searchTask() {
       let url = "/mytask/";
@@ -740,7 +737,7 @@ export default {
     function tabClick(val) {
       tab.value = val;
     }
-    return { search, loading, form, formatter, edit, editMode, search_status, task_user, getName, getStatus, editTask, completeIt, saveTask, cancelTask, completeTask, searchTask, goMyTasks, goAllTasks, changeStatus, subRCA, goSearch, tabClick, tab, selected_id };
+    return { search, loading, form, formatter, edit, editMode, search_status, task_user, getName, getStatus, editTask, completeIt, saveTask, cancelTask, completeTask, searchTask, goMyTasks, goAllTasks, changeStatus, subRCA, goSearch, tabClick, tab, selected_id,subconStatus };
   },
 };
 </script>

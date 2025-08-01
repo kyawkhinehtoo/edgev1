@@ -108,8 +108,15 @@ class IncidentTaskController extends Controller
             )
             ->orderBy('tasks.id', 'DESC')
             ->paginate(10);
+        $tasks->getCollection()->transform(function ($task) use ($user) {
+                $remaining = $this->checkRemainingItems($task->id);
+                $task->remaining = $remaining['remaining_count'];
+            
+            return $task;
+        });
           // Get existing checklist values for this customer
-       
+        
+
         $tasks->appends($request->all())->links();
         return Inertia::render(
             'Client/IncidentTask',
@@ -214,6 +221,30 @@ class IncidentTaskController extends Controller
         });
 
         return $result;
+    }
+    // Check remaining checklist items for a task
+    public function checkRemainingItems($taskId)
+    {
+        // Get all checklist IDs for the task's service type
+        $service_type = 'installation'; // Adjust if needed
+        $checklistIds = SubconChecklist::where('service_type', $service_type)->pluck('id');
+
+        // Get checklist values for this task
+        $filledChecklistIds = SubconChecklistValue::where('task_id', $taskId)
+            ->whereIn('subcon_checklist_id', $checklistIds)
+            ->pluck('subcon_checklist_id');
+
+        // Remaining checklist IDs
+        $remainingIds = $checklistIds->diff($filledChecklistIds);
+
+        // Optionally, get the checklist items themselves
+       // $remainingItems = SubconChecklist::whereIn('id', $remainingIds)->get();
+        $remainingCount = $remainingIds->count();
+    
+        return [
+            'remaining_count' => $remainingCount
+            //'remaining_items' => $remainingItems,
+        ];
     }
     public function updateTaskCheckList(Request $request, $taskId)
     {
