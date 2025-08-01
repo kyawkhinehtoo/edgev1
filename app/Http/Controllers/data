@@ -1,6 +1,27 @@
 
 
-Open (Request)
-Supervisor Assigned
-Team Assigned
-Done 
+Open (Request) 1 
+Supervisor Assigned 6
+Team Assign 2
+Close  3 
+
+Open to Request 
+Escalated  ကို Team Assign ပြောင်းရန် 
+    public function getStatus($data)
+    {
+        $status = "Open";
+        if ($data == 1) {
+            $status = "Open";
+        } else if ($data == 2) {
+            $status = "Escalated";
+        } else if ($data == 3) {
+            $status = "Closed";
+        } else if ($data == 4) {
+            $status = "Deleted";
+        } else if ($data == 5) {
+            $status = "Resolved";
+        }else if ($data == 6) {
+            $status = "Supervisor Assigned";
+        }
+        return $status;
+    }

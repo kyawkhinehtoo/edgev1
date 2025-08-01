@@ -168,6 +168,7 @@ export default {
     JetDropdown,
     JetDropdownLink,
     JetNavLink,
+  'jet-nav-link': JetNavLink,
   },
   
   provide() {

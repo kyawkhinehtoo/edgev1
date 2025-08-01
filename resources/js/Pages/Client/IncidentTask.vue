@@ -178,6 +178,9 @@
             <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               :class="[tab == 2 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
                 @click="tabClick(2)" preserve-state>Customer Info</a></li>
+            <li class="px-2 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              :class="[tab == 3 ? 'border-b-2 border-indigo-400 -mb-px' : 'opacity-50']"><a href="#"
+                @click="tabClick(3)" preserve-state>Attachment Info</a></li>
 
           </ul>
         </div>
@@ -441,6 +444,13 @@
             <customer-detail :data="selected_id" v-if="selected_id && tab == 2" />
           </div>
           <!--tab 2-->
+          <div :class="[tab==3?'':'hidden']">
+          
+            <span v-if="user.role?.incident_supervisor"> <task-check-list-supervisor  :taskId="form?.id" :user="user"  v-if="tab == 3" /></span>
+            <span v-if="user.user_type == 'subcon'">
+             <task-check-list-subcon  :taskId="form?.id" v-if="tab == 3" />
+            </span>
+            </div>
         </div>
         <!-- Tab Contents -->
       </div>
@@ -463,6 +473,8 @@ import { ref, onMounted, reactive, watch, provide } from "vue";
 import Multiselect from "@suadelabs/vue3-multiselect";
 import { router, Link, useForm } from "@inertiajs/vue3";
 import CustomerDetail from "@/Components/CustomerDetail";
+import TaskCheckListSubcon from "@/Components/TaskCheckListSubcon.vue";
+import TaskCheckListSupervisor from "@/Components/TaskCheckListSupervisor.vue";
 export default {
   name: "IncidentTask",
   components: {
@@ -471,7 +483,9 @@ export default {
     Multiselect,
     NoData,
     Link,
-    CustomerDetail
+    CustomerDetail,
+    TaskCheckListSubcon,
+    TaskCheckListSupervisor
   },
   props: {
     tasks: Object,
@@ -487,6 +501,8 @@ export default {
     subcon: Object,
     pendingRootCause: Object,
     subRootCause: Object,
+    checklistValues: Object,
+    checkListSummary: Object,
   },
   setup(props) {
     const search = ref("");

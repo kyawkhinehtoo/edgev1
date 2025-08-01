@@ -22,6 +22,10 @@ use App\Events\AddIncident;
 use App\Events\UpdateIncident;
 use App\Models\RootCause;
 use App\Models\Subcom;
+use App\Models\SubconChecklist;
+use App\Models\SubconChecklistsGroup;
+use App\Models\SubconChecklistValue;
+use App\Models\SubconChecklistValueHistory;
 use App\Models\SubRootCause;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewIncidentNotification;
@@ -94,6 +98,7 @@ class IncidentTaskController extends Controller
                 'i.code',
                 'i.edge_code',
                 'c.ftth_id',
+                'c.id as customer_id',
                 'i.priority',
                 'i.type',
                 'i.topic',
@@ -103,7 +108,8 @@ class IncidentTaskController extends Controller
             )
             ->orderBy('tasks.id', 'DESC')
             ->paginate(10);
-
+          // Get existing checklist values for this customer
+       
         $tasks->appends($request->all())->links();
         return Inertia::render(
             'Client/IncidentTask',
@@ -118,8 +124,199 @@ class IncidentTaskController extends Controller
             ]
         );
     }
+    public function getTaskChecklistValues($task_id){
+
+        $subconCheckList = SubconChecklist::where('service_type', 'installation')->get();
+
+        // Get existing checklist values for this customer
+        $checklistValues = SubconChecklistValue::where('task_id', $task_id)->get();
+        $checkListSummary = $this->checklistSummary($task_id);
+        $taskCheckList = Task::with('incident.customer')->findOrFail($task_id);
+        $formattedValues = [];
+        $checklistImages = [];
+        foreach ($checklistValues as $value) {
+            $formattedValues[$value->subcon_checklist_id] = [
+                'title' => $value->title,
+                'attachment' => $value->attachment,
+                'status' => $value->status
+            ];
+
+            if ($value->attachment) {
+                $checklistImages[$value->subcon_checklist_id] = $value->attachment;
+            }
+        }
+
+        // Add checklist values and images to customer object
+        $taskCheckList->checklist_values = $formattedValues;
+        $taskCheckList->checklist_images = $checklistImages;
+        return response()->json([
+            'subconCheckList' => $subconCheckList,
+            'checklistValues' => $checklistValues,
+            'checkListSummary' => $checkListSummary,
+            'taskCheckList' => $taskCheckList,
+        ]);
+        
+    }
+      public function checklistSummary($taskId)
+    {
+        $user = User::with('role')->find(Auth::user()->id);
+        $task = Task::with('incident','incident.customer')->where('id', $taskId)->firstOrFail();
+        $service_type = 'installation'; // Default service type, can be changed based on your logic
+        $groups = SubconChecklistsGroup::with([
+            'checklists' => function ($query) use ($service_type) {
+                $query->where('service_type', $service_type);
+            },
+            'checklists.values' => function ($query) use ($taskId) {
+                $query->where('task_id', $taskId);
+            }
+        ])->get();
+
+        $isSupervisor = $user->role?->oss_supervisor ?? false;
+        $customer = $isSupervisor ? $task->incident?->customer : null;
+        $status = $customer?->installation_status ?? null;
+        $showValues = !$isSupervisor || in_array($status, ['photo_upload_complete', 'supervisor_approved']);
+
+        $result = $groups->map(function ($group) use ($showValues) {
+            $total = count($group->checklists);
+            $approved = $requested = $rejected = $remaining = $skip = 0;
+
+            foreach ($group->checklists as $checklist) {
+                if ($showValues) {
+                    $value = $checklist->values->first();
+                    if (!$value) {
+                        $remaining++;
+                    } elseif ($value->status === 'requested') {
+                        $requested++;
+                    } elseif ($value->status === 'skip') {
+                        $skip++;
+                    } elseif ($value->status === 'approved') {
+                        $approved++;
+                    } elseif ($value->status === 'declined') {
+                        $rejected++;
+                    } else {
+                        $remaining++;
+                    }
+                } else {
+                    $remaining++;
+                }
+            }
+
+            return [
+                'id' => $group->id,
+                'group_name' => $group->name,
+                'total' => $total,
+                'requested' => $requested,
+                'approved' => $approved,
+                'rejected' => $rejected,
+                'skip' => $skip,
+                'remaining' => $remaining,
+            ];
+        });
+
+        return $result;
+    }
+    public function updateTaskCheckList(Request $request, $taskId)
+    {
+  
+        $user = User::with('role')->find(Auth::user()->id);
+        if ($user->user_type == 'isp' || $user->user_type == 'partner') {
+            return abort(403, 'Unauthorized action.');
+        }
+        // Get all request keys to identify checklist fields
+        $requestKeys = array_keys($request->all());
+        $checklistFields = [];
+        $validationRules = [];
+        // Extract checklist fields from request
+        foreach ($requestKeys as $key) {
+            if (preg_match('/^checklist_(\d+)_(title|attachment|status)$/', $key, $matches)) {
+                $checklistId = $matches[1];
+                $fieldType = $matches[2];
+
+                if (!isset($checklistFields[$checklistId])) {
+                    $checklistFields[$checklistId] = [];
+                }
+
+                $checklistFields[$checklistId][$fieldType] = $key;
+            }
+        }
+         // Add validation rules for each checklist field
+        foreach ($checklistFields as $checklistId => $fields) {
+            $title = $fields['title'] ?? null;
+
+            if (isset($fields['title'])) {
+            $validationRules[$fields['title']] = 'nullable|string';
+            }
+            if (isset($fields['attachment'])) {
+            $validationRules[$fields['attachment']] = 'nullable|image|max:10240';
+            }
+            if (isset($fields['status'])) {
+            // If title is present and not empty in request, status is required
+            if ($title && !empty($request->$title)) {
+                $validationRules[$fields['status']] = 'required|string|in:requested,skip,approved,declined';
+            } else {
+                $validationRules[$fields['status']] = 'nullable|string|in:requested,skip,approved,declined';
+            }
+            }
+        }
+        $validator = Validator::make($request->all(), $validationRules);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator);
+        }
+         // Process and save checklist values
+        foreach ($checklistFields as $checklistId => $fields) {
+            $title = isset($fields['title']) ? $request->input($fields['title']) : null;
+            $status = isset($fields['status']) ? $request->input($fields['status']) : null;
+            $attachmentPath = null;
+
+            // Process attachment if exists
+            if (isset($fields['attachment']) && $request->hasFile($fields['attachment'])) {
+                $attachmentPath = $request->file($fields['attachment'])
+                    ->store('checklist_attachments/' . $taskId, 'public');
+            }
+
+            // Find existing checklist value or create new one
+            if ($title || $status) {
 
 
+                $checklistValue = SubconChecklistValue::updateOrCreate(
+                    [
+                        'subcon_checklist_id' => $checklistId,
+                        'task_id' => $taskId,
+                    ],
+                    [
+                        'title' => $title??'NA',
+                        'status' => $status,
+                        'current_actor_user_id' => Auth::id(),
+                        'last_status_changed_at' => now(),
+                    ]
+                );
+
+                // Update attachment only if a new file was uploaded
+                if ($attachmentPath) {
+                    // Delete old attachment if exists
+                    if ($checklistValue->attachment) {
+                        Storage::delete('public/' . $checklistValue->attachment);
+                    }
+                    $checklistValue->attachment = $attachmentPath;
+                    $checklistValue->save();
+                }
+
+                // Create history record
+                SubconChecklistValueHistory::create([
+                    'checklist_value_id' => $checklistValue->id,
+                    'title' => $title??'NA',
+                    'attachment' => $attachmentPath ?: $checklistValue->attachment,
+                    'action' => $status,
+                    'actor_id' => Auth::id(),
+                    'acted_at' => now(),
+                ]);
+            }
+        }
+        
+
+        return redirect()->back()->with('message', 'Task checklist updated successfully.');
+    }
     public function update(Request $request, $id)
     {
 

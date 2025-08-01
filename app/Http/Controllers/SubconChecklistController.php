@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SubconChecklist;
 use App\Models\SubconChecklistsGroup;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -16,7 +17,7 @@ class SubconChecklistController extends Controller
      */
     public function __construct(){
         $user = User::with('role')->find(auth()->id());
-        if(!$user->role->system_setting){
+        if(!$user->role?->system_setting){
              abort(403); // Unauthorized access for non-dn_panel users
         }
     }
@@ -112,4 +113,6 @@ class SubconChecklistController extends Controller
         return Redirect::route('subcon-checklists.index')
             ->with('message', 'Checklist deleted successfully.');
     }
+
+   
 }

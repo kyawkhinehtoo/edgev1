@@ -149,7 +149,10 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::post('/uploadData',[FileController::class,'upload'])->name('upload');
 	Route::post('/customer/search/',[CustomerController::class,'show']);
 	Route::post('/subcom/customer/{id}', [CustomerController::class, 'subcomUpdate'])->name('subcom.customer.update');
-	
+
+	Route::get('/getTaskCheckList/{id}', [IncidentTaskController::class, 'getTaskChecklistValues'])->name('getTaskCheckList');
+	Route::post('/taskCheckList/{id}', [IncidentTaskController::class, 'updateTaskCheckList'])->name('taskCheckList.update');
+
 	Route::get('/getPop/{id}',[PortController::class,'getPopByPartner']);
 	Route::get('/getDnId/{id}',[PortController::class,'getSNByDN']);
 	Route::get('/getDNInfo/{id}',[PortController::class,'getDNInfo']);
@@ -392,6 +395,9 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
     $data = ['name' => 'Kyaw Khine Htoo'];
     $mailService->send('kkhmailbox@gmail.com', new MyTestMail($data));
     return 'Sent!';
+
+	
+
 });
 });
 

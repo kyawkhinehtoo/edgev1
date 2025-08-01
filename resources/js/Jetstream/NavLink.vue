@@ -1,14 +1,26 @@
 <script setup>
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import Show from '@/Pages/Profile/Show.vue';
 
 const props = defineProps({
-    href: String,
-    active: Boolean,
-    show : Boolean,
-    isCollapsed: Boolean,
+    href: {
+        type: String,
+        default: '#'
+    },
+    active: {
+        type: Boolean,
+        default: false
+    },
+    show: {
+        type: Boolean,
+        default: true
+    },
+    isCollapsed: {
+        type: Boolean,
+        default: false
+    }
 });
+
 
 const classes = computed(() => {
     return props.active

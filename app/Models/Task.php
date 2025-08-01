@@ -79,4 +79,10 @@ class Task extends Model
     {
         return $this->belongsTo(SubRootCause::class, 'sub_root_causes_id');
     }
+
+    public function incident()
+    {
+        return $this->belongsTo(Incident::class, 'incident_id');
+    }
+   
 }
