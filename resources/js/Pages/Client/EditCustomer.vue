@@ -44,6 +44,63 @@
                       Basic Information</h6>
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
                       <div class="col-span-1 sm:col-span-1">
+                        <label for="customer_installation_type" class="block text-sm font-medium text-gray-700"><span
+                            class="text-red-500">*</span>
+                          Customer Installation Type </label>
+                        <div class="mt-1 flex ">
+                        
+                            <div class="flex items-center space-x-4">
+                            <label class="inline-flex items-center">
+                              <input
+                              type="radio"
+                              class="form-radio text-indigo-600"
+                              v-model="form.customer_installation_type"
+                              value="new_installation"
+                              :disabled="checkPerm('customer_installation_type')"
+                              />
+                              <span class="ml-2 text-gray-700 text-sm">New </span>
+                            </label>
+                            <label class="inline-flex items-center">
+                              <input
+                              type="radio"
+                              class="form-radio text-yellow-600"
+                              v-model="form.customer_installation_type"
+                              value="relocation"
+                              :disabled="checkPerm('customer_installation_type')"
+                              />
+                              <span class="ml-2 text-gray-700 text-sm">Relocation</span>
+                            </label>
+                            </div>
+                        </div>
+                        <p v-show="$page.props.errors.customer_installation_type" class="mt-2 text-sm text-red-500">{{ $page.props.errors.customer_installation_type
+                        }}
+                        </p>
+                      </div>
+                      <template v-if="form.customer_installation_type === 'relocation'">
+                         <div class="col-span-1 sm:col-span-1">
+                        <label for="name" class="block text-sm font-medium text-gray-700"><span
+                            class="text-red-500">*</span>
+                          Old Customer ID (EDGE ID)</label>
+                        <div class="mt-1 flex rounded-md shadow-sm" v-if="oldCustomers?.length > 0">
+                         <multiselect 
+                          v-model="form.old_customer"
+                          :options="oldCustomers"
+                          track-by="id"
+                          label="ftth_id"
+                          placeholder="Select Old Customer"
+                          :allow-empty="false"
+                          @update:modelValue="form.old_customer_id = $event?.id"
+                          :disabled="checkPerm('old_customer_id')">
+                          </multiselect>
+                        </div>
+                        <p v-show="$page.props.errors.old_customer_id" class="mt-2 text-sm text-red-500">{{ $page.props.errors.old_customer_id
+                        }}
+                        </p>
+                      </div>
+                      
+                      </template>
+                     
+                      <div class="col-span-1 sm:col-span-1">
                         <label for="name" class="block text-sm font-medium text-gray-700"><span
                             class="text-red-500">*</span>
                           Customer Name </label>
@@ -136,7 +193,7 @@
                           $page.props.errors.longitude }}</p>
                       </div>
 
-                      <div class="col-span-1 sm:col-span-4">
+                      <div class="col-span-1 sm:col-span-2">
                         <label for="address" class="block text-sm font-medium text-gray-700"><span
                             class="text-red-500">*</span>
                           Full Address </label>
@@ -588,7 +645,6 @@
                         <hr class="my-4 md:min-w-full" />
                         <h6 class="md:min-w-full text-indigo-700 text-xs uppercase font-bold block pt-1 no-underline">
                           Installation Information</h6>
-
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-4">
 
                           <div class="col-span-1 sm:col-span-1">
@@ -710,8 +766,180 @@
                               $page.props.errors.installation_remark }}</p>
                           </div>
                         </div>
+                        <template v-if="user.user_type === 'internal'">
+                           <hr class="my-4 md:min-w-full" />
+                        <h6 class="md:min-w-full text-indigo-700 text-xs uppercase font-bold block pt-1 no-underline">
+                         Site Termination Information</h6>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 mt-4">
+
+                         
+
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="fiber_distance" class="block text-sm font-medium text-gray-700"> ONU Collection Status
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <select
+                                v-model="form.onu_collection_status"
+                                name="onu_collection_status"
+                                id="onu_collection_status"
+                                class="form-select block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                :disabled="checkPerm('onu_collection_status')"
+                              >
+                                <option value="">Select Status</option>
+                                <option value="no_action">No Action</option>
+                                <option value="collected">Collected</option>
+                                <option value="reused">Reused</option>
+                              </select>
+                              <p v-show="$page.props.errors.onu_collection_status" class="mt-2 text-sm text-red-500">{{
+                                $page.props.errors.onu_collection_status }}</p>
+                            </div>
+                          </div>
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="onu_condition" class="block text-sm font-medium text-gray-700">ONU Condition</label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <select
+                              v-model="form.onu_condition"
+                              name="onu_condition"
+                              id="onu_condition"
+                              class="form-select block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                              :disabled="checkPerm('onu_condition')"
+                              >
+                              <option value="">Select Condition</option>
+                              <option value="good">Good</option>
+                              <option value="damaged">Damaged</option>
+                              </select>
+                            </div>
+                            <p v-show="$page.props.errors.onu_condition" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.onu_condition }}</p>
+                            </div>
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="onu_collection_date" class="block text-sm font-medium text-gray-700"> ONU Collection Date </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <span
+                                class="z-10 leading-snug font-normal absolute text-center text-gray-300 bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                                <i class="fas fa-tools"></i>
+                              </span>
+                              <input v-model="form.onu_collection_date" type="date" name="onu_collection_date"
+                                id="onu_collection_date"
+                                class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                                :disabled="checkPerm('onu_collection_date')" />
+                            </div>
+                            <p v-show="$page.props.errors.onu_collection_date" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.onu_collection_date }}</p>
+
+                          </div>
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="onu_collected_by" class="block text-sm font-medium text-gray-700">ONU Collected By
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <span
+                                class="z-10 leading-snug font-normal  text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                                <i class="fas fa-user"></i>
+                              </span>
+                              <input type="text" v-model="form.onu_collected_by" name="onu_collected_by"
+                                id="onu_collected_by"
+                                class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              :disabled="checkPerm('onu_collected_by')" />
+                            </div>
+                            <p v-show="$page.props.errors.onu_collected_by" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.onu_collected_by }}</p>
+                          </div>
+                         
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="fiber_distance" class="block text-sm font-medium text-gray-700"> Drop Cable Collection Status
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <select
+                                v-model="form.drop_cable_collection_status"
+                                name="drop_cable_collection_status"
+                                id="drop_cable_collection_status"
+                                class="form-select block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                :disabled="checkPerm('drop_cable_collection_status')"
+                              >
+                                <option value="">Select Status</option>
+                                <option value="no_action">No Action</option>
+                                <option value="collected">Collected</option>
+                                <option value="reused">Reused</option>
+                              </select>
+                              <p v-show="$page.props.errors.drop_cable_collection_status" class="mt-2 text-sm text-red-500">{{
+                                $page.props.errors.drop_cable_collection_status }}</p>
+                            </div>
+                          </div>
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="onu_condition" class="block text-sm font-medium text-gray-700">Drop Cable Condition</label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <select
+                              v-model="form.drop_cable_condition"
+                              name="drop_cable_condition"
+                              id="drop_cable_condition"
+                              class="form-select block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                               :disabled="checkPerm('drop_cable_condition')"
+                              >
+                              <option value="">Select Condition</option>
+                              <option value="good">Good</option>
+                              <option value="damaged">Damaged</option>
+                              </select>
+                            </div>
+                            <p v-show="$page.props.errors.drop_cable_condition" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.drop_cable_condition }}</p>
+                            </div>
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="drop_cable_collection_date" class="block text-sm font-medium text-gray-700"> Drop Cable Collection Date </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <span
+                                class="z-10 leading-snug font-normal absolute text-center text-gray-300 bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                                <i class="fas fa-tools"></i>
+                              </span>
+                              <input v-model="form.drop_cable_collection_date" type="date" name="drop_cable_collection_date"
+                                id="drop_cable_collection_date"
+                                class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                                :disabled="checkPerm('drop_cable_collection_date')" />
+                            </div>
+                            <p v-show="$page.props.errors.drop_cable_collection_date" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.drop_cable_collection_date }}</p>
+
+                          </div>
+                          <div class="col-span-1 sm:col-span-1">
+                            <label for="drop_cable_collected_by" class="block text-sm font-medium text-gray-700">Drop Cable Collected By
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <span
+                                class="z-10 leading-snug font-normal  text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
+                                <i class="fas fa-user"></i>
+                              </span>
+                              <input type="text" v-model="form.drop_cable_collected_by" name="drop_cable_collected_by"
+                                id="drop_cable_collected_by"
+                                class="pl-10 mt-1 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                              :disabled="checkPerm('drop_cable_collected_by')" />
+                            </div>
+                            <p v-show="$page.props.errors.drop_cable_collected_by" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.drop_cable_collected_by }}</p>
+                          </div>
+
+                           <div class="col-span-1 sm:col-span-1">
+                            <label for="service_termination_date" class="block text-sm font-medium text-gray-700"> Service Termination Date </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <span
+                                class="z-10 leading-snug font-normal absolute text-center text-gray-300 bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-2">
+                                <i class="fas fa-tools"></i>
+                              </span>
+                              <input v-model="form.service_termination_date" type="date" name="service_termination_date"
+                                id="service_termination_date"
+                                class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                                :disabled="checkPerm('service_termination_date')" />
+                            </div>
+                            <p v-show="$page.props.errors.service_termination_date" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.service_termination_date }}</p>
+
+                          </div>
+
+                         
+                        </div>
+                          </template>
                       </div>
                     </div>
+                      
+                       
 
 
                   </div>
@@ -1040,6 +1268,7 @@ export default {
 
   },
   props: {
+    oldCustomers: Object,
     packages: Object,
     isps: Object,
     townships: Object,
@@ -1130,6 +1359,9 @@ export default {
     const form = useForm({
       id: props.customer.id,
       name: props.customer.name,
+      customer_installation_type: props.customer.customer_installation_type,
+      old_customer : props.oldCustomers?.filter(customer => customer.id === props.customer.old_customer_id),
+      old_customer_id : props.customer.old_customer_id,
       phone_1: props.customer.phone_1,
       address: props.customer.current_address?.address,
       latitude: (lat_long[0]) ? lat_long[0] : '',
@@ -1187,6 +1419,18 @@ export default {
       city_id: props.customer.city_id ?? null,
       pppoe_username: props.customer.pppoe_username || '',
       pppoe_password: props.customer.pppoe_password || '',
+      customer_installation_type: props.customer.customer_installation_type || '',
+      old_customer_id: props.customer.old_customer_id || null,
+      onu_collection_status: props.customer.onu_collection_status || '',
+      onu_condition: props.customer.onu_condition || '',
+      onu_collection_date: props.customer.onu_collection_date || '',
+      onu_collected_by: props.customer.onu_collected_by || '',
+      drop_cable_collection_status: props.customer.drop_cable_collection_status || '',
+      drop_cable_condition: props.customer.drop_cable_condition || '',
+      drop_cable_collection_date: props.customer.drop_cable_collection_date || '',
+      drop_cable_collected_by: props.customer.drop_cable_collected_by || '',
+      service_activation_date: props.customer.service_activation_date || '',
+      service_termination_date: props.customer.service_termination_date || '',
     });
     const form2 = useForm({
       ...Object.fromEntries(

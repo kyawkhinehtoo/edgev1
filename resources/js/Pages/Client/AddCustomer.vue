@@ -14,6 +14,62 @@
                   Basic Information</h6>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
                   <div class="col-span-1 sm:col-span-1">
+                        <label for="customer_installation_type" class="block text-sm font-medium text-gray-700"><span
+                            class="text-red-500">*</span>
+                          Customer Installation Type </label>
+                        <div class="mt-1 flex ">
+                        
+                            <div class="flex items-center space-x-4">
+                            <label class="inline-flex items-center">
+                              <input
+                              type="radio"
+                              class="form-radio text-indigo-600"
+                              v-model="form.customer_installation_type"
+                              value="new_installation"
+                              :disabled="checkPerm('customer_installation_type')"
+                              />
+                              <span class="ml-2 text-gray-700 text-sm">New </span>
+                            </label>
+                            <label class="inline-flex items-center">
+                              <input
+                              type="radio"
+                              class="form-radio text-yellow-600"
+                              v-model="form.customer_installation_type"
+                              value="relocation"
+                              :disabled="checkPerm('customer_installation_type')"
+                              />
+                              <span class="ml-2 text-gray-700 text-sm">Relocation</span>
+                            </label>
+                            </div>
+                        </div>
+                        <p v-show="$page.props.errors.customer_installation_type" class="mt-2 text-sm text-red-500">{{ $page.props.errors.customer_installation_type
+                        }}
+                        </p>
+                      </div>
+                      <template v-if="form.customer_installation_type === 'relocation'">
+                         <div class="col-span-1 sm:col-span-1">
+                        <label for="name" class="block text-sm font-medium text-gray-700"><span
+                            class="text-red-500">*</span>
+                          Old Customer ID (EDGE ID)</label>
+                        <div class="mt-1 flex rounded-md shadow-sm" v-if="oldCustomers?.length > 0">
+                         <multiselect 
+                          v-model="form.old_customer"
+                          :options="oldCustomers"
+                          track-by="id"
+                          label="ftth_id"
+                          placeholder="Select Old Customer"
+                          :allow-empty="false"
+                          @update:modelValue="form.old_customer_id = $event?.id"
+                          :disabled="checkPerm('old_customer_id')">
+                          </multiselect>
+                        </div>
+                        <p v-show="$page.props.errors.old_customer_id" class="mt-2 text-sm text-red-500">{{ $page.props.errors.old_customer_id
+                        }}
+                        </p>
+                      </div>
+                      
+                      </template>
+                  <div class="col-span-1 sm:col-span-1">
                     <label for="name" class="block text-sm font-medium text-gray-700"><span
                         class="text-red-500">*</span>
                       Customer Name </label>
@@ -386,6 +442,7 @@ export default {
     portSharingServices: Object,
     maintenanceServices: Object,
     cities: Object,
+    oldCustomers: Object,
   },
   setup(props) {
 
@@ -394,6 +451,10 @@ export default {
 
     const form = useForm({
       id: null,
+      customer_installation_type: "new_installation",
+      old_customer: null,
+
+      old_customer_id: null,
       name: "",
       phone_1: "",
       city: "",

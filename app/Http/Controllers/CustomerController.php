@@ -66,6 +66,20 @@ class CustomerController extends Controller
         $status = Status::get();
         $isps = Isp::get();
         $dn = DnPorts::get();
+
+        // Get customers whose id is never referenced as old_customer_id and whose status type is not 'new'
+        $oldCustomers = Customer::join('status','customers.status_id','status.id')->where(function ($query) {
+            $query->where('customers.deleted', '=', 0)
+                ->orWhereNull('customers.deleted');
+            })
+            ->whereNotIn('customers.id', function ($subQuery) {
+            $subQuery->select('old_customer_id')
+                ->from('customers')
+                ->whereNotNull('old_customer_id');
+            })
+            ->where('status.type', '!=', 'new')
+            ->get();
+
         $onuSerials = Customer::where('customers.deleted', '=', 0)
             ->orWhereNull('customers.deleted')
             ->whereNotNull('onu_serial')
@@ -388,6 +402,7 @@ class CustomerController extends Controller
             'onuSerials' => $onuSerials,
             'isps' => $isps,
             'partners' => $partners,
+            'oldCustomers' => $oldCustomers,
         ]);
     }
 
@@ -406,7 +421,18 @@ class CustomerController extends Controller
         $projects = Project::get();
         $pops = Pop::get();
         $bundle_equiptments = BundleEquiptment::get();
-
+        $oldCustomers   = Customer::join('status', 'customers.status_id', '=', 'status.id')
+            ->where(function ($query) {
+                return $query->where('customers.deleted', '=', 0)
+                    ->orWhereNull('customers.deleted');
+            })
+            ->whereNotIn('customers.id', function ($subQuery) {
+                $subQuery->select('old_customer_id')
+                    ->from('customers')
+                    ->whereNotNull('old_customer_id');
+            })
+            ->where('status.type', '!=', 'new')
+            ->get();
         $installationServices = InstallationService::where('type', 'new')->get();
         $portSharingServices = PortSharingService::get();
         $maintenanceServices = MaintenanceService::get();
@@ -453,6 +479,7 @@ class CustomerController extends Controller
                 'portSharingServices' => $portSharingServices,
                 'maintenanceServices' => $maintenanceServices,
                 'cities' => $cities,
+                'oldCustomers' => $oldCustomers,
             ]
         );
     }
@@ -463,6 +490,8 @@ class CustomerController extends Controller
         $userPerms = $this->getPermision();
 
         $validator = Validator::make($request->all(), [
+            'customer_installation_type' => 'required|max:255',
+            'old_customer_id' => 'nullable|exists:customers,id|required_if:customer_installation_type,relocation',
             'name' => 'required|max:255',
             'phone_1' => 'required|max:255',
             'address' => 'required',
@@ -479,6 +508,16 @@ class CustomerController extends Controller
             'maintenance_service_id' => 'required',
             'service_type' => 'required',
             'bandwidth' => 'required|integer',
+            // New installation/collection fields
+            // 'customer_installation_type' => 'required|in:new_installation,relocation',
+            // 'old_customer_id' => 'nullable|exists:customers,id|required_if:customer_installation_type,relocation',
+            // 'onu_collected_by' => 'nullable|string|max:255|required_if:onu_collection_status,collected',
+            // 'onu_collection_status' => 'required|string|in:no_action,collected,reused',
+            // 'onu_collection_date' => 'nullable|date|required_if:onu_collection_status,collected',
+            // 'drop_cable_collected_by' => 'nullable|string|max:255|required_if:drop_cable_collection_status,collected',
+            // 'drop_cable_collection_status' => 'required|string|in:no_action,collected,reused',
+            // 'drop_cable_collection_date' => 'nullable|date|required_if:drop_cable_collection_status,collected',
+           
         ]);
 
         if ($user->user_type === 'internal') {
@@ -550,6 +589,8 @@ class CustomerController extends Controller
         DB::beginTransaction();
         try {
             $customer = new Customer();
+            $customer->customer_installation_type = $request->customer_installation_type;
+            $customer->old_customer_id = $request->old_customer_id;
             $customer->name = $request->name;
             $customer->phone_1 = $request->phone_1;
 
@@ -810,6 +851,18 @@ class CustomerController extends Controller
 
         $total_documents = FileUpload::where('customer_id', $customer->id)->whereNull('incident_id')->count();
 
+         // Get customers whose id is never referenced as old_customer_id and whose status type is not 'new'
+        $oldCustomers = Customer::join('status','customers.status_id','status.id')->where(function ($query) {
+            $query->where('customers.deleted', '=', 0)
+                ->orWhereNull('customers.deleted');
+            })
+            ->whereNotIn('customers.id', function ($subQuery) {
+            $subQuery->select('old_customer_id')
+                ->from('customers')
+                ->whereNotNull('old_customer_id');
+            })
+            ->where('status.type', '!=', 'new')
+            ->get();
 
         return Inertia::render(
             'Client/EditCustomer',
@@ -837,6 +890,7 @@ class CustomerController extends Controller
                 'supervisors' => $supervisors,
                 'cities' => $cities,
                 'checkListSummary' => $checkListSummary,
+                'oldCustomers' => $oldCustomers,
             ]
         );
     }
@@ -925,34 +979,19 @@ class CustomerController extends Controller
             'installation_date' => 'nullable|date',
             'bandwidth' => 'required|integer',
             'service_type' => 'required',
-            // 'route_kmz_image' => 'nullable|image|max:10240',
-            // 'drum_no_image' => 'nullable|image|max:10240',
-            // 'start_meter_image' => 'nullable|image|max:10240',
-            // 'end_meter_image' => 'nullable|image|max:10240',
-
-            // 'splitter_no' => [
-            //     'nullable',
-            //     function ($attribute, $value, $fail) use ($request) {
-            //         if ($value && $request->pop_id && $request->pop_device_id && $request->dn_id && $request->sn_id) {
-
-            //             $exists = Customer::where('splitter_no', json_decode($value)->name)
-            //                 ->where('pop_id', json_decode($request->pop_id)->id)
-            //                 ->where('pop_device_id', json_decode($request->pop_device_id)->id)
-            //                 ->where('dn_id', json_decode($request->dn_id)->id)
-            //                 ->where('sn_id', json_decode($request->sn_id)->id)
-            //                 ->where('id', '!=', $request->id ?? null)
-            //                 ->exists();
-
-            //             if ($exists) {
-            //                 $fail('The splitter number is already in use for this combination of POP, POP Device, DN, and SN.');
-            //             }
-            //         }
-            //     }
-            // ],
+            // New installation/collection fields
+            'customer_installation_type' => 'required|in:new_installation,relocation',
+            'old_customer_id' => 'nullable|exists:customers,id|required_if:customer_installation_type,relocation',
+            'onu_collected_by' => 'nullable|string|max:255|required_if:onu_collection_status,collected',
+            'onu_collection_status' => 'required|string|in:no_action,collected,reused',
+            'onu_collection_date' => 'nullable|date|required_if:onu_collection_status,collected',
+            'drop_cable_collected_by' => 'nullable|string|max:255|required_if:drop_cable_collection_status,collected',
+            'drop_cable_collection_status' => 'required|string|in:no_action,collected,reused',
+            'drop_cable_collection_date' => 'nullable|date|required_if:drop_cable_collection_status,collected',
         ])->validate();
         if ($request->has('id') && !$user?->roles?->read_customer && $userPerms) {
             $customer = Customer::find($request->input('id'));
-            $oldCustomer = clone $customer;
+            $oldCustomers = clone $customer;
 
 
 
@@ -1048,7 +1087,7 @@ class CustomerController extends Controller
                      continue;
                 }
                 if ($value == 'subcom_assign_date') {
-                    if (!empty($request->subcom) && !$oldCustomer->subcom_assign_date) {
+                    if (!empty($request->subcom) && !$oldCustomers->subcom_assign_date) {
                         if (!$customer->subcom_assign_date) {
                             $customer->$value = Carbon::now()->format('Y-m-d H:i:s');
                         }
@@ -1165,7 +1204,7 @@ class CustomerController extends Controller
             $changes = $customer->getChanges();    // Get the updated values after the update
             app(\App\Services\CustomerHistoryService::class)->storeCustomerHistory(
                 $customer,         // newly updated Customer
-                $oldCustomer,      // old snapshot
+                $oldCustomers,      // old snapshot
                 $changes,          // the changes array
                 $request->input('id'),
                 $request->input('start_date') // optional
@@ -1404,7 +1443,7 @@ class CustomerController extends Controller
             return back()->withErrors($validator);
         }
 
-        $oldCustomer = clone $customer;
+        $oldCustomers = clone $customer;
 
 
 
@@ -1490,7 +1529,7 @@ class CustomerController extends Controller
 
         app(\App\Services\CustomerHistoryService::class)->storeCustomerHistory(
             $customer,         // newly updated Customer
-            $oldCustomer,      // old snapshot
+            $oldCustomers,      // old snapshot
             $changes,          // the changes array
             $id,
             $request->input('start_date') // optional

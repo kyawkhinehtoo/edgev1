@@ -26,7 +26,6 @@ class Customer extends Model
      * @var array
      */
     protected $fillable = [
-
         'ftth_id',
         'isp_ftth_id',
         'name',
@@ -65,7 +64,24 @@ class Customer extends Model
         'created_at',
         'updated_at',
         'deleted',
+        // New fields
+        'customer_installation_type',
+        'old_customer_id',
+        'onu_collection_status',
+        'onu_condition',
+        'onu_collection_date',
+        'onu_collected_by',
+        'drop_cable_collection_status',
+        'drop_cable_condition',
+        'drop_cable_collection_date',
+        'drop_cable_collected_by',
     ];
+    // Relationships for new fields
+    public function oldCustomer()
+    {
+        return $this->belongsTo(Customer::class, 'old_customer_id');
+    }
+   
 
     protected $casts = [
         'ftth_id' => 'string',

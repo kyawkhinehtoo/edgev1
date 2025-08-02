@@ -149,9 +149,9 @@ class IncidentController extends Controller
                 $query->where('incidents.supervisor_id',$user->id);
              })
             ->whereNotIn('incidents.status',[3,4])
-      
+            ->groupBy('incidents.id')
             ->count('incidents.id');
-    
+          
         $ticketRequest = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
             ->where('incidents.status', '=', '1')
@@ -372,7 +372,7 @@ class IncidentController extends Controller
             )
             ->groupBy('incidents.id')
             ->paginate(10);
-
+            
         // foreach ($incidents as $value) {
         //     $max_invoice_id =  DB::table('tasks')
         //                                 ->where('tasks.invoice_id', '=', $value->id)
