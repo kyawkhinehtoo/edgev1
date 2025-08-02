@@ -391,7 +391,7 @@ class CustomerController extends Controller
             'onuSerials' => $onuSerials,
             'isps' => $isps,
             'partners' => $partners,
-            'oldCustomers' => $oldCustomers,
+            
         ]);
     }
 
