@@ -270,7 +270,7 @@ class IncidentController extends Controller
         $team = DB::table('users')
             ->select('users.name as name', 'users.id as id')
             ->get();
-        $supervisors = DB::table('users')
+        $supervisors = DB::table('users')   
             ->join('roles', 'users.role_id', '=', 'roles.id')
             ->select('users.name as name', 'users.id as id')
             ->where('roles.incident_supervisor', 1)
@@ -281,6 +281,7 @@ class IncidentController extends Controller
         }
         $customers = Customer::select('id', 'ftth_id')
             ->join('status', 'customers.status_id', '=', 'status.id')
+            ->join('maintenance_services', 'customers.maintenance_service_id', '=', 'maintenance_services.id')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
@@ -294,7 +295,7 @@ class IncidentController extends Controller
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
             })
-            ->select('customers.*')
+            ->select('customers.*', 'maintenance_services.id as maintenance_service_id','maintenance_services.name as maintenance_service_name','maintenance_services.service_type as maintenance_service_type')
             ->get();
         $orderby = null;
         if ($request->sort && $request->order) {
@@ -304,6 +305,7 @@ class IncidentController extends Controller
 
         $incidents =  DB::table('incidents')
             ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+            ->join('maintenance_services', 'customers.maintenance_service_id', '=', 'maintenance_services.id')
             ->join('customer_addresses', 'customer_addresses.customer_id', '=', 'customers.id')
             ->join('townships', 'customer_addresses.township_id', '=', 'townships.id')
             ->join('users', 'incidents.incharge_id', '=', 'users.id')
@@ -372,11 +374,15 @@ class IncidentController extends Controller
             'incidents.*',
             'customers.ftth_id as ftth_id',
             'townships.short_code as township_short',
-            'users.name as incharge'
+            'users.name as incharge',
+            'maintenance_services.id as maintenance_service_id',
+            'maintenance_services.name as maintenance_service_name',
+            'maintenance_services.service_type as maintenance_service_type',
+            'maintenance_services.sla_hours as maintenance_sla_hours',
             )
             ->groupBy('incidents.id')
             ->paginate(10);
-            
+        $maintenanceServices = MaintenanceService::where('status', '=', 1)->get();
         // foreach ($incidents as $value) {
         //     $max_invoice_id =  DB::table('tasks')
         //                                 ->where('tasks.invoice_id', '=', $value->id)
@@ -460,6 +466,7 @@ class IncidentController extends Controller
                 'supervisorAssign' => $supervisorAssign,
                 'close' => $close,
                 'suspensionTickets' => $suspensionTickets,
+                'maintenanceServices' => $maintenanceServices,
             ]
         );
     }
@@ -811,10 +818,12 @@ class IncidentController extends Controller
             'status' => ['required'],
             'description' => ['required'],
             'customer_id' => ['required'],
+            'new_bandwidth' => ['required_if:type,plan_change'],
+            'new_maintenance_plan_id' => ['required_if:type,plan_change'],
         ])->validate();
         // dd($request->all());
         $user = User::with('role')->where('id', Auth::id())->first();
-        if ($request->customer_id['id']) {
+        if ($request->customer_id) {
             $incident = new Incident();
             // $incident->code = $request->code;
             $user = User::with('role')->where('id', Auth::id())->first();
@@ -824,29 +833,31 @@ class IncidentController extends Controller
             $isp = Isp::where('id', $user->isp_id)->first();
 
 
-            $incident->customer_id = $request->customer_id['id'];
+            $incident->customer_id = $request->customer_id;
             $incident->incharge_id = $request->incharge_id['id'];
             $incident->type = $request->type;
             $incident->priority = $request->priority;
             $incident->topic = $request->topic;
             $incident->status = $request->status;
-          
+             $incident->start_date = $request->start_date?? null;
             if ($request->type == 'plan_change') {
-                $myDateTime = new DateTime;
-                $newtime = clone $myDateTime;
-                if ($request->start_date)
-                    $myDateTime = new DateTime($request->start_date);
-                if ($myDateTime->format('d') <= 7) {
-                    $newtime->modify('first day of this month');
-                    $incident->start_date = $newtime->format('Y-m-j h:m:s');
-                } else {
-                    $newtime->modify('+1 month');
-                    $newtime->modify('first day of this month');
-                    $incident->start_date = $newtime->format('Y-m-j h:m:s');
-                }
-            } else {
-                $incident->start_date = $request->start_date;
-            }
+
+                $incident->new_bandwidth = $request->new_bandwidth;
+                $incident->new_maintenance_service_id = $request->new_maintenance_plan_id;
+                
+                // $myDateTime = new DateTime;
+                // $newtime = clone $myDateTime;
+                // if ($request->start_date)
+                //     $myDateTime = new DateTime($request->start_date);
+                // if ($myDateTime->format('d') <= 7) {
+                //     $newtime->modify('first day of this month');
+                //     $incident->start_date = $newtime->format('Y-m-j h:m:s');
+                // } else {
+                //     $newtime->modify('+1 month');
+                //     $newtime->modify('first day of this month');
+                //     $incident->start_date = $newtime->format('Y-m-j h:m:s');
+                // }
+            } 
 
            
             $incident->suspension_incident_id = $request->suspension_incident_id;
@@ -944,6 +955,8 @@ class IncidentController extends Controller
             'root_cause_id' => ['required_if:status,3'],
             'sub_root_cause_id' => ['required_if:status,3'],
             'rca_notes' => ['required_if:status,3'],
+            'new_bandwidth' => ['required_if:type,plan_change'],
+            'new_maintenance_plan_id' => ['required_if:type,plan_change'],
         ], [
             'root_cause_id.required_if' => 'Please mention the RCA before closing the incident.',
             'sub_root_cause_id.required_if' => 'Please mention the sub RCA before closing the incident.',
@@ -980,7 +993,7 @@ class IncidentController extends Controller
 
                 $incident = Incident::find($request->input('id'));
                 // Check if incident->code matches "T-0015-MGT" or "T-0015"
-                if (!$incident->edge_code){
+                if (!$incident->edge_code && $user->user_type == 'internal'){
                    $customer = Customer::find($incident->customer_id);
                    if($customer){
                     $maintenance = MaintenanceService::where('id', $customer->maintenance_service_id)->first();
@@ -1040,28 +1053,31 @@ class IncidentController extends Controller
                 }
 
                 $incident->code = $request->code;
-                $incident->customer_id = $request->customer_id['id'];
+                $incident->customer_id = $request->customer_id;
                 $incident->incharge_id = $request->incharge_id['id'];
                 $incident->type = $request->type;
                 $incident->priority = $request->priority;
                 $incident->topic = $request->topic;
                 $incident->status = $request->status;
+                $incident->start_date = $request->start_date?? null;
                 if ($request->type == 'plan_change') {
-                    $myDateTime = new DateTime;
-                    $newtime = clone $myDateTime;
-                    if ($request->start_date)
-                        $myDateTime = new DateTime($request->start_date);
-                    if ($myDateTime->format('d') <= 7) {
-                        $newtime->modify('first day of this month');
-                        $incident->start_date = $newtime->format('Y-m-j h:m:s');
-                    } else {
-                        $newtime->modify('+1 month');
-                        $newtime->modify('first day of this month');
-                        $incident->start_date = $newtime->format('Y-m-j h:m:s');
-                    }
-                } else {
-                    $incident->start_date = $request->start_date;
-                }
+
+                $incident->new_bandwidth = $request->new_bandwidth;
+                $incident->new_maintenance_service_id = $request->new_maintenance_plan_id;
+                
+                // $myDateTime = new DateTime;
+                // $newtime = clone $myDateTime;
+                // if ($request->start_date)
+                //     $myDateTime = new DateTime($request->start_date);
+                // if ($myDateTime->format('d') <= 7) {
+                //     $newtime->modify('first day of this month');
+                //     $incident->start_date = $newtime->format('Y-m-j h:m:s');
+                // } else {
+                //     $newtime->modify('+1 month');
+                //     $newtime->modify('first day of this month');
+                //     $incident->start_date = $newtime->format('Y-m-j h:m:s');
+                // }
+             } 
                 $incident->end_date = $request->end_date;
                 if (!empty($request->new_township)) {
                     $incident->new_township = $request->new_township['id'];

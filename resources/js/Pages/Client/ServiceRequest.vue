@@ -164,29 +164,53 @@
 
 
                       <!-- end of general -->
-
-                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.bandwidth">
+                       <div class="col-span-1 grid grid-cols-2 gap-2">
+                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.current_bandwidth">
                         <label for="current_package" class="block text-gray-700 text-sm font-bold">Current
                           Plan:</label>
                       </div>
-                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.bandwidth">
+                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.current_bandwidth">
 
-                        <input type="text" :class="{ 'ring-1 ring-blue-200': form.new_package }"
+                        <input type="text" :class="{ 'ring-1 ring-blue-200': form.current_bandwidth }"
                           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                          id="current_package" :value='`${form.current_package.item_data}`' :readonly="true" />
+                          id="current_package" :value='`${form.current_bandwidth}`' :readonly="true" />
                       </div>
 
+                       <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.maintenance_service_name">
+                        <label for="current_package" class="block text-gray-700 text-sm font-bold">Current
+                          Maintenance Plan:</label>
+                      </div>
+                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.maintenance_service_name">
 
+                        <input type="text" :class="{ 'ring-1 ring-blue-200': form.maintenance_service_name }"
+                          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                          id="current_package" :value='`${form.maintenance_service_name}`' :readonly="true" />
+                      </div>
 
-                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.new_package">
-                        <label for="new_package" class="block text-gray-700 text-sm font-bold mt-3 mr-2">New
+                      </div>
+                      <div class="col-span-1 grid grid-cols-2 gap-2">
+                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.new_bandwidth">
+                        <label for="current_package" class="block text-gray-700 text-sm font-bold">New
                           Plan:</label>
                       </div>
-                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.new_package">
+                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.new_bandwidth">
 
-                        <input type="text"
-                          class="mt-1 ring-1 ring-green-200  focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                          id="new_package" :value='`${form.new_package.item_data}`' :readonly="true" />
+                        <input type="text" :class="{ 'ring-1 ring-blue-200': form.new_bandwidth }"
+                          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                          id="current_package" :value='`${form.new_bandwidth}`' :readonly="true" />
+                      </div>
+
+                       <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.new_maintenance_service_name">
+                        <label for="current_package" class="block text-gray-700 text-sm font-bold">New
+                          Maintenance Plan:</label>
+                      </div>
+                      <div class="mb-4 col-span-1 sm:col-span-1" v-if="form.new_maintenance_service_name">
+
+                        <input type="text" :class="{ 'ring-1 ring-blue-200': form.new_maintenance_service_name }"
+                          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                          id="current_package" :value='`${form.new_maintenance_service_name}`' :readonly="true" />
+                      </div>
+
                       </div>
                     </div>
                     <template v-if="form.new_address">
@@ -573,8 +597,10 @@ export default {
       current_township: null,
       new_township: null,
       description: null,
-      bandwidth: null,
-
+      current_bandwidth: null,
+      maintenance_service_name: null,
+      new_bandwidth: null,
+      new_maintenance_service_name: null,
       current_partner: null,
       current_pop: null,
 
@@ -650,8 +676,10 @@ export default {
       form.new_township = null;
       form.description = null;
 
-      form.bandwidth = null;
-
+      form.current_bandwidth = null;
+      form.maintenance_service_name = null;
+      form.new_bandwidth = null;
+      form.new_maintenance_service_name = null; 
       form.current_partner = null;
       form.current_pop = null;
 
@@ -764,8 +792,10 @@ export default {
       form.current_township = data.customer.current_address?.township.name
       form.new_township = props.townships.filter((d) => d.id == data.new_township)[0];
       form.description = data.description;
-      form.bandwidth = data.bandwidth;
-
+      form.current_bandwidth = data.current_bandwidth;
+      form.maintenance_service_name = data.maintenance_service_name;
+      form.new_bandwidth = data.new_bandwidth;
+      form.new_maintenance_service_name = data.new_maintenance_service_name;
       form.current_partner = data.customer.sn_port?.pop?.partner.name;
       form.current_pop = data.customer.sn_port?.pop?.site_name;
 

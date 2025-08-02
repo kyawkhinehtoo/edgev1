@@ -54,6 +54,7 @@ class ServiceRequestController extends Controller
             ->where('status', 1)
             ->get(['id', 'name']);
         $incidents = Incident::with('customer.snPort.snSplitter')
+            
             ->with('customer.snPort.dnSplitter')
             ->with('customer.snPort.popDevice')
             ->with('customer.snPort.pop')
@@ -61,9 +62,11 @@ class ServiceRequestController extends Controller
             ->with('customer.currentAddress.township')
             ->join('users', 'users.id', '=', 'incidents.incharge_id')
             ->join('customers', 'customers.id', '=', 'incidents.customer_id')
+            ->join('maintenance_services', 'customers.maintenance_service_id', '=', 'maintenance_services.id')
             ->join('status', 'customers.status_id', '=', 'status.id')
             ->leftjoin('tasks', 'incidents.id', 'tasks.incident_id')
             ->leftjoin('subcoms', 'tasks.assigned', 'subcoms.id')
+            ->leftjoin('maintenance_services as m1', 'incidents.new_maintenance_service_id', 'm1.id')
             ->whereIn('incidents.type', ['relocation', 'termination', 'plan_change', 'suspension', 'resume'])
             ->when($closed, function ($query, $closed) {
                 $query->whereIN('incidents.status', [3, 4]);
@@ -107,9 +110,8 @@ class ServiceRequestController extends Controller
             ->select(
                 'incidents.*',
                 'customers.id as customer_id',
+                'customers.bandwidth as current_bandwidth',
                 'customers.ftth_id as ftth_id',
-                'customers.package_id as current_package',
-                'incidents.package_id as new_package',
                 'users.name as incharge',
                 'status.name as status_name',
                 'status.id as status_id',
@@ -117,6 +119,11 @@ class ServiceRequestController extends Controller
                 'tasks.target as assign_date',
                 'tasks.status as task_status',
                 'tasks.complete_date as complete_date',
+                'maintenance_services.id as maintenance_service_id',
+                'maintenance_services.name as maintenance_service_name',
+                'maintenance_services.service_type as maintenance_service_type',
+                'maintenance_services.sla_hours as maintenance_sla_hours',
+                'm1.name as new_maintenance_service_name',
             )
             ->paginate(10);
         $incidents->appends($request->all())->links();
@@ -317,6 +324,10 @@ class ServiceRequestController extends Controller
                     $status = Status::where('name', '=', 'Waiting to Resume')->first();
                     $customer->status_id = $status->id;
                 }
+                if ($incident->type == 'plan_change') {
+                    $status = Status::where('name', '=', 'Waiting to Plan Change')->first();
+                    $customer->status_id = $status->id;
+                }
 
                 $customer->update();
 
@@ -371,30 +382,11 @@ class ServiceRequestController extends Controller
                 }
                 if ($incident->type == 'plan change') {
                     //new
-                    if ($incident->new_package)
-                        $new_history->new_package = $incident->new_package['id'];
-                    //old
-                    if ($incident->current_package)
-                        $new_history->old_package = $incident->current_package['id'];
-
-                    // $status = Status::where('name','=','Active')->first();
-                    // $new_history->new_status = $status->id;
-                    $myDateTime = new DateTime;
-                    $newtime = clone $myDateTime;
-                    if ($incident->start_date) {
-                        $myDateTime = new DateTime($incident->start_date);
-                        $new_history->start_date = $newtime->format('Y-m-j h:m:s');
-                    }
-
-                    // if($myDateTime->format('d') <= 7){
-                    //     $newtime->modify('first day of this month');
-                    //     $new_history->start_date = $newtime->format('Y-m-j h:m:s');
-                    // }else{
-                    //     $newtime->modify('+1 month');
-                    //     $newtime->modify('first day of this month');
-                    //     $new_history->start_date = $newtime->format('Y-m-j h:m:s');
-                    // }
-                    $incident->status = 3;
+                     $status = Status::where('name', '=', 'Waiting to Plan Change')->first();
+                   // dd($incident->suspension_incident_id);
+                   // $incident->suspension_incident_id = $incident->suspension_incident_id;
+                    $new_history->new_status = $status->id;
+                    $incident->status = 10;
                 }
                 $new_history->save();
 

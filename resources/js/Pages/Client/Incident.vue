@@ -365,7 +365,8 @@
                       <div class="py-2 col-span-4 sm:col-span-4">
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="customers.length !== 0">
                           <multiselect deselect-label="Selected already" :options="customers" track-by="id"
-                            label="ftth_id" v-model="form.customer_id" :allow-empty="false"
+                            label="ftth_id" v-model="form.customer" :allow-empty="false"
+                            @update:modelValue="form.customer_id = $event?.id; updateCustomer($event?.id)"
                             :disabled="checkDisable()"></multiselect>
                         </div>
                         <p v-if="$page.props.errors.customer" class="mt-2 text-sm text-red-500">{{
@@ -764,21 +765,72 @@
                       <!-- relocation service -->
 
                       <!-- plan change -->
-                      <div class="py-2 col-span-1 sm:col-span-1" v-if="form.type == 'plan_change'">
+                       <template v-if="form.type == 'plan_change'">
+                        <div class="py-2 col-span-1 sm:col-span-1">
+                         <div class="mt-1 flex">
+                          <label for="current_bandwidth" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Current Bandwidth
+                            : </label>
+                        </div>
+                      </div>
+                      <div class="py-2 col-span-4 sm:col-span-4">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                           <input type="text" v-model="form.current_bandwidth" name="current_bandwidth" id="current_bandwidth"
+                            class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            disabled />
+                        </div>
+                        <p v-if="$page.props.errors.current_bandwidth" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.current_bandwidth }}</p>
+                      </div>
+                       <div class="py-2 col-span-1 sm:col-span-1">
+                         <div class="mt-1 flex">
+                          <label for="current_maintenance_plan" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Current Maintenance Plan
+                            : </label>
+                        </div>
+                      </div>
+                      <div class="py-2 col-span-4 sm:col-span-4">
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                           <input type="text" v-model="form.current_maintenance_plan" name="current_maintenance_plan" id="current_maintenance_plan"
+                            class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            disabled />
+                        </div>
+                        <p v-if="$page.props.errors.current_maintenance_plan" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.current_maintenance_plan }}</p>
+                      </div>
+                      <!-- end of plan change -->
                         <div class="mt-1 flex">
-                          <label for="new_package" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> New
-                            Package: </label>
+                          <label for="new_bandwidth" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> New
+                            Bandwidth: </label>
                         </div>
+                      
+                      <div class="py-2 col-span-4 sm:col-span-4" >
+                        <div class="mt-1 flex rounded-md shadow-sm">
+                           <input type="integer" v-model="form.new_bandwidth" name="new_bandwidth" id="new_bandwidth"
+                            class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
+                            :disabled="checkDisable()" />
+                        </div>
+                        <p v-if="$page.props.errors.new_bandwidth" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.new_bandwidth }}</p>
+                       
                       </div>
-                      <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'plan_change'">
-                        <div class="mt-1 flex rounded-md shadow-sm" v-if="packages.length !== 0">
-                          <multiselect deselect-label="Selected already" :options="packages" track-by="id"
-                            label="item_data" v-model="form.package_id" :allow-empty="false"
+                       <div class="mt-1 flex">
+                          <label for="new_bandwidth" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> New
+                            Maintenance Plan: </label>
+                        </div>
+                      <div class="py-2 col-span-4 sm:col-span-4" >
+                        <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredMaintenanceServices.length !== 0">
+                          <multiselect deselect-label="Selected already" :options="filteredMaintenanceServices" track-by="id"
+                            label="name" v-model="form.new_maintenance_plan" :allow-empty="false"
+                            @update:modelValue="form.new_maintenance_plan_id = $event?.id"
                             :disabled="checkDisable()"></multiselect>
+                          
                         </div>
-                        <p v-if="$page.props.errors.package" class="mt-2 text-sm text-red-500">{{
-                          $page.props.errors.package }}</p>
+                       
+                        <p v-if="$page.props.errors.new_maintenance_plan_id" class="mt-2 text-sm text-red-500">{{
+                          $page.props.errors.new_maintenance_plan_id }}</p>
+                       
                       </div>
+                       </template>
+                      
                       <!-- end of plan change -->
                       <!-- relocation start date -->
                       <div class="py-2 col-span-1 sm:col-span-1" v-if="form.type == 'plan_change'">
@@ -1002,6 +1054,7 @@ export default {
     supervisorAssign: Object,
     close: Object,
     suspensionTickets: Object,
+    maintenanceServices:Object,
   },
   setup(props) {
     const search = ref("");
@@ -1042,6 +1095,7 @@ export default {
       suspension_incident: null,
       suspension_incident_id: null,
       priority: null,
+      customer: null,
       customer_id: null,
       incharge_id: props.team.filter((d) => d.id == props.user.id)[0],
       supervisor_id: null,
@@ -1070,8 +1124,13 @@ export default {
       rca_notes: null,
       relocation_service: null,
       relocation_service_id: null,
+      current_bandwidth: null,
+      current_maintenance_plan: null,
+      new_bandwidth: null,
+      new_maintenance_plan: null,
+      new_maintenance_plan_id: null,
     });
-
+    let filteredMaintenanceServices = ref([]);
     let tab = ref(true);
     let selection = ref("");
     function typeChange(type) {
@@ -1145,14 +1204,18 @@ export default {
         form.latitude = lat_long[0];
         form.longitude = lat_long[1];
       }
-
+      if(data.maintenance_service_type)
+      filteredMaintenanceServices.value = props.maintenanceServices.filter(d => d.service_type == data.maintenance_service_type);
+      
+      let my_customer = props.customers.filter((d) => d.id == data.customer_id)[0];
       form.id = data.id;
       form.code = data.code;
       form.edge_code = data.edge_code;
       form.suspension_incident = props.suspensionTickets.filter((d) => d.id == data.suspension_incident_id)[0];
       form.suspension_incident_id = data.suspension_incident_id;
       form.priority = data.priority;
-      form.customer_id = props.customers.filter((d) => d.id == data.customer_id)[0];
+      form.customer = props.customers.filter((d) => d.id == data.customer_id)[0];
+      form.customer_id = data.customer_id;
       form.incharge_id = props.noc.filter((d) => d.id == data.incharge_id)[0];
       form.type = data.type;
       form.topic = data.topic;
@@ -1179,8 +1242,15 @@ export default {
       form.relocation_service = data.relocation_service_id? props.relocationServices.find(d => d.id == data.relocation_service_id) : null;
       
       form.relocation_service_id = data.relocation_service_id;
+      form.current_bandwidth = my_customer.bandwidth;
+      form.current_maintenance_plan = data.maintenance_service_name;  
+      form.new_bandwidth = data.new_bandwidth;
+      form.new_maintenance_plan = props.maintenanceServices.filter(d => d.id == data.new_maintenance_service_id)[0];
+      form.new_maintenance_plan_id = data.new_maintenance_service_id;
+      console.log("maintenance service id : " + data.new_maintenance_service_id);
       openModal();
     }
+
     function clearform() {
       selected_id.value = null;
       editMode.value = false;
@@ -1190,6 +1260,7 @@ export default {
       form.suspension_incident = "";
       form.suspension_incident_id = "";
       form.priority = "normal";
+      form.customer = "";
       form.customer_id = "";
       form.incharge_id = props.team.filter((d) => d.id == props.user.id)[0];
       form.type = "default";
@@ -1219,7 +1290,17 @@ export default {
       form.supervisor = null;
       form.supervisor_id = null;
     }
-
+    function updateCustomer(id){
+      if (id != null) {
+        form.current_bandwidth = form.customer.bandwidth;
+        form.current_maintenance_plan = form.customer.maintenance_service_name;
+        console.log("updateCustomer : " + form.customer.maintenance_service_type);
+        filteredMaintenanceServices.value = props.maintenanceServices.filter(d => d.service_type == form.customer.maintenance_service_type);
+      } else {
+        form.current_bandwidth = null;
+        form.current_maintenance_plan = null;
+      }
+    }
     function getStatus(data) {
       let status = "Request";
       if (data == 1) {
@@ -1240,6 +1321,8 @@ export default {
         status = "Waiting to Reopen";
       } else if (data == 9) {
         status = "Waiting to Terminate";
+      } else if (data == 10) {
+        status = "Waiting to Plan Change";
       }
       return status;
     }
@@ -1453,7 +1536,7 @@ export default {
 
       priorityColor();
     });
-    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA,clickStatus,checkDisable };
+    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA,clickStatus,checkDisable,updateCustomer,filteredMaintenanceServices };
   },
 };
 </script>

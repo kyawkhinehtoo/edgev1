@@ -175,7 +175,7 @@ class IncidentTaskController extends Controller
     {
         $user = User::with('role')->find(Auth::user()->id);
         $task = Task::with('incident','incident.customer')->where('id', $taskId)->firstOrFail();
-        $service_type = $task->incident->type; // Default service type, can be changed based on your logic
+        $service_type = ($task->incident->type=='termination')?'termination':'maintenance'; // Default service type, can be changed based on your logic
         $groups = SubconChecklistsGroup::with([
             'checklists' => function ($query) use ($service_type) {
                 $query->where('service_type', $service_type);
@@ -236,7 +236,9 @@ class IncidentTaskController extends Controller
     public function checkRemainingItems($taskId)
     {
         // Get all checklist IDs for the task's service type
-        $service_type = 'installation'; // Adjust if needed
+        $task = Task::with('incident')->findOrFail($taskId);
+        $service_type = ($task->incident->type=='termination')?'termination':'maintenance'; 
+        
         $checklistIds = SubconChecklist::where('service_type', $service_type)->pluck('id');
 
         // Get checklist values for this task
