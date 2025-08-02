@@ -67,18 +67,7 @@ class CustomerController extends Controller
         $isps = Isp::get();
         $dn = DnPorts::get();
 
-        // Get customers whose id is never referenced as old_customer_id and whose status type is not 'new'
-        $oldCustomers = Customer::join('status','customers.status_id','status.id')->where(function ($query) {
-            $query->where('customers.deleted', '=', 0)
-                ->orWhereNull('customers.deleted');
-            })
-            ->whereNotIn('customers.id', function ($subQuery) {
-            $subQuery->select('old_customer_id')
-                ->from('customers')
-                ->whereNotNull('old_customer_id');
-            })
-            ->where('status.type', '!=', 'new')
-            ->get();
+        
 
         $onuSerials = Customer::where('customers.deleted', '=', 0)
             ->orWhereNull('customers.deleted')
@@ -420,18 +409,29 @@ class CustomerController extends Controller
         $sn = SnPort::get();
         $projects = Project::get();
         $pops = Pop::get();
+          $user = User::with('role')->find(Auth::user()->id);
         $bundle_equiptments = BundleEquiptment::get();
-        $oldCustomers   = Customer::join('status', 'customers.status_id', '=', 'status.id')
-            ->where(function ($query) {
-                return $query->where('customers.deleted', '=', 0)
-                    ->orWhereNull('customers.deleted');
+         $oldCustomers = Customer::join('status','customers.status_id','status.id')->where(function ($query) {
+            $query->where('customers.deleted', '=', 0)
+                ->orWhereNull('customers.deleted');
             })
             ->whereNotIn('customers.id', function ($subQuery) {
-                $subQuery->select('old_customer_id')
-                    ->from('customers')
-                    ->whereNotNull('old_customer_id');
+            $subQuery->select('old_customer_id')
+                ->from('customers')
+                ->whereNotNull('old_customer_id');
             })
-            ->where('status.type', '!=', 'new')
+            ->when($user->user_type, function ($query, $user_type) use ($user) {
+                if ($user_type == 'partner') {
+                    $query->where('customers.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
+                if ($user_type == 'subcon') {
+                    $query->where('customers.subcom_id', '=', $user->subcom_id);
+                }
+            })
+            ->where('status.name', 'LIKE', '%Terminate%')
             ->get();
         $installationServices = InstallationService::where('type', 'new')->get();
         $portSharingServices = PortSharingService::get();
@@ -458,7 +458,7 @@ class CustomerController extends Controller
         // $townships = Township::join('cities', 'townships.city_id', '=', 'cities.id')->select('townships.*', 'cities.name as city_name', 'cities.short_code as city_code', 'cities.id as city_id')->get();
         $status_list = $this->getStatusList();
         $max_id = $this->getmaxid();
-        $user = User::with('role')->find(Auth::user()->id);
+      
         return Inertia::render(
             'Client/AddCustomer',
             [
@@ -852,7 +852,7 @@ class CustomerController extends Controller
         $total_documents = FileUpload::where('customer_id', $customer->id)->whereNull('incident_id')->count();
 
          // Get customers whose id is never referenced as old_customer_id and whose status type is not 'new'
-        $oldCustomers = Customer::join('status','customers.status_id','status.id')->where(function ($query) {
+         $oldCustomers = Customer::join('status','customers.status_id','status.id')->where(function ($query) {
             $query->where('customers.deleted', '=', 0)
                 ->orWhereNull('customers.deleted');
             })
@@ -861,7 +861,18 @@ class CustomerController extends Controller
                 ->from('customers')
                 ->whereNotNull('old_customer_id');
             })
-            ->where('status.type', '!=', 'new')
+            ->when($user->user_type, function ($query, $user_type) use ($user) {
+                if ($user_type == 'partner') {
+                    $query->where('customers.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
+                if ($user_type == 'subcon') {
+                    $query->where('customers.subcom_id', '=', $user->subcom_id);
+                }
+            })
+            ->where('status.name', 'LIKE', '%Terminate%')
             ->get();
 
         return Inertia::render(

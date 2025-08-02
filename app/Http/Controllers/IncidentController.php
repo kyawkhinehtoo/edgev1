@@ -154,7 +154,7 @@ class IncidentController extends Controller
           
         $ticketRequest = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
-            ->where('incidents.status', '=', '1')
+            ->whereIn('incidents.status', [1, 5, 6,7,8,9])
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
@@ -320,15 +320,19 @@ class IncidentController extends Controller
             $query->whereIn('tasks.id', $myTasks);
             })
             ->when($request->status, function ($query, $status) use ($user){
+                if($status==1){
+                  
+                    return $query->whereIn('incidents.status', [1, 5, 6,7,8,9]);
+                }
                  $query->where('incidents.status', '=', $status);
             }, function ($query) use ($user) {
                 if($user->role?->incident_supervisor == 1){
-                   return $query->whereRaw('incidents.status in (2,5,6)');
+                   return $query->whereRaw('incidents.status in (2,5,6,7,8,9)');
                 }
                 if($user->role?->incident_oss == 1){
-                return $query->whereRaw('incidents.status in (1,5,6)');
+                return $query->whereRaw('incidents.status in (1,5,6,7,8,9)');
                 }
-                return $query->whereRaw('incidents.status in (1,2,3,5,6,7,8)');
+                return $query->whereRaw('incidents.status in (1,2,3,5,6,7,8,9)');
             })
             ->when($request->keyword, function ($query, $search) {
             $query->where(function ($query) use ($search) {
@@ -826,7 +830,7 @@ class IncidentController extends Controller
             $incident->priority = $request->priority;
             $incident->topic = $request->topic;
             $incident->status = $request->status;
-
+          
             if ($request->type == 'plan_change') {
                 $myDateTime = new DateTime;
                 $newtime = clone $myDateTime;

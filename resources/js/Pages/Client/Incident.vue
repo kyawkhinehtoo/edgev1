@@ -422,7 +422,7 @@
                             required @change="form.topic = null" :disabled="checkDisable()">
                             <option value="default">Please Choose Ticket Type</option>
                             <option value="service_complaint">Service Complaint</option>
-                            <option value="relocation">Relocation Request</option>
+                            <!-- <option value="relocation">Relocation Request</option> -->
                             <option value="plan_change">Plan Change</option>
                             <option value="suspension">Suspension</option>
                             <option value="resume">Reopen</option>
@@ -504,11 +504,12 @@
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="checkDisable()">
                             <option value="1">Request</option>
-                            <option value="6" :disabled="checkDisable()">Supervisor Assign</option>
+                            <option value="6" :disabled="user.user_type!='internal'">Supervisor Assign</option>
                             <option value="2" disabled>Team Assign</option>
                             <option value="5" disabled>Resolved Open</option>
                             <option value="7" disabled>Waiting to Suspend</option>
                             <option value="8" disabled>Waiting to Reopen</option>
+                            <option value="9" disabled>Waiting to Terminate</option>
                             <option value="3">Closed</option>
                           </select>
                         </div>
@@ -1237,6 +1238,8 @@ export default {
         status = "Waiting to Suspend";
       } else if (data == 8) {
         status = "Waiting to Reopen";
+      } else if (data == 9) {
+        status = "Waiting to Terminate";
       }
       return status;
     }

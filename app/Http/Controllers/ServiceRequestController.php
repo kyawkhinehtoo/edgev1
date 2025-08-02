@@ -303,8 +303,9 @@ class ServiceRequestController extends Controller
                 // if($incident->new_township){
                 //     $customer->township_id = $incident->new_township;
                 // }
+              
                 if ($incident->type == 'termination') {
-                    $status = Status::where('name', 'LIKE', '%Termina%')->first();
+                    $status = Status::where('name', 'LIKE', '%Waiting To Terminate%')->first();
                     $customer->status_id = $status->id;
                 }
                 if ($incident->type == 'suspension') {
@@ -352,17 +353,17 @@ class ServiceRequestController extends Controller
                     $incident->status = 3;
                 }
                 if ($incident->type == 'termination') {
-                    $status = Status::where('name', 'LIKE', '%Termina%')->first();
+                     $status = Status::where('name', 'LIKE', '%Waiting To Terminate%')->first();
                     $new_history->new_status = $status->id;
-                    $incident->status = 3;
+                    $incident->status = 9;
                 }
                 if ($incident->type == 'suspension') {
-                    $status = Status::where('name', 'LIKE', '%Suspen%')->first();
+                    $status = Status::where('name', 'LIKE', '%Waiting to Suspend%')->first();
                     $new_history->new_status = $status->id;
                     $incident->status = 7;
                 }
                 if ($incident->type == 'resume') {
-                    $status = Status::where('name', '=', 'Active')->first();
+                    $status = Status::where('name', '=', 'Waiting to Resume')->first();
                    // dd($incident->suspension_incident_id);
                    // $incident->suspension_incident_id = $incident->suspension_incident_id;
                     $new_history->new_status = $status->id;
