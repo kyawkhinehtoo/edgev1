@@ -11,6 +11,7 @@ class SubconChecklistsGroup extends Model
     protected $fillable = [
         'name',
         'description',
+        'category',
         'required',
     ];
     protected $casts = [

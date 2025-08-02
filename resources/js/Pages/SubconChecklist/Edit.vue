@@ -76,6 +76,7 @@ const submit = () => {
                 >
                   <option value="installation">Installation</option>
                   <option value="maintenance">Maintenance</option>
+                  <option value="termination">Termination</option>
                 </select>
                 <div v-if="form.errors.service_type" class="text-red-500 text-sm mt-1">{{ form.errors.service_type }}</div>
               </div>

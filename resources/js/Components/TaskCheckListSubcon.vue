@@ -23,7 +23,10 @@
             @click="selectGroup(group.id)"
             :class="['cursor-pointer transition-colors', selectedGroupId === group.id ? 'bg-indigo-100' : 'hover:bg-gray-50']"
           >
-            <td class="px-4 py-2 text-blue-600 underline font-medium">{{ group.group_name }}</td>
+            <td class="px-4 py-2 font-medium">
+              <label class="text-blue-500">{{ group.group_name }}</label>
+              <span class="text-red-600" v-if="group.required">*</span>
+            </td>
             <td class="px-4 py-2 text-center">
               <span v-if="group.total > 0" class="px-2 py-1 rounded-xl bg-yellow-100 text-yellow-700 text-xs font-semibold">{{ group.total }}</span>
               <span v-else class="text-gray-400">{{ group.total }}</span>

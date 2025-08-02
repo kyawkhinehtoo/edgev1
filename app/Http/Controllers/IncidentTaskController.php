@@ -138,7 +138,9 @@ class IncidentTaskController extends Controller
     }
     public function getTaskChecklistValues($task_id){
 
-        $subconCheckList = SubconChecklist::where('service_type', 'installation')->get();
+        $task = Task::with('incident')->findOrFail($task_id);
+      
+        $subconCheckList = SubconChecklist::where('service_type', $task->incident->type)->get();
 
         // Get existing checklist values for this customer
         $checklistValues = SubconChecklistValue::where('task_id', $task_id)->get();
@@ -173,7 +175,7 @@ class IncidentTaskController extends Controller
     {
         $user = User::with('role')->find(Auth::user()->id);
         $task = Task::with('incident','incident.customer')->where('id', $taskId)->firstOrFail();
-        $service_type = 'installation'; // Default service type, can be changed based on your logic
+        $service_type = $task->incident->type; // Default service type, can be changed based on your logic
         $groups = SubconChecklistsGroup::with([
             'checklists' => function ($query) use ($service_type) {
                 $query->where('service_type', $service_type);
@@ -181,7 +183,9 @@ class IncidentTaskController extends Controller
             'checklists.values' => function ($query) use ($taskId) {
                 $query->where('task_id', $taskId);
             }
-        ])->get();
+        ])
+        ->where('category', $task->incident->type)
+        ->get();
         
         $isSupervisor = $user->role?->incident_supervisor ?? false;
        
@@ -215,6 +219,7 @@ class IncidentTaskController extends Controller
 
             return [
                 'id' => $group->id,
+                'required' => $group->required ,
                 'group_name' => $group->name,
                 'total' => $total,
                 'requested' => $requested,

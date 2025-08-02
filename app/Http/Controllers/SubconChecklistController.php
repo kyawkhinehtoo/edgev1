@@ -49,7 +49,7 @@ class SubconChecklistController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'has_attachment' => 'boolean',
-            'service_type' => 'required|in:installation,maintenance',
+            'service_type' => 'required|in:installation,maintenance,termination',
             'remarks' => 'required|string',
             'status' => 'required|string|max:255',
             'group_id' => 'required|exists:subcon_checklists_group,id',
@@ -91,7 +91,7 @@ class SubconChecklistController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'has_attachment' => 'boolean',
-            'service_type' => 'required|in:installation,maintenance',
+            'service_type' => 'required|in:installation,maintenance,termination',
             'remarks' => 'required|string',
             'status' => 'required|string|max:255',
             'group_id' => 'required|exists:subcon_checklists_group,id',

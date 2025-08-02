@@ -8,7 +8,7 @@
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
           <div class="flex justify-between mb-6">
             <div class="flex items-center flex-1">
-              <div class="w-1/3">
+              <div class="w-1/3 flex gap-2">
                 <input
                   v-model="search"
                   type="text"
@@ -16,6 +16,13 @@
                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   @keyup.enter="searchGroups"
                 >
+                <select v-model="categoryFilter" @change="searchGroups"
+                  class="w-40 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                  <option value="">All Categories</option>
+                  <option value="installation">Installation</option>
+                  <option value="maintenance">Maintenance</option>
+                  <option value="termination">Termination</option>
+                </select>
               </div>
             </div>
             <button @click="searchGroups"
@@ -34,6 +41,7 @@
               <tr>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">No.</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Category</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Description</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Required</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -43,6 +51,7 @@
               <tr v-for="(group, index) in groups.data" :key="group.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ index + 1 }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ group.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap capitalize">{{ group.category }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ group.description }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ group.required ? 'Yes' : 'No' }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -71,6 +80,18 @@
                           class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                           id="name" placeholder="Enter Group Name" v-model="form.name">
                         <div v-if="$page.props.errors?.name" class="text-red-500">{{ $page.props.errors.name[0] }}</div>
+                      </div>
+                      <div class="mb-4">
+                        <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Group Category:</label>
+                        <select
+                          v-model="form.category"
+                          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        >
+                          <option value="installation">Installation</option>
+                          <option value="maintenance">Maintenance</option>
+                          <option value="termination">Termination</option>
+                        </select>
+                        <div v-if="$page.props.errors?.category" class="text-red-500">{{ $page.props.errors.category[0] }}</div>
                       </div>
                       <div class="mb-4">
                         <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
@@ -142,9 +163,11 @@ export default {
     const form = useForm({
       id: null,
       name: '',
+      category: 'installation',
       description: '',
       required: false,
     });
+    const categoryFilter = ref(props.category || '');
     const showModal = ref(false);
     const search = ref(props.search || '');
     function openModal() {
@@ -183,6 +206,7 @@ export default {
     function editGroup(group) {
       form.id = group.id;
       form.name = group.name;
+      form.category = group.category;
       form.description = group.description;
       form.required = group.required ? true : false;
       showModal.value = true;
@@ -190,6 +214,7 @@ export default {
     function resetForm() {
       form.id = null;
       form.name = '';
+      form.category = 'installation';
       form.description = '';
       form.required = false;
     }
@@ -199,12 +224,11 @@ export default {
       }
     }
     function searchGroups() {
-      const params = { group: search.value };
-      
-        router.get('/subcon-checklists-group', params, { preserveState: true });
+      const params = { group: search.value, category: categoryFilter.value };
+      router.get('/subcon-checklists-group', params, { preserveState: true });
     }
     
-    return { form, submit, editGroup, resetForm, deleteGroup, showModal, openModal, closeModal, search, searchGroups };
+    return { form, submit, editGroup, resetForm, deleteGroup, showModal, openModal, closeModal, search, searchGroups, categoryFilter };
   },
 };
 </script>
