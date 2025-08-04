@@ -154,7 +154,7 @@ class IncidentController extends Controller
           
         $ticketRequest = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
-            ->whereIn('incidents.status', [1, 5, 6,7,8,9])
+            ->whereIn('incidents.status', [1, 5, 6,7,8,9,10])
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
@@ -275,6 +275,10 @@ class IncidentController extends Controller
             ->select('users.name as name', 'users.id as id')
             ->where('roles.incident_supervisor', 1)
             ->get();
+        $partners = DB::table('users')   
+            ->select('users.name as name', 'users.id as id')
+            ->where('users.user_type', 'partner')
+            ->get();
         $subcons = Subcom::get();
         if ($user->user_type == 'subcon') {
             $subcons = Subcom::where('id', $user->subcom_id)->get();
@@ -301,10 +305,10 @@ class IncidentController extends Controller
         if ($request->sort && $request->order) {
             $orderby = $request->sort . ' ' . $request->order;
         }
-
-
+      
         $incidents =  DB::table('incidents')
             ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+            ->join('partners', 'customers.partner_id', '=', 'partners.id')
             ->join('maintenance_services', 'customers.maintenance_service_id', '=', 'maintenance_services.id')
             ->join('customer_addresses', 'customer_addresses.customer_id', '=', 'customers.id')
             ->join('townships', 'customer_addresses.township_id', '=', 'townships.id')
@@ -312,7 +316,7 @@ class IncidentController extends Controller
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
             if ($user_type == 'partner') {
-                $query->where('customers.partner_id', '=', $user->partner_id);
+                $query->where('incidents.partner_id', '=', $user->partner_id);
             }
             if ($user_type == 'isp') {
                 $query->where('customers.isp_id', '=', $user->isp_id);
@@ -324,17 +328,17 @@ class IncidentController extends Controller
             ->when($request->status, function ($query, $status) use ($user){
                 if($status==1){
                   
-                    return $query->whereIn('incidents.status', [1, 5, 6,7,8,9]);
+                    return $query->whereIn('incidents.status', [1, 5, 6,7,8,9,10]);
                 }
                  $query->where('incidents.status', '=', $status);
             }, function ($query) use ($user) {
                 if($user->role?->incident_supervisor == 1){
-                   return $query->whereRaw('incidents.status in (2,5,6,7,8,9)');
+                   return $query->whereRaw('incidents.status in (2,5,6,7,8,9,10)');
                 }
                 if($user->role?->incident_oss == 1){
-                return $query->whereRaw('incidents.status in (1,5,6,7,8,9)');
+                return $query->whereRaw('incidents.status in (1,2,5,6,7,8,9,10)');
                 }
-                return $query->whereRaw('incidents.status in (1,2,3,5,6,7,8,9)');
+                return $query->whereRaw('incidents.status in (1,2,3,5,6,7,8,9,10)');
             })
             ->when($request->keyword, function ($query, $search) {
             $query->where(function ($query) use ($search) {
@@ -379,9 +383,12 @@ class IncidentController extends Controller
             'maintenance_services.name as maintenance_service_name',
             'maintenance_services.service_type as maintenance_service_type',
             'maintenance_services.sla_hours as maintenance_sla_hours',
+            'partners.name as customer_partner_name',
+            'partners.id as customer_partner_id',
             )
             ->groupBy('incidents.id')
             ->paginate(10);
+          
         $maintenanceServices = MaintenanceService::where('status', '=', 1)->get();
         // foreach ($incidents as $value) {
         //     $max_invoice_id =  DB::table('tasks')
@@ -839,6 +846,7 @@ class IncidentController extends Controller
             $incident->priority = $request->priority;
             $incident->topic = $request->topic;
             $incident->status = $request->status;
+            $incident->partner_id = $request->partner_id?? null;
              $incident->start_date = $request->start_date?? null;
             if ($request->type == 'plan_change') {
 
@@ -1059,12 +1067,19 @@ class IncidentController extends Controller
                 $incident->priority = $request->priority;
                 $incident->topic = $request->topic;
                 $incident->status = $request->status;
+            
                 $incident->start_date = $request->start_date?? null;
                 if ($request->type == 'plan_change') {
 
                 $incident->new_bandwidth = $request->new_bandwidth;
                 $incident->new_maintenance_service_id = $request->new_maintenance_plan_id;
-                
+                if($incident->partner_id ){
+                      $incident->partner_id = $request->partner_id;
+                      if($incident->status == 1){
+                        $incident->status = 10;
+                      }
+                }
+                  
                 // $myDateTime = new DateTime;
                 // $newtime = clone $myDateTime;
                 // if ($request->start_date)

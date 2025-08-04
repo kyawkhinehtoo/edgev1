@@ -394,15 +394,25 @@
                        <template v-if="user.role?.incident_oss">
                         <div class="py-2 col-span-1 sm:col-span-1" >
                           <div class="mt-1 flex">
-                            <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign Supervisor : </label>
+                            <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> <span v-if="form.type != 'plan_change'">Assign Supervisor : </span> <span v-else>Assign Team : </span></label>
                           </div>
                         </div>
-                        <div class="py-2 col-span-4 sm:col-span-4">
+                        <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type != 'plan_change'" >
                           <div class="mt-1 flex rounded-md shadow-sm" v-if="supervisors?.length !== 0">
                             <multiselect deselect-label="Selected already" :options="supervisors" track-by="id" label="name"
                               v-model="form.supervisor" :allow-empty="true" 
                                 @update:modelValue="form.supervisor_id = $event?.id"
                               ></multiselect>
+                          </div>
+                          <p v-if="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.supervisor_id }}</p>
+                        </div>
+                        <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'plan_change'">
+                          <div class="mt-1 flex rounded-md shadow-sm">
+                            <select name="partner" id="partner" v-model="form.partner_id">
+                              <option value="default">Please Assign Partner</option>
+                              <option :value="form.customer_partner_id">{{ form.customer_partner_name }}</option>
+                            </select>
                           </div>
                           <p v-if="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
                             $page.props.errors.supervisor_id }}</p>
@@ -511,6 +521,7 @@
                             <option value="7" disabled>Waiting to Suspend</option>
                             <option value="8" disabled>Waiting to Reopen</option>
                             <option value="9" disabled>Waiting to Terminate</option>
+                            <option value="10" disabled>Waiting to Plan Change</option>
                             <option value="3">Closed</option>
                           </select>
                         </div>
@@ -1129,6 +1140,9 @@ export default {
       new_bandwidth: null,
       new_maintenance_plan: null,
       new_maintenance_plan_id: null,
+      partner_id: null,
+      customer_partner_id: null,
+      customer_partner_name: null,
     });
     let filteredMaintenanceServices = ref([]);
     let tab = ref(true);
@@ -1146,6 +1160,21 @@ export default {
         }
       }
     }
+
+    const incidentStatusList = ref([
+        { id: 1, name: 'Request', '$isDisabled': true },
+        { id: 2, name: 'Team Assign' },
+        { id: 3, name: 'Close' },
+        { id: 4, name: 'Deleted' },
+        { id: 5, name: 'Resolved Open' ,'$isDisabled': true },
+        { id: 6, name: 'Supervisor Assign', '$isDisabled': true },
+        { id: 7, name: 'Waiting to Suspend' },
+        { id: 8, name: 'Waiting to Reopen' },
+        { id: 9, name: 'Waiting To Terminate' },
+        { id: 10, name: 'Waiting to Plan Change' },
+        // { id: 11, name: 'Partner Assign' },
+        // { id: 12, name: 'Plan Change Complete' },
+    ]);
     function checkDisable() {
 
       console.log("checkDisable() called");
@@ -1155,6 +1184,12 @@ export default {
       }
       if (props.user.user_type === 'internal') {
         return false;
+      }else if(props.user.user_type === 'partner'){
+        if( form.status == 10){
+          return false;
+        }else{
+          return true;
+        }
       }else{
         if(form.status == 1 || form.status == ''){
            console.log("status is 1 or empty");
@@ -1230,6 +1265,7 @@ export default {
       form.description = data.description;
       form.date = data.date;
       form.time = data.time;
+      form.partner_id = data.partner_id;
       form.close_date = data.close_date;
       form.close_time = data.close_time;
       form.resolved_date = data.resolved_date;
@@ -1247,6 +1283,8 @@ export default {
       form.new_bandwidth = data.new_bandwidth;
       form.new_maintenance_plan = props.maintenanceServices.filter(d => d.id == data.new_maintenance_service_id)[0];
       form.new_maintenance_plan_id = data.new_maintenance_service_id;
+      form.customer_partner_id = data.customer_partner_id;
+      form.customer_partner_name = data.customer_partner_name;
       console.log("maintenance service id : " + data.new_maintenance_service_id);
       openModal();
     }
@@ -1287,6 +1325,7 @@ export default {
       form.sub_root_cause_id = null;
       form.relocation_service = "";
       form.relocation_service_id = null;
+      form.partner_id = null;
       form.supervisor = null;
       form.supervisor_id = null;
     }

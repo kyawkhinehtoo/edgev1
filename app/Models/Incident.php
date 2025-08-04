@@ -32,6 +32,7 @@ class Incident extends Model
         'priority',
         'incharge_id',
         'customer_id',
+        'partner_id',
         'package_id',
         'type',
         'topic',
@@ -178,5 +179,9 @@ class Incident extends Model
     public function suspensionIncident()
     {
         return $this->belongsTo(Incident::class, 'suspension_incident_id');
+    }
+    public function partner()
+    {
+        return $this->belongsTo(Partner::class,'partner_id');
     }
 }
