@@ -283,6 +283,10 @@ class IncidentController extends Controller
             ->select('users.name as name', 'users.id as id')
             ->where('users.user_type', 'partner')
             ->get();
+         $noc = User::with('role')
+            ->where('disabled', '=', 0)
+            ->select('name as name', 'id as id')
+            ->get();
         $subcons = Subcom::get();
         if ($user->user_type == 'subcon') {
             $subcons = Subcom::where('id', $user->subcom_id)->get();
@@ -489,6 +493,7 @@ class IncidentController extends Controller
                 'maintenanceServices' => $maintenanceServices,
                 'isps' => $isps,
                 'slas' => $slas,
+                'noc' => $noc,
             ]
         );
     }

@@ -1111,6 +1111,7 @@ export default {
     close: Object,
     suspensionTickets: Object,
     maintenanceServices: Object,
+    noc: Object,
   },
   setup(props) {
     const search = ref("");
