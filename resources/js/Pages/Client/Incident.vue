@@ -519,7 +519,7 @@
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="checkDisableType()">
                             <option value="1">Request</option>
-                            <option value="6" :disabled="user.user_type != 'internal'">Supervisor Assign</option>
+                            <option value="6" :disabled="user.user_type != 'internal' || form.type =='plan_change' ">Supervisor Assign</option>
                             <option value="2" disabled>Team Assign</option>
                             <option value="5" :disabled="user.user_type != 'partner'">Resolved Open</option>
                             <option value="7" disabled>Waiting to Suspend</option>
@@ -873,13 +873,14 @@
                             class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                             <i class="fas fa-random"></i>
                           </span>
+      
                          <input 
                             type="date" 
                             v-model="form.start_date"
                             :min="nextMonthFirstDay"
                             :max="nextMonthFirstDay"
                             class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            disabled
+                            :disabled="!user.role?.system_setting"
                           />
                         </div>
                         <p v-if="$page.props.errors.start_date" class="mt-2 text-sm text-red-500">{{
