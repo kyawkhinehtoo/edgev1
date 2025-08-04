@@ -30,7 +30,7 @@
               <option value="termination">Termination</option>
             </select>
           </div>
-          <!-- 
+          
           <div class="flex w-full">
             <span
               class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
@@ -39,11 +39,24 @@
             <select v-model="incidentBy"
               class="relative self-center block w-full pr-12 py-2 rounded-md text-gray-400 text-sm border-gray-300 focus:ring focus:ring-indigo-500 focus:border-indigo-500 focus:ring-opacity-10 focus:outline-none pl-10"
               tabindex="4" @change="changeStatus">
-              <option value="default">All Member</option>
-              <option v-for="row in noc" v-bind:key="row.id" :value="row.id">{{ row.name }}</option>
+              <option value="default">All ISP</option>
+              <option v-for="row in isps" v-bind:key="row.id" :value="row.id">{{ row.name }}</option>
 
             </select>
-          </div> -->
+          </div>
+          <div class="flex w-full">
+            <span
+              class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
+              <i class="fas fa-sliders-h"></i>
+            </span>
+            <select v-model="sla_hour"
+              class="relative self-center block w-full pr-12 py-2 rounded-md text-gray-400 text-sm border-gray-300 focus:ring focus:ring-indigo-500 focus:border-indigo-500 focus:ring-opacity-10 focus:outline-none pl-10"
+              tabindex="4" @change="changeStatus">
+              <option value="default">All SLA Hours</option>
+              <option v-for="row in slas" v-bind:key="row.sla_hours" :value="row.sla_hours">{{ row.sla_hours }}</option>
+
+            </select>
+          </div>
           <div class="flex w-full">
             <span
               class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
@@ -182,6 +195,9 @@
                     @click="sortBy('edge_code')">EDGE Ticket <i class="fas fa-sort text-gray-400"></i></th>
                   <th scope="col"
                     class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    @click="sortBy('maintenance_sla_hours')">SLA <i class="fas fa-sort text-gray-400"></i></th>
+                  <th scope="col"
+                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     @click="sortBy('ftth_id')">User <i class="fas fa-sort text-gray-400"></i></th>
                   <th scope="col"
                     class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
@@ -204,6 +220,7 @@
                   <td class="px-2 py-3 whitespace-nowrap">{{ row.date }} {{ row.time }}</td>
                   <td class="px-2 py-3 whitespace-nowrap">{{ row.code }}</td>
                   <td class="px-2 py-3 whitespace-nowrap">{{ row.edge_code }}</td>
+                  <td class="px-2 py-3 whitespace-nowrap">{{ row.maintenance_sla_hours }} Hrs</td>
                   <td class="px-2 py-3 whitespace-nowrap" v-if="row.ftth_id">{{ row.ftth_id }}</td>
                   <td class="px-2 py-3 whitespace-nowrap" v-if="row.township_short">{{ row.township_short }}</td>
                   <td class="px-2 py-3 whitespace-nowrap capitalize">{{ row.type.replace("_", " ") }}</td>
@@ -1068,7 +1085,8 @@ export default {
   props: {
     incidents: Object,
     incidents_2: Object,
-    noc: Object,
+    isps: Object,
+    slas: Object,
     team: Object,
     townships: Object,
     customers: Object,
@@ -1104,6 +1122,7 @@ export default {
     let incidentStatus = ref(0);
     let incidentType = ref("default");
     let incidentBy = ref("default");
+    let sla_hour = ref("default");
     let incidentDate = ref([]);
     let subRCA = ref([]);
     const formatter = ref({
@@ -1498,7 +1517,10 @@ export default {
       }
 
       if (incidentBy.value != "default") {
-        url = url + "&member=" + incidentBy.value;
+        url = url + "&isp=" + incidentBy.value;
+      }
+      if (sla_hour.value != "default") {
+        url = url + "&sla_hour=" + sla_hour.value;
       }
       if (incidentDate.value != "") {
         url = url + "&date=" + incidentDate.value;
@@ -1518,9 +1540,11 @@ export default {
       if (incidentType.value != "default") {
         url = url + "&type=" + incidentType.value;
       }
-
+       if (sla_hour.value != "default") {
+        url = url + "&sla_hour=" + sla_hour.value;
+      }
       if (incidentBy.value != "default") {
-        url = url + "&member=" + incidentBy.value;
+        url = url + "&isp=" + incidentBy.value;
       }
       if (incidentDate.value != "") {
         url = url + "&date=" + incidentDate.value;
@@ -1555,7 +1579,10 @@ export default {
       }
 
       if (incidentBy.value != "default") {
-        suburl += "&member=" + incidentBy.value;
+        suburl += "&isp=" + incidentBy.value;
+      }
+      if (sla_hour.value != "default") {
+        suburl += "&sla_hour=" + sla_hour.value;
       }
       if (incidentStatus.value != null) {
         suburl += "&status=" + incidentStatus.value;
@@ -1663,7 +1690,7 @@ export default {
 
       priorityColor();
     });
-    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA, clickStatus, checkDisable, updateCustomer, filteredMaintenanceServices, checkDisableType,nextMonthFirstDay,changeType };
+    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA, clickStatus, checkDisable, updateCustomer, filteredMaintenanceServices, checkDisableType,nextMonthFirstDay,changeType,sla_hour };
   },
 };
 </script>

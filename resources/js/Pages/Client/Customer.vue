@@ -119,6 +119,7 @@
             <thead class="bg-gray-50">
               <tr>
                
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">ISP</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">UID</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">CID</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Date</th>
@@ -126,6 +127,7 @@
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Prefer Date</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Package</th>
+                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ins SLA</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Township</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase" v-if="$page.props.user.user_type != 'isp'">Installation Status</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -139,6 +141,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="row in customers.data" :key="row.id" :class="getRowClass(row)">
                 
+                <td class="px-3 py-3 text-xs font-medium">{{ row.isp.short_code }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.ftth_id }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.isp_ftth_id }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.order_date }}</td>
@@ -146,7 +149,8 @@
                 <td class="px-3 py-3 text-xs font-medium">{{ row.prefer_install_date }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.name }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.bandwidth }} Mbps</td>
-                <td class="px-3 py-3 text-xs font-medium">{{ row.current_address?.township.name }}</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.installation_service_sla_hours }} Hrs</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.current_address?.township.short_code }}</td>
                 <td class="px-3 py-3 text-xs font-medium" v-if="$page.props.user.user_type != 'isp'">
                   {{ 
                     row.installation_status 

@@ -204,6 +204,7 @@ class CustomerController extends Controller
         $customers =  Customer::with('package', 'currentAddress.township', 'isp', 'status')
             ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
             ->join('townships', 'townships.id', 'customer_addresses.township_id')
+            ->join('installation_services', 'customers.installation_service_id', '=', 'installation_services.id')
             ->leftjoin('sn_ports', 'customers.id', '=', 'sn_ports.customer_id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -364,7 +365,7 @@ class CustomerController extends Controller
                 // Default sorting if no sort parameter is provided
                 $query->orderBy('updated_at', 'desc');
             })
-            ->select('customers.*', 'customer_addresses.address as address', 'customer_addresses.location as location', 'customer_addresses.township_id as township_id', 'townships.name as township_name')
+            ->select('customers.*', 'customer_addresses.address as address', 'customer_addresses.location as location', 'customer_addresses.township_id as township_id', 'townships.name as township_name','installation_services.name as installation_service_name','installation_services.sla_hours as installation_service_sla_hours')
 
             ->paginate(10);
         $dynamicRanderPage = "Client/Customer";
@@ -577,7 +578,8 @@ class CustomerController extends Controller
                 }
             }
             //   $max_id = $max_c_id [$request->city_id];
-            $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type, 0, 2) . $selectedService->short_code . $installationService->sla_hours;
+            // $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type, 0, 2) . $selectedService->short_code . $installationService->sla_hours;
+            $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type, 0, 2);
             $auto_ftth_id = strtoupper($auto_ftth_id);
         } else {
             throw \Illuminate\Validation\ValidationException::withMessages([
@@ -1267,7 +1269,7 @@ class CustomerController extends Controller
             $cid = array();
             foreach ($customers as $customer) {
                 ///(^TCL[0-9]{5}-[A-Z]{3,})$/
-                $reg = "/(^[A-Z]{3}" . $city->short_code . "[0-9]{7}[A-Z]{3}[0-9]{2})$/";
+                $reg = "/(^[A-Z]{3}" . $city->short_code . "[0-9]{7}[A-Z]{2})$/";
                 if (preg_match($reg, $customer->ftth_id)) {
                     $pattern = '/\d+/'; // Regular expression to match integers
                     preg_match($pattern, $customer->ftth_id, $matches);

@@ -29,6 +29,7 @@ use DateTime;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\NewIncidentNotification;
 use App\Notifications\NewTaskNotification;
+use Mpdf\Tag\Main;
 
 class IncidentController extends Controller
 {
@@ -262,10 +263,13 @@ class IncidentController extends Controller
                 }
             })
             ->count();
-        $noc = DB::table('users')
-            ->leftjoin('roles', 'users.role_id', '=', 'roles.id')
-            //  ->where('roles.name', 'LIKE', '%noc%')
-            ->select('users.name as name', 'users.id as id')
+        $isps = Isp::when($user->user_type, function ($query, $user_type) use ($user) {
+                if ($user_type == 'isp') {
+                    $query->where('id', '=', $user->isp_id);
+                }
+            })->get();
+        $slas = MaintenanceService::select('sla_hours')
+            ->groupBy('sla_hours')
             ->get();
         $team = DB::table('users')
             ->select('users.name as name', 'users.id as id')
@@ -368,6 +372,16 @@ class IncidentController extends Controller
             ->when($user->role?->incident_supervisor, function($query) use ($user){
                $query->where('incidents.supervisor_id',$user->id);
             })
+            ->when($request->isp, function ($query, $isp) use ($user) {
+                if ($user->user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                } else {
+                    $query->where('customers.isp_id', '=', $isp);
+                }
+            })
+            ->when($request->sla_hour, function ($query, $sla_hours) {
+                $query->where('maintenance_services.sla_hours', '=', $sla_hours);
+            })
             ->when($orderby, function ($query, $sort) {
             $query->orderByRaw($sort);
             }, function ($query) {
@@ -396,62 +410,61 @@ class IncidentController extends Controller
         //                                 ->latest('id')->first();
         // }
 
-        $incidents_2 =  DB::table('incidents')
-            ->join('customers', 'incidents.customer_id', '=', 'customers.id')
-            ->join('users', 'incidents.incharge_id', '=', 'users.id')
-            ->when($user->user_type, function ($query, $user_type) use ($user) {
-                if ($user_type == 'partner') {
-                    $query->where('customers.partner_id', '=', $user->partner_id);
-                }
-                if ($user_type == 'isp') {
-                    $query->where('customers.isp_id', '=', $user->isp_id);
-                }
-                if ($user_type == 'subcon') {
-                    $query->where('customers.subcom_id', '=', $user->subcom_id);
-                }
-            })
-            ->when($request->status, function ($query, $status) use ($user){
-                 $query->where('incidents.status', '=', $status);
-            }, function ($query) use ($user) {
-                if($user->role?->incident_supervisor == 1){
-                   return $query->whereRaw('incidents.status in (2,5,6)');
-                }
-                if($user->role?->incident_oss == 1){
-                return $query->whereRaw('incidents.status in (1,5,6)');
-                }
-                return $query->whereRaw('incidents.status in (1,2,3,5,6)');
-            })
-            ->when($request->keyword, function ($query, $search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('customers.ftth_id', 'LIKE', '%' . $search . '%')
-                        ->orWhere('incidents.edge_code', 'LIKE', '%' . $search . '%')
-                        ->orWhere('incidents.code', 'LIKE', '%' . $search . '%');
-                });
-            })
-            ->when($orderby, function ($query, $sort) {
-                $query->orderByRaw($sort);
-            }, function ($query) {
-                $query->orderBy('incidents.id', 'DESC');
-            })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-                $query->where('incidents.supervisor_id',$user->id);
-             })
-            ->select(
-                'incidents.*',
-                'incidents.status as status',
-                'customers.ftth_id as ftth_id',
-                'customers.id as customer_id',
-                'users.name as incharge',
-            )
-            ->get();
+        // $incidents_2 =  DB::table('incidents')
+        //     ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+        //     ->join('users', 'incidents.incharge_id', '=', 'users.id')
+        //     ->when($user->user_type, function ($query, $user_type) use ($user) {
+        //         if ($user_type == 'partner') {
+        //             $query->where('customers.partner_id', '=', $user->partner_id);
+        //         }
+        //         if ($user_type == 'isp') {
+        //             $query->where('customers.isp_id', '=', $user->isp_id);
+        //         }
+        //         if ($user_type == 'subcon') {
+        //             $query->where('customers.subcom_id', '=', $user->subcom_id);
+        //         }
+        //     })
+        //     ->when($request->status, function ($query, $status) use ($user){
+        //          $query->where('incidents.status', '=', $status);
+        //     }, function ($query) use ($user) {
+        //         if($user->role?->incident_supervisor == 1){
+        //            return $query->whereRaw('incidents.status in (2,5,6)');
+        //         }
+        //         if($user->role?->incident_oss == 1){
+        //         return $query->whereRaw('incidents.status in (1,5,6)');
+        //         }
+        //         return $query->whereRaw('incidents.status in (1,2,3,5,6)');
+        //     })
+        //     ->when($request->keyword, function ($query, $search) {
+        //         $query->where(function ($query) use ($search) {
+        //             $query->where('customers.ftth_id', 'LIKE', '%' . $search . '%')
+        //                 ->orWhere('incidents.edge_code', 'LIKE', '%' . $search . '%')
+        //                 ->orWhere('incidents.code', 'LIKE', '%' . $search . '%');
+        //         });
+        //     })
+        //     ->when($orderby, function ($query, $sort) {
+        //         $query->orderByRaw($sort);
+        //     }, function ($query) {
+        //         $query->orderBy('incidents.id', 'DESC');
+        //     })
+        //     ->when($user->role?->incident_supervisor, function($query) use ($user){
+        //         $query->where('incidents.supervisor_id',$user->id);
+        //      })
+        //     ->select(
+        //         'incidents.*',
+        //         'incidents.status as status',
+        //         'customers.ftth_id as ftth_id',
+        //         'customers.id as customer_id',
+        //         'users.name as incharge',
+        //     )
+        //     ->get();
         $incidents->appends($request->all())->links();
         return Inertia::render(
             'Client/Incident',
             [
                 'incidents' => $incidents,
-                'incidents_2' => $incidents_2,
+                // 'incidents_2' => $incidents_2,
                 'packages' => $packages,
-                'noc' => $noc,
                 'team' => $team,
                 'townships' => $townships,
                 'customers' => $customers,
@@ -474,6 +487,8 @@ class IncidentController extends Controller
                 'close' => $close,
                 'suspensionTickets' => $suspensionTickets,
                 'maintenanceServices' => $maintenanceServices,
+                'isps' => $isps,
+                'slas' => $slas,
             ]
         );
     }
@@ -1002,11 +1017,11 @@ class IncidentController extends Controller
                 $incident = Incident::find($request->input('id'));
                 // Check if incident->code matches "T-0015-MGT" or "T-0015"
                 if (!$incident->edge_code && $user->user_type == 'internal'){
-                   $customer = Customer::find($incident->customer_id);
+                   $customer = Customer::with('city')->find($incident->customer_id);
                    if($customer){
                     $maintenance = MaintenanceService::where('id', $customer->maintenance_service_id)->first();
                     if($maintenance && $maintenance->short_code){
-
+                        
                         $prefix_1 = 'RT';
                         // service_complaint - RT
                         // plan_change - PC 
@@ -1039,8 +1054,8 @@ class IncidentController extends Controller
                         }
 
                         $today = date('Ymd');
-                        $prefix_2 = strtoupper(substr($maintenance->short_code, 0, 2));
-                        $pattern = '^[A-Z]{2}-[A-Z]{2}' . $today . '-([0-9]{4})$';
+                 //       $prefix_2 = strtoupper(substr($maintenance->short_code, 0, 2));
+                        $pattern = '^[A-Z]{2}-' .$customer->city->short_code. $today . '-([0-9]{4})$';
                         $maxCode = Incident::where('edge_code', 'REGEXP', $pattern)
                                             ->orderByDesc('edge_code')
                                             ->value('edge_code');
@@ -1052,7 +1067,8 @@ class IncidentController extends Controller
                             }
                         }
                        
-                        $incident->edge_code = $prefix_1.'-' . $prefix_2 . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                     //   $incident->edge_code = $prefix_1.'-' . $prefix_2 . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                        $incident->edge_code = $prefix_1.'-' .$customer->city->short_code. $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
                        
                     }
                    }
