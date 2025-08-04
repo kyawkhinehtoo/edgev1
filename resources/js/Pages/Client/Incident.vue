@@ -433,7 +433,7 @@
                         <div class="mt-1 flex">
                           <select v-model="form.type"
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            required @change="form.topic = null" :disabled="checkDisable()">
+                            required  @change="form.topic = null, changeType(form.type)" :disabled="checkDisable()">
                             <option value="default">Please Choose Ticket Type</option>
                             <option value="service_complaint">Service Complaint</option>
                             <!-- <option value="relocation">Relocation Request</option> -->
@@ -873,9 +873,14 @@
                             class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                             <i class="fas fa-random"></i>
                           </span>
-                          <input type="date" v-model="form.start_date" name="start_date" id="start_date"
+                         <input 
+                            type="date" 
+                            v-model="form.start_date"
+                            :min="nextMonthFirstDay"
+                            :max="nextMonthFirstDay"
                             class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            :disabled="checkDisable()" />
+                            disabled
+                          />
                         </div>
                         <p v-if="$page.props.errors.start_date" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.start_date }}</p>
@@ -1258,9 +1263,11 @@ export default {
       return true;
     }
     function openModal() {
-      var today = new Date();
+      const today = new Date();
       var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
       var time = today.getHours() + ":" + today.getMinutes();
+
+    
       if (!form.close_date && incidentStatus.value != 3)
         form.close_date = date;
       if (!form.close_time && incidentStatus.value != 3)
@@ -1281,7 +1288,11 @@ export default {
       let edit_data = props.incidents_2.filter((d) => d.id == data.id)[0];
       edit(edit_data);
     }
+    
+    const nextMonthFirstDay = ref('');
     function edit(data) {
+   
+    
       let lat_long = null;
       selected_id.value = data.id;
 
@@ -1293,6 +1304,8 @@ export default {
       }
       if (data.maintenance_service_type)
         filteredMaintenanceServices.value = props.maintenanceServices.filter(d => d.service_type == data.maintenance_service_type);
+
+    
 
       let my_customer = props.customers.filter((d) => d.id == data.customer_id)[0];
       form.id = data.id;
@@ -1455,6 +1468,25 @@ export default {
       }
       router.get(url, { keyword: search.value }, { preserveState: true });
     };
+    const changeType =(type) => {
+      console.log("changeType : " + type);
+        if(type== 'plan_change'){
+            // Calculate first day of next month in Asia/Yangon timezone
+            const today = new Date();
+            // Get current date in Asia/Yangon
+            const yangonOffset = 6.5 * 60; // UTC+6:30 in minutes
+            const utc = today.getTime() + (today.getTimezoneOffset() * 60000);
+            const yangonDate = new Date(utc + yangonOffset * 60000);
+
+            // Get first day of next month
+            const firstDayNextMonth = new Date(yangonDate.getFullYear(), yangonDate.getMonth() + 1, 2);
+
+            // Format as YYYY-MM-DD for input type="date"
+            const formatted = firstDayNextMonth.toISOString().split('T')[0];
+            nextMonthFirstDay.value = formatted;
+            form.start_date = nextMonthFirstDay.value;
+      }
+    }
     const changeStatus = () => {
       let url = "/incident/";
       if (search.value != null) {
@@ -1600,6 +1632,9 @@ export default {
       });
 
       priorityColor();
+
+
+
     });
 
     function getSubRCA(data) {
@@ -1627,7 +1662,7 @@ export default {
 
       priorityColor();
     });
-    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA, clickStatus, checkDisable, updateCustomer, filteredMaintenanceServices, checkDisableType };
+    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA, clickStatus, checkDisable, updateCustomer, filteredMaintenanceServices, checkDisableType,nextMonthFirstDay,changeType };
   },
 };
 </script>
