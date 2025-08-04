@@ -960,9 +960,7 @@ class IncidentController extends Controller
             'type' => ['required'],
             'status' => ['required'],
             'description' => ['required'],
-            'root_cause_id' => ['required_if:status,3'],
-            'sub_root_cause_id' => ['required_if:status,3'],
-            'rca_notes' => ['required_if:status,3'],
+ 
             'new_bandwidth' => ['required_if:type,plan_change'],
             'new_maintenance_plan_id' => ['required_if:type,plan_change'],
         ], [
@@ -970,7 +968,9 @@ class IncidentController extends Controller
             'sub_root_cause_id.required_if' => 'Please mention the sub RCA before closing the incident.',
             'rca_notes.required_if' => 'Please mention the RCA notes before closing the incident.',
         ]);
-
+        $validator->sometimes(['root_cause_id', 'sub_root_cause_id', 'rca_notes'], 'required', function ($input) {
+            return $input->type === 'service_complaint' && $input->status == 3;
+        });
         $validator->after(function ($validator) use ($request) {
             if ($request->supervisor_id && $request->status == 1) {
                 $validator->errors()->add('status', 'Please choose Supervsior Assign');
@@ -1073,8 +1073,9 @@ class IncidentController extends Controller
 
                 $incident->new_bandwidth = $request->new_bandwidth;
                 $incident->new_maintenance_service_id = $request->new_maintenance_plan_id;
-                if($incident->partner_id ){
+                if($request->partner_id ){
                       $incident->partner_id = $request->partner_id;
+                
                       if($incident->status == 1){
                         $incident->status = 10;
                       }
