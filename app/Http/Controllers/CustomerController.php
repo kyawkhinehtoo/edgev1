@@ -922,7 +922,9 @@ class CustomerController extends Controller
             'checklists.values' => function ($query) use ($customerId) {
                 $query->where('customer_id', $customerId);
             }
-        ])->get();
+        ])
+        ->where('category',$service_type)
+        ->get();
 
         $isSupervisor = $user->role?->installation_supervisor ?? false;
         $customer = $isSupervisor ? Customer::find($customerId) : null;
