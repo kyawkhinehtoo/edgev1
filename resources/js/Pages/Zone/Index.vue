@@ -8,7 +8,7 @@
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
           <div class="flex justify-between mb-6">
-            <div class="flex items-center flex-1">
+            <div class="flex items-center flex-1 space-x-4">
               <div class="w-1/3">
                 <input
                   v-model="search"
@@ -16,6 +16,17 @@
                   placeholder="Search Zones..."
                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
+              </div>
+              <div class="w-1/4">
+                <select
+                  v-model="city_id"
+                  class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="">All Cities</option>
+                  <option v-for="city in cities" :key="city.id" :value="city.id">
+                    {{ city.name }}
+                  </option>
+                </select>
               </div>
             </div>
             <Link :href="route('zone.create')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
@@ -27,6 +38,7 @@
             <thead>
               <tr>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">City</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Description</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Townships</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -36,6 +48,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="zone in zones.data" :key="zone.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ zone.name }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">{{ zone.city ? zone.city.name : 'N/A' }}</td>
                 <td class="px-6 py-4">{{ zone.description }}</td>
                 <td class="px-6 py-4">
                   <div class="flex flex-wrap gap-1">
@@ -84,19 +97,21 @@ export default {
   },
   props: {
     zones: Object,
+    cities: Array,
     filters: Object
   },
   setup(props) {
     const search = ref(props.filters.search)
+    const city_id = ref(props.filters.city_id)
 
-    watch(search, debounce((value) => {
+    watch([search, city_id], debounce(([searchValue, cityValue]) => {
       router.get(route('zone.index'), 
-        { search: value }, 
+        { search: searchValue, city_id: cityValue }, 
         { preserveState: true, preserveScroll: true }
       )
     }, 300))
 
-    return { search }
+    return { search, city_id }
   },
   methods: {
     deleteZone(zone) {

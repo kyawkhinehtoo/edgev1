@@ -1,0 +1,6 @@
+name,core_quantity,type,cable_layout,cable_length,status
+Main-Feeder-01,144,feeder,UG,2.5,Active
+Sub-Feeder-01,48,sub_feeder,OH,1.2,Active
+Dist-Route-01,12,distributed_route,UG,0.8,Active
+Backup-Feeder-01,96,feeder,UG,3.2,Active
+Secondary-Dist-01,24,distributed_route,OH,1.5,Active

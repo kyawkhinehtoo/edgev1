@@ -204,7 +204,7 @@ class CustomerController extends Controller
         $customers =  Customer::with('package', 'currentAddress.township', 'isp', 'status')
             ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
             ->join('townships', 'townships.id', 'customer_addresses.township_id')
-            ->join('installation_services', 'customers.installation_service_id', '=', 'installation_services.id')
+            ->leftjoin('installation_services', 'customers.installation_service_id', '=', 'installation_services.id')
             ->leftjoin('sn_ports', 'customers.id', '=', 'sn_ports.customer_id')
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
@@ -532,18 +532,22 @@ class CustomerController extends Controller
 
         // Now check business logic condition
         $bandwidth = (int) $request->bandwidth;
-        $selectedService = PortSharingService::where('max_speed', '>=', $bandwidth)
-            ->where('type', $request->service_type)
-            ->orderBy('max_speed', 'asc')
+          $selectedService = PortSharingService::when($request->service_type, function ($query,$service_type) use ($bandwidth) {
+            if($service_type == 'FTTH'){
+                  $query->where('max_speed', '>=', $bandwidth);
+            }
+            })->orderBy('max_speed', 'asc')
             ->first();
-
+ 
+ 
         if (!$selectedService) {
             // Manually throw ValidationException with custom message
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'bandwidth' => 'Invalid bandwidth value, please check.',
             ]);
         }
-
+        
+        if($request->service_type == 'FTTH'){
         $installationService = InstallationService::find($request->installation_service_id);
         if (!$installationService) {
             // Manually throw ValidationException with custom message
@@ -551,7 +555,7 @@ class CustomerController extends Controller
                 'installation_service_id' => 'Invalid Installation value, please check.',
             ]);
         }
-
+        }
         $maintenanceService = MaintenanceService::find($request->maintenance_service_id);
         if (!$maintenanceService) {
             // Manually throw ValidationException with custom message
@@ -579,7 +583,7 @@ class CustomerController extends Controller
             }
             //   $max_id = $max_c_id [$request->city_id];
             // $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type, 0, 2) . $selectedService->short_code . $installationService->sla_hours;
-            $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($selectedService->type, 0, 2);
+            $auto_ftth_id = $isp->short_code . $request->city['short_code'] . str_pad($result + 1, 7, '0', STR_PAD_LEFT) . substr($request->service_type, 0, 2);
             $auto_ftth_id = strtoupper($auto_ftth_id);
         } else {
             throw \Illuminate\Validation\ValidationException::withMessages([

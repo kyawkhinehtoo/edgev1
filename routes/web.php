@@ -68,12 +68,12 @@ use App\Services\DynamicMailService;
 use App\Mail\MyTestMail;
 
 Route::get('/', function () {
-    if (auth()->check()) {
-        return auth()->user()->user_type === 'internal' 
-            ? redirect('/dashboard')
-            : redirect('/home');
-    }
-    return redirect('/login');
+	if (auth()->check()) {
+		return auth()->user()->user_type === 'internal' 
+			? redirect('/dashboard')
+			: redirect('/home');
+	}
+	return redirect('/login');
 });
 
 Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
@@ -97,7 +97,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::get('/activity-log', [ActivityLogController::class,'index'])->name('activity-log.index');
 	Route::post('/activity-log', [ActivityLogController::class,'index']);
 	Route::resource('/setting',SystemSettingController::class);
-    Route::get('/generateSN',[SNPortController::class,'generateSN']);
+	Route::get('/generateSN',[SNPortController::class,'generateSN']);
 	Route::delete('/snport/group/{id}',[SNPortController::class,'deleteGroup']);
 	Route::delete('/port/group/{id}',[PortController::class,'deleteGroup']);
 	Route::resource('partner', PartnerController::class);
@@ -116,9 +116,9 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 
 
 	Route::get('/port-sharing-service', [PortSharingServiceController::class, 'index'])->name('port-sharing-service.index');
-    Route::post('/port-sharing-service', [PortSharingServiceController::class, 'store'])->name('port-sharing-service.store');
-    Route::put('/port-sharing-service/{id}', [PortSharingServiceController::class, 'update'])->name('port-sharing-service.update');
-    Route::delete('/port-sharing-service/{id}', [PortSharingServiceController::class, 'destroy'])->name('port-sharing-service.destroy');
+	Route::post('/port-sharing-service', [PortSharingServiceController::class, 'store'])->name('port-sharing-service.store');
+	Route::put('/port-sharing-service/{id}', [PortSharingServiceController::class, 'update'])->name('port-sharing-service.update');
+	Route::delete('/port-sharing-service/{id}', [PortSharingServiceController::class, 'destroy'])->name('port-sharing-service.destroy');
 	
 	Route::get('/maintenance-service', [MaintenanceServiceController::class, 'index'])->name('maintenance-service.index');
 	Route::post('/maintenance-service', [MaintenanceServiceController::class, 'store'])->name('maintenance-service.store');
@@ -140,10 +140,13 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 });
 
 
-    Route::group(['middleware'=>['auth','user.type:internal,partner,subcon,isp']],function(){
+	Route::group(['middleware'=>['auth','user.type:internal,partner,subcon,isp']],function(){
 	Route::get('/dashboard',[DashboardController::class,'show'])->name('dashboard');
-    Route::resource('/customer',CustomerController::class);
-    Route::resource('/incident',IncidentController::class);
+	Route::match(['get', 'post'], '/isp-dashboard', [DashboardController::class, 'ispDashboard'])->name('isp.dashboard');
+	Route::match(['get', 'post'], '/isp-installation-dashboard', [DashboardController::class, 'ispInstallationDashboard'])->name('isp.installation.dashboard');
+	Route::match(['get', 'post'], '/isp-maintenance-dashboard', [DashboardController::class, 'ispMaintenanceDashboard'])->name('isp.maintenance.dashboard');
+	Route::resource('/customer',CustomerController::class);
+	Route::resource('/incident',IncidentController::class);
 	Route::get('/getCustomerHistory/{id}',[CustomerController::class,'getHistory']);
 	Route::get('/getCustomerFile/{id}',[IncidentController::class,'getCustomerFile']);
 	Route::post('/uploadData',[FileController::class,'upload'])->name('upload');
@@ -190,14 +193,14 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 
 
 	Route::group(['middleware'=>['auth','user.type:internal']],function(){
-    Route::get('importExportView',[ExcelController::class,'importExportView'])->name('importExportView');
+	Route::get('importExportView',[ExcelController::class,'importExportView'])->name('importExportView');
 
 	Route::post('importExcel',[ExcelController::class,'importExcel'])->name('importExcel');
 	Route::post('updateExcel',[ExcelController::class,'updateExcel'])->name('updateExcel');
 
-    Route::post('/port',[PortController::class,'index'])->name('port.search');
+	Route::post('/port',[PortController::class,'index'])->name('port.search');
 	Route::post('/port-store',[PortController::class,'store'])->name('port.store');
-    Route::get('updateDNView',[ExcelController::class,'updateDNView'])->name('updateDNView');
+	Route::get('updateDNView',[ExcelController::class,'updateDNView'])->name('updateDNView');
 	Route::get('updateSNView',[ExcelController::class,'updateSNView'])->name('updateSNView');
 	Route::post('importDN',[ExcelController::class,'importDN'])->name('importDN');
 	Route::post('importSN',[ExcelController::class,'importSN'])->name('importSN');
@@ -373,6 +376,16 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::post('/showbill', [BillingController::class, 'showBill'])->name('showbill.show');
 	Route::get('odnImportView',[ExcelController::class,'odnImportView'])->name('odnImportView');
 	Route::post('importODN',[ExcelController::class,'importODN'])->name('importODN');
+	Route::get('odnDnImportView',[ExcelController::class,'odnDnImportView'])->name('odnDnImportView');
+	Route::post('importOdnDn',[ExcelController::class,'importOdnDn'])->name('importOdnDn');
+	Route::get('odnFiberCableImportView',[ExcelController::class,'odnFiberCableImportView'])->name('odnFiberCableImportView');
+	Route::post('importOdnFiberCable',[ExcelController::class,'importOdnFiberCable'])->name('importOdnFiberCable');
+	Route::get('odnJcImportView',[ExcelController::class,'odnJcImportView'])->name('odnJcImportView');
+	Route::post('importOdnJc',[ExcelController::class,'importOdnJc'])->name('importOdnJc');
+	Route::get('odnOdbImportView',[ExcelController::class,'odnOdbImportView'])->name('odnOdbImportView');
+	Route::post('importOdnOdb',[ExcelController::class,'importOdnOdb'])->name('importOdnOdb');
+	Route::get('odnSnImportView',[ExcelController::class,'odnSnImportView'])->name('odnSnImportView');
+	Route::post('importOdnSn',[ExcelController::class,'importOdnSn'])->name('importOdnSn');
 	Route::resource('odfs', OdfController::class);
 	Route::resource('odb-fiber-cables', OdbFiberCableController::class);
 	Route::resource('odbs', OdbController::class);
@@ -392,9 +405,9 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::resource('activities', ActivityController::class);
 	Route::get('/sn/nearby', [SnSplitterController::class, 'nearby'])->name('sn.nearby');
 	Route::get('/send-dynamic-email', function (DynamicMailService $mailService) {
-    $data = ['name' => 'Kyaw Khine Htoo'];
-    $mailService->send('kkhmailbox@gmail.com', new MyTestMail($data));
-    return 'Sent!';
+	$data = ['name' => 'Kyaw Khine Htoo'];
+	$mailService->send('kkhmailbox@gmail.com', new MyTestMail($data));
+	return 'Sent!';
 
 	
 

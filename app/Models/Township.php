@@ -98,4 +98,14 @@ class Township extends Model
     {
         return $this->hasMany(DnBox::class);
     }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+
+    public function partner()
+    {
+        return $this->belongsTo(Partner::class);
+    }
 }

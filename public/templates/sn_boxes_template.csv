@@ -1,0 +1,6 @@
+sn_name,dn_splitter,location,status,sn_splitter_name,fiber_type,port_number,fiber_cable,core_number
+SN-Box-01,DN-Split-01,"16.8661,96.1951",active,SN-Split-01,distributed_route,1,Dist-Route-01,2
+SN-Box-02,DN-Split-01,"16.8662,96.1952",active,SN-Split-02,patch_chord,2,,
+SN-Box-03,DN-Split-02,"16.8663,96.1953",active,SN-Split-03,distributed_route,1,Secondary-Dist-01,3
+SN-Box-04,DN-Split-03,"16.8664,96.1954",active,,,,
+SN-Box-05,DN-Split-04,"16.8665,96.1955",inactive,SN-Split-05,patch_chord,1,,

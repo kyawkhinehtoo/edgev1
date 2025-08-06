@@ -29,7 +29,7 @@
 
         <!-- Quick Access Cards -->
        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6" >
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6" >
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                 <div class="flex flex-col items-center">
                     <div class="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center mb-4">
@@ -44,6 +44,20 @@
                     </Link>
                 </div>
             </div>
+             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6" v-if="$page.props.login_type == 'isp'">
+                <div class="flex flex-col items-center">
+                  <div class="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
+                    <i class="fas fa-chart-line text-yellow-600"></i>
+                  </div>
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Dashboard </h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">
+                   Dashboard Information
+                  </p>
+                  <Link :href="route('isp.dashboard')" class="inline-flex items-center px-4 py-2 bg-purple-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-purple-700 focus:bg-purple-700 active:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    Dashboard 
+                  </Link>
+                </div>
+              </div>
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                 <div class="flex flex-col items-center">
                   <div class="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center mb-4">

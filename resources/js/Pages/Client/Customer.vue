@@ -141,7 +141,7 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="row in customers.data" :key="row.id" :class="getRowClass(row)">
                 
-                <td class="px-3 py-3 text-xs font-medium">{{ row.isp.short_code }}</td>
+                <td class="px-3 py-3 text-xs font-medium">{{ row.isp?.short_code }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.ftth_id }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.isp_ftth_id }}</td>
                 <td class="px-3 py-3 text-xs font-medium">{{ row.order_date }}</td>

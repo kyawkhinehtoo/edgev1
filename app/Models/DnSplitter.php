@@ -12,6 +12,7 @@ class DnSplitter extends Model
         'fiber_id',
         'pop_device_id',
         'core_number',
+        'core_color',
         'location',
         'status',
     ];

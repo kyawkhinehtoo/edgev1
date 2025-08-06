@@ -1,0 +1,6 @@
+jc_name,location,type,status,source_fiber,dest_fiber,source_color,source_port,dest_color,dest_port,assignment_status
+JC-001,"16.8661,96.1951",jc,Active,Main-Feeder-01,Sub-Feeder-01,Blue,1,Blue,1,active
+JC-002,"16.8662,96.1952",jc,Active,Main-Feeder-01,Dist-Route-01,Green,2,Green,1,active
+JC-003,"16.8663,96.1953",cabinet,Active,Sub-Feeder-01,Secondary-Dist-01,Orange,3,Orange,2,active
+JC-004,"16.8664,96.1954",jc,Active,,,,,,
+JC-005,"16.8665,96.1955",jc,Inactive,,,,,,

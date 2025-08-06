@@ -22,6 +22,11 @@ use App\Exports\PublicIpExport;
 use App\Imports\CustomersUpdate;
 use App\Imports\DNUpdate;
 use App\Imports\ODNImport;
+use App\Imports\OdnDnImport;
+use App\Imports\OdnFiberCableImport;
+use App\Imports\OdnJcImport;
+use App\Imports\OdnOdbImport;
+use App\Imports\OdnSnImport;
 use App\Imports\SNUpdate;
 use App\Imports\TempBillingUpdate;
 use Excel;
@@ -69,6 +74,31 @@ class ExcelController extends Controller
     public function odnImportView()
     {
         return view('excel.odnimport');
+    }
+
+    public function odnDnImportView()
+    {
+        return view('excel.odn_dn_import');
+    }
+
+    public function odnFiberCableImportView()
+    {
+        return view('excel.odn_fiber_cable_import');
+    }
+
+    public function odnJcImportView()
+    {
+        return view('excel.odn_jc_import');
+    }
+
+    public function odnOdbImportView()
+    {
+        return view('excel.odn_odb_import');
+    }
+
+    public function odnSnImportView()
+    {
+        return view('excel.odn_sn_import');
     }
 
     /**
@@ -209,6 +239,66 @@ class ExcelController extends Controller
         Excel::import(new ODNImport, $request->import_file);
 
         Session::put('success', 'Your file is imported successfully in database.');
+
+        return back();
+    }
+
+    public function importOdnDn(Request $request)
+    {
+        ini_set('max_execution_time', 0);
+        Storage::prepend('odn_dn_import.log', 'Starting ODN DN Import Process');
+        
+        Excel::import(new OdnDnImport, $request->import_file);
+
+        Session::put('success', 'ODN DN Splitters imported successfully. Check odn_dn_import.log for details.');
+
+        return back();
+    }
+
+    public function importOdnFiberCable(Request $request)
+    {
+        ini_set('max_execution_time', 0);
+        Storage::prepend('odn_fiber_cable_import.log', 'Starting ODN Fiber Cable Import Process');
+        
+        Excel::import(new OdnFiberCableImport, $request->import_file);
+
+        Session::put('success', 'ODN Fiber Cables imported successfully. Check odn_fiber_cable_import.log for details.');
+
+        return back();
+    }
+
+    public function importOdnJc(Request $request)
+    {
+        ini_set('max_execution_time', 0);
+        Storage::prepend('odn_jc_import.log', 'Starting ODN JC Import Process');
+        
+        Excel::import(new OdnJcImport, $request->import_file);
+
+        Session::put('success', 'ODN JC Boxes imported successfully. Check odn_jc_import.log for details.');
+
+        return back();
+    }
+
+    public function importOdnOdb(Request $request)
+    {
+        ini_set('max_execution_time', 0);
+        Storage::prepend('odn_odb_import.log', 'Starting ODN ODB Import Process');
+        
+        Excel::import(new OdnOdbImport, $request->import_file);
+
+        Session::put('success', 'ODN ODBs imported successfully. Check odn_odb_import.log for details.');
+
+        return back();
+    }
+
+    public function importOdnSn(Request $request)
+    {
+        ini_set('max_execution_time', 0);
+        Storage::prepend('odn_sn_import.log', 'Starting ODN SN Import Process');
+        
+        Excel::import(new OdnSnImport, $request->import_file);
+
+        Session::put('success', 'ODN SN Boxes and Splitters imported successfully. Check odn_sn_import.log for details.');
 
         return back();
     }
