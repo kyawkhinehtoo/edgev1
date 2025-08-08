@@ -96,7 +96,7 @@ const deleteCoreAssignment = (id) => {
             <h3 class="text-lg font-medium">Core Assignment List</h3>
             <div class="flex space-x-3">
               <a
-                href="http://edge.test/odnJcImportView"
+                :href="route('odnJcImportView')"
                 class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                 target="_blank"
               >

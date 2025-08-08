@@ -18,7 +18,7 @@ class EquiptmentController extends Controller
      */
     public function __construct(){
         $user = User::with('role')->find(auth()->id());
-        if(!$user->role->system_setting){
+        if (!($user->role->system_setting === true || $user->user_type == 'isp')) {
              abort(403); // Unauthorized access for non-dn_panel users
         }
     }

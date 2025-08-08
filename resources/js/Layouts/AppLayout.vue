@@ -238,10 +238,10 @@ export default {
             { name: "Network Point Setup", route: "port-sharing-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
             { name: "Maintenance Setup", route: "maintenance-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
             { name: "Installation Setup", route: "installation-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
-            { name: "Discount Setup", route: "discount-setup.index", icon: "fas fa-percentage mr-2" ,show : true,show : true},
+            { name: "Discount Setup", route: "discount-setup.index", icon: "fas fa-percentage mr-2" ,show : true,show :  this.$page.props.login_type != 'isp'},
 
           
-            { name: "Suspense Config", route: "billconfig.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
+            { name: "Suspense Config", route: "billconfig.index", icon: "fas fa-cube mr-2" ,show : true,show : this.$page.props.login_type != 'isp'},
           
           ],
         },
@@ -357,7 +357,7 @@ export default {
           case 'odn':
             return this.$page.props?.role?.dn_panel;
           case 'product_catalog':
-            return this.$page.props?.role?.product_catalog;
+            return this.$page.props?.role?.product_catalog ||  this.$page.props.login_type == 'isp';
           case 'billing':
             return this.$page.props?.role?.billing_panel;
           case 'report':

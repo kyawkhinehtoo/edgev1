@@ -41,7 +41,7 @@ class OdnSnImport implements ToModel, WithHeadingRow
             }
 
             // Validate status
-            $validStatuses = ['active', 'inactive'];
+            $validStatuses = ['active', 'inactive','plan'];
             $status = strtolower(trim($row['status'] ?? 'active'));
             if (!in_array($status, $validStatuses)) {
                 Storage::append('odn_sn_import.log', "Invalid status: " . $row['status'] . " for SN: " . $row['sn_name']);

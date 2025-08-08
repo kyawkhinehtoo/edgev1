@@ -1106,6 +1106,8 @@ class IncidentController extends Controller
                                 break;
                             case 'plan_change':
                                 $incident->status = 10; // Waiting to Plan Change
+                            case 'termination':
+                                $incident->status = 9; // Waiting to Terminate
                             default:
                                 $incident->status = 1; // Request
                                 break;

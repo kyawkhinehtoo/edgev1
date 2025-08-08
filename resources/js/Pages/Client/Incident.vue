@@ -411,7 +411,7 @@
 
                       <!-- supervisor  -->
                       <template v-if="user.role?.incident_oss">
-                        <template v-if="form.type != 'plan_change' && form.type!='suspension' && form.type!='resume'" >
+                        <template v-if="form.type != 'plan_change' && form.type!='suspension' && form.type!='resume' && form.type!='termination'  " >
                            <div class="py-2 col-span-1 sm:col-span-1">
                           <div class="mt-1 flex">
                             <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign Supervisor : </label>
@@ -545,12 +545,13 @@
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="checkDisableType()">
                             <option value="1">Request</option>
-                            <option value="6" :disabled="user.user_type != 'internal' || form.type =='plan_change' ">Supervisor Assign</option>
+                            <option value="6" :disabled="user.user_type != 'internal' || form.type =='plan_change'  ">Supervisor Assign</option>
                             <option value="2" disabled>Team Assign</option>
                             <option value="5" :disabled="user.user_type != 'partner'">Resolved Open</option>
                             <option value="7" disabled>Waiting to Suspend</option>
                             <option value="8" disabled>Waiting to Reopen</option>
                             <option value="9" disabled>Waiting to Terminate</option>
+                            <option value="11" disabled>Waiting to Dismantle</option>
                             <option value="10" :disabled="user.user_type != 'partner'">Waiting to Plan Change</option>
                             <option value="3">Closed</option>
                           </select>
