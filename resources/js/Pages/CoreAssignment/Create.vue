@@ -46,6 +46,7 @@ const colors = [
 ]
 const status = [
   { id: 'active', name: 'Active' },
+  { id: 'plan', name: 'Plan' },
   { id: 'inactive', name: 'Inactive' }
 ]
 const ports = [
@@ -89,7 +90,7 @@ const fetchPopDevices = async () => {
         return;
       }
       try {
-        const response = await fetch(`/getFeederByOLT/${form.pop_id}`);
+        const response = await fetch(`/getFeederByOLT/${form.pop_device_id}`);
         const data = await response.json();
         feederCables.value = data || [];
         console.log('fetch Feeder Cables');

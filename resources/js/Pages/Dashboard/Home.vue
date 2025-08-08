@@ -29,7 +29,7 @@
 
         <!-- Quick Access Cards -->
        
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6" >
+        <div class="grid grid-cols-1 gap-6 mb-6 " :class="$page.props.login_type == 'isp' ? 'md:grid-cols-4' : 'md:grid-cols-3'">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6">
                 <div class="flex flex-col items-center">
                     <div class="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center mb-4">

@@ -52,12 +52,14 @@ class OdbFiberCableController extends Controller
         $validated = $request->validate([
             'odb_id' => 'required|exists:odbs,id',
             'fiber_cable_id' => 'required|exists:fiber_cables,id',
+            'fiber_cable_color' => 'nullable|string|max:50',
+            'fiber_cable_port' => 'nullable|integer|min:1',
             'pop_device_id' => 'nullable|exists:pop_devices,id',
             'odb_port' => 'required|integer|unique:odb_fiber_cables,odb_port,NULL,id,odb_id,' . $request->odb_id,
             'olt_port' => 'nullable|integer|unique:odb_fiber_cables,olt_port,NULL,id,pop_device_id,' . $request->pop_device_id,
             'olt_cable_label' => 'nullable|string',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive,maintenance'
+            'status' => 'required|in:active,inactive,maintenance,plan'
         ]);
 
         OdbFiberCable::create($validated);
@@ -83,12 +85,14 @@ class OdbFiberCableController extends Controller
     
             'odb_id' => 'required|exists:odbs,id',
             'fiber_cable_id' => 'required|exists:fiber_cables,id',
+            'fiber_cable_color' => 'nullable|string|max:50',
+            'fiber_cable_port' => 'nullable|integer|min:1',
             'pop_device_id' => 'nullable|exists:pop_devices,id',
             'odb_port' => 'required|integer|unique:odb_fiber_cables,odb_port,' . $OdbFiberCable->id . ',id,odb_id,' . $request->odb_id,
             'olt_port' => 'nullable|integer|unique:odb_fiber_cables,olt_port,' . $OdbFiberCable->id . ',id,pop_device_id,' . $request->pop_device_id,
             'olt_cable_label' => 'nullable|string',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive,maintenance'
+            'status' => 'required|in:active,inactive,maintenance,plan'
         ]);
         
         $OdbFiberCable->update($validated);

@@ -48,6 +48,7 @@ class EquiptmentController extends Controller
             'name' => 'required',
             'detail' => 'required',
             'price' => 'required|numeric',
+            'date' => 'required|date',
             'is_active' => 'required|boolean',
         ])->validate();
 
@@ -83,6 +84,7 @@ class EquiptmentController extends Controller
         Validator::make($request->all(), [
             'name' => 'required',
             'detail' => 'required',
+            'date' => 'required|date',
             'price' => 'required|numeric',
             'is_active' => 'required|boolean',
         ])->validate();

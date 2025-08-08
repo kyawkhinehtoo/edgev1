@@ -10,6 +10,7 @@ class SnSplitter extends Model
         'name',
         'sn_id',
         'fiber_id',
+        'fiber_color',
         'core_number',
         'port_number',
         'location',

@@ -172,8 +172,13 @@ class BillingController extends Controller
                     $customerAddress = $customer->currentAddress()->first();
                     $portLeasing = $this->getPriceForCustomerByIsp($customer->id);
                     $mrc = $portLeasing['fee'];
-                    $installationFee = InstallationService::find($customer->installation_service_id)->first()->fees;
-               
+                    try {
+                        $installationService = InstallationService::find($customer->installation_service_id);
+                        $installationFee = $installationService ? $installationService->fees : 0;
+                    } catch (\Exception $e) {
+                        $installationFee = 0; // Default to 0 if installation service not found                         $installationFee = 0;
+                    }
+
                     // **New Installations** (Prorated MRC)
                     if ($customer->service_activation_date && $customer->service_activation_date->format('Y-m') == $billingPeriod) {
                
@@ -242,7 +247,7 @@ class BillingController extends Controller
                         $totalInstallationAmount += $installationFee;
                     }
                     // **Normal Monthly Recurring Charge (MRC)**
-                    elseif ($customer->installation_date->format('Y-m') < $billingPeriod) {
+                    elseif ($customer->installation_date?->format('Y-m') < $billingPeriod) {
                         $totalPortLeasingCustomer++;
                         $isTerminated = $customer->service_termination_date && $customer->service_termination_date->format('Y-m') == $billingPeriod;
                         $isSuspended = $customer->status->type == 'suspense';

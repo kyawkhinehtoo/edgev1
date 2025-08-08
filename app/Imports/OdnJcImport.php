@@ -63,11 +63,10 @@ class OdnJcImport implements ToModel, WithHeadingRow
                             'source_id' => $sourceFiber->id,
                             'dest_id' => $destFiber->id,
                             'jc_id' => $jcBox->id,
-                        ],
-                        [
-                            'source_color' => trim($row['source_color']) ?: null,
+                     
+                            'source_color' => $row['source_color'] ? strtolower(trim($row['source_color'])) : null,
                             'source_port' => $row['source_port'] ? (int)$row['source_port'] : null,
-                            'dest_color' => trim($row['dest_color']) ?: null,
+                            'dest_color' => $row['dest_color'] ? strtolower(trim($row['dest_color'])) : null,
                             'dest_port' => $row['dest_port'] ? (int)$row['dest_port'] : null,
                             'status' => trim($row['assignment_status']) ?: 'active'
                         ]

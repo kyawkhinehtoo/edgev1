@@ -37,16 +37,16 @@ class IncidentController extends Controller
     {
         //Auth::id();
 
-      //  dd($request->date);
+        //  dd($request->date);
         $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
 
-        $rootCause = RootCause::with('subRootCauses')->where('is_maintenance',true)->where('is_pending',false)->get();
-        $pendingRootCause = RootCause::with('subRootCauses')->where('is_maintenance',true)->where('is_pending',true)->get();
+        $rootCause = RootCause::with('subRootCauses')->where('is_maintenance', true)->where('is_pending', false)->get();
+        $pendingRootCause = RootCause::with('subRootCauses')->where('is_maintenance', true)->where('is_pending', true)->get();
         $subRootCause = SubRootCause::get();
         $relocationServices = InstallationService::where('type', 'relocation')->get();
         $suspensionTickets = Incident::where('type', 'suspension')
             ->join('customers', 'incidents.customer_id', '=', 'customers.id')
-             ->when($user->user_type, function ($query, $user_type) use ($user) {
+            ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
                 }
@@ -56,7 +56,7 @@ class IncidentController extends Controller
             })
             ->whereIn('status', [1, 7])
             ->select('incidents.*')
-            ->get();    
+            ->get();
         $read_permission = false;
         $write_permission = false;
         $task_write = true;
@@ -64,7 +64,7 @@ class IncidentController extends Controller
             $read_permission = true;
             $write_permission = true;
             $task_write = false;
-        } else if ($user->user_type == 'partner' ) {
+        } else if ($user->user_type == 'partner') {
             $read_permission = true;
             $write_permission = false;
             $task_write = false;
@@ -73,10 +73,10 @@ class IncidentController extends Controller
             $write_permission = false;
             $task_write = true;
         } else if ($user->user_type == 'internal') {
-           
+
             $read_permission = true;
             $write_permission = true;
-            $task_write = $user->role?->incident_supervisor?? false;
+            $task_write = $user->role?->incident_supervisor ?? false;
         } else {
             $permission =  DB::table('roles')
                 ->join('users', 'users.role_id', '=', 'roles.id')
@@ -106,10 +106,10 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-                $query->where('incidents.supervisor_id',$user->id);
-             })
-            ->whereNotIn('incidents.status',[3,4])
+            ->when($user->role?->incident_supervisor, function ($query) use ($user) {
+                $query->where('incidents.supervisor_id', $user->id);
+            })
+            ->whereNotIn('incidents.status', [3, 4])
             //->groupBy('incidents.id')
             ->count();
         $high = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
@@ -126,11 +126,11 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-                $query->where('incidents.supervisor_id',$user->id);
-             })
-             ->whereNotIn('incidents.status',[3,4])
-           // ->groupBy('incidents.id')
+            ->when($user->role?->incident_supervisor, function ($query) use ($user) {
+                $query->where('incidents.supervisor_id', $user->id);
+            })
+            ->whereNotIn('incidents.status', [3, 4])
+            // ->groupBy('incidents.id')
             ->count();
         $normal = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
@@ -146,16 +146,16 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-                $query->where('incidents.supervisor_id',$user->id);
-             })
-            ->whereNotIn('incidents.status',[3,4])
+            ->when($user->role?->incident_supervisor, function ($query) use ($user) {
+                $query->where('incidents.supervisor_id', $user->id);
+            })
+            ->whereNotIn('incidents.status', [3, 4])
             ->groupBy('incidents.id')
             ->count('incidents.id');
-          
+
         $ticketRequest = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
-            ->whereIn('incidents.status', [1, 5, 6,7,8,9,10])
+            ->whereIn('incidents.status', [1, 5, 6, 7, 8, 9, 10])
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
                     $query->where('customers.partner_id', '=', $user->partner_id);
@@ -167,11 +167,11 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-                $query->where('incidents.supervisor_id',$user->id);
-             })
+            ->when($user->role?->incident_supervisor, function ($query) use ($user) {
+                $query->where('incidents.supervisor_id', $user->id);
+            })
             ->when($request->date, function ($query, $date) {
-                
+
                 if (!empty(trim($date)) && $date !== null && $date != 'null') {
                     $d = explode(',', $date);
                     $from = date($d[0]);
@@ -194,9 +194,9 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-                $query->where('incidents.supervisor_id',$user->id);
-             })
+            ->when($user->role?->incident_supervisor, function ($query) use ($user) {
+                $query->where('incidents.supervisor_id', $user->id);
+            })
             ->when($request->date, function ($query, $date) {
                 if (!empty(trim($date)) && $date !== null && $date != 'null') {
                     $d = explode(',', $date);
@@ -206,7 +206,7 @@ class IncidentController extends Controller
                 }
             })
             ->count();
-         $supervisorAssign = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
+        $supervisorAssign = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
             ->where('incidents.status', '=', '6')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
@@ -220,9 +220,9 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-                $query->where('incidents.supervisor_id',$user->id);
-             })
+            ->when($user->role?->incident_supervisor, function ($query) use ($user) {
+                $query->where('incidents.supervisor_id', $user->id);
+            })
             ->when($request->date, function ($query, $date) {
                 if (!empty(trim($date)) && $date !== null && $date != 'null') {
                     $d = explode(',', $date);
@@ -237,7 +237,7 @@ class IncidentController extends Controller
             //     $query->whereDate('incidents.date', $today);
             // }
             ->count();
-         $close = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
+        $close = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
             ->where('incidents.status', '=', '3')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
@@ -251,9 +251,9 @@ class IncidentController extends Controller
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
                 $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-                $query->where('incidents.supervisor_id',$user->id);
-             })
+            ->when($user->role?->incident_supervisor, function ($query) use ($user) {
+                $query->where('incidents.supervisor_id', $user->id);
+            })
             ->when($request->date, function ($query, $date) {
                 if (!empty(trim($date)) && $date !== null && $date != 'null') {
                     $d = explode(',', $date);
@@ -264,26 +264,26 @@ class IncidentController extends Controller
             })
             ->count();
         $isps = Isp::when($user->user_type, function ($query, $user_type) use ($user) {
-                if ($user_type == 'isp') {
-                    $query->where('id', '=', $user->isp_id);
-                }
-            })->get();
+            if ($user_type == 'isp') {
+                $query->where('id', '=', $user->isp_id);
+            }
+        })->get();
         $slas = MaintenanceService::select('sla_hours')
             ->groupBy('sla_hours')
             ->get();
         $team = DB::table('users')
             ->select('users.name as name', 'users.id as id')
             ->get();
-        $supervisors = DB::table('users')   
+        $supervisors = DB::table('users')
             ->join('roles', 'users.role_id', '=', 'roles.id')
             ->select('users.name as name', 'users.id as id')
             ->where('roles.incident_supervisor', 1)
             ->get();
-        $partners = DB::table('users')   
+        $partners = DB::table('users')
             ->select('users.name as name', 'users.id as id')
             ->where('users.user_type', 'partner')
             ->get();
-         $noc = User::with('role')
+        $noc = User::with('role')
             ->where('disabled', '=', 0)
             ->select('name as name', 'id as id')
             ->get();
@@ -302,18 +302,18 @@ class IncidentController extends Controller
                     $query->where('customers.isp_id', '=', $user->isp_id);
                 }
             })
-            ->whereIn('status.type',['active','suspense','terminate'])
+            ->whereIn('status.type', ['active', 'suspense', 'terminate'])
             ->where(function ($query) {
                 return $query->where('customers.deleted', '=', 0)
                     ->orWhereNull('customers.deleted');
             })
-            ->select('customers.*', 'maintenance_services.id as maintenance_service_id','maintenance_services.name as maintenance_service_name','maintenance_services.service_type as maintenance_service_type')
+            ->select('customers.*', 'maintenance_services.id as maintenance_service_id', 'maintenance_services.name as maintenance_service_name', 'maintenance_services.service_type as maintenance_service_type')
             ->get();
         $orderby = null;
         if ($request->sort && $request->order) {
             $orderby = $request->sort . ' ' . $request->order;
         }
-      
+
         $incidents =  DB::table('incidents')
             ->join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->join('partners', 'customers.partner_id', '=', 'partners.id')
@@ -323,58 +323,58 @@ class IncidentController extends Controller
             ->join('users', 'incidents.incharge_id', '=', 'users.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
-            if ($user_type == 'partner') {
-                $query->where('incidents.partner_id', '=', $user->partner_id);
-            }
-            if ($user_type == 'isp') {
-                $query->where('customers.isp_id', '=', $user->isp_id);
-            }
+                if ($user_type == 'partner') {
+                    $query->where('incidents.partner_id', '=', $user->partner_id);
+                }
+                if ($user_type == 'isp') {
+                    $query->where('customers.isp_id', '=', $user->isp_id);
+                }
             })
             ->when($user->user_type == 'subcon', function ($query) use ($myTasks) {
-            $query->whereIn('tasks.id', $myTasks);
+                $query->whereIn('tasks.id', $myTasks);
             })
-            ->when($request->status, function ($query, $status) use ($user){
-                if($status==1){
-                  
-                    return $query->whereIn('incidents.status', [1, 5, 6,7,8,9,10]);
+            ->when($request->status, function ($query, $status) use ($user) {
+                if ($status == 1) {
+
+                    return $query->whereIn('incidents.status', [1, 5, 6, 7, 8, 9, 10]);
                 }
-                 $query->where('incidents.status', '=', $status);
+                $query->where('incidents.status', '=', $status);
             }, function ($query) use ($user) {
-                if($user->role?->incident_supervisor == 1){
-                   return $query->whereRaw('incidents.status in (2,5,6,7,8,9,10)');
+                if ($user->role?->incident_supervisor == 1) {
+                    return $query->whereRaw('incidents.status in (2,5,6,7,8,9,10)');
                 }
-                if($user->role?->incident_oss == 1){
-                return $query->whereRaw('incidents.status in (1,2,5,6,7,8,9,10)');
+                if ($user->role?->incident_oss == 1) {
+                    return $query->whereRaw('incidents.status in (1,2,5,6,7,8,9,10)');
                 }
                 return $query->whereRaw('incidents.status in (1,2,3,5,6,7,8,9,10)');
             })
             ->when($request->keyword, function ($query, $search) {
-            $query->where(function ($query) use ($search) {
-                $query->where('customers.ftth_id', 'LIKE', '%' . $search . '%')
-                ->orWhere('incidents.edge_code', 'LIKE', '%' . $search . '%')
-                ->orWhere('incidents.code', 'LIKE', '%' . $search . '%');
-            });
+                $query->where(function ($query) use ($search) {
+                    $query->where('customers.ftth_id', 'LIKE', '%' . $search . '%')
+                        ->orWhere('incidents.edge_code', 'LIKE', '%' . $search . '%')
+                        ->orWhere('incidents.code', 'LIKE', '%' . $search . '%');
+                });
             })
             ->when($request->type, function ($query, $type) {
-            $query->where('incidents.type', '=', $type);
+                $query->where('incidents.type', '=', $type);
             })
             ->when($request->member, function ($query, $member) {
-            $query->where('users.id', '=', $member);
+                $query->where('users.id', '=', $member);
             })
             ->when($request->priority, function ($query, $priority) {
-            $query->where('incidents.priority', '=', $priority);
+                $query->where('incidents.priority', '=', $priority);
             })
             ->when($request->date, function ($query, $date) {
-                if(!empty(trim($date)) && $date !== null && $date != 'null') {
-                 
-                $d = explode(',', $date);
-                $from = date($d[0]);
-                $to = date($d[1]);
-                $query->whereBetween('incidents.date', [$from, $to]);
+                if (!empty(trim($date)) && $date !== null && $date != 'null') {
+
+                    $d = explode(',', $date);
+                    $from = date($d[0]);
+                    $to = date($d[1]);
+                    $query->whereBetween('incidents.date', [$from, $to]);
                 }
             })
-            ->when($user->role?->incident_supervisor, function($query) use ($user){
-               $query->where('incidents.supervisor_id',$user->id);
+            ->when($user->role?->incident_supervisor, function ($query) use ($user) {
+                $query->where('incidents.supervisor_id', $user->id);
             })
             ->when($request->isp, function ($query, $isp) use ($user) {
                 if ($user->user_type == 'isp') {
@@ -387,26 +387,26 @@ class IncidentController extends Controller
                 $query->where('maintenance_services.sla_hours', '=', $sla_hours);
             })
             ->when($orderby, function ($query, $sort) {
-            $query->orderByRaw($sort);
+                $query->orderByRaw($sort);
             }, function ($query) {
-            $query->orderBy('incidents.id', 'DESC');
+                $query->orderBy('incidents.id', 'DESC');
             })
             ->where('customer_addresses.is_current', '=', 1)
             ->select(
-            'incidents.*',
-            'customers.ftth_id as ftth_id',
-            'townships.short_code as township_short',
-            'users.name as incharge',
-            'maintenance_services.id as maintenance_service_id',
-            'maintenance_services.name as maintenance_service_name',
-            'maintenance_services.service_type as maintenance_service_type',
-            'maintenance_services.sla_hours as maintenance_sla_hours',
-            'partners.name as customer_partner_name',
-            'partners.id as customer_partner_id',
+                'incidents.*',
+                'customers.ftth_id as ftth_id',
+                'townships.short_code as township_short',
+                'users.name as incharge',
+                'maintenance_services.id as maintenance_service_id',
+                'maintenance_services.name as maintenance_service_name',
+                'maintenance_services.service_type as maintenance_service_type',
+                'maintenance_services.sla_hours as maintenance_sla_hours',
+                'partners.name as customer_partner_name',
+                'partners.id as customer_partner_id',
             )
             ->groupBy('incidents.id')
             ->paginate(10);
-          
+
         $maintenanceServices = MaintenanceService::where('status', '=', 1)->get();
         // foreach ($incidents as $value) {
         //     $max_invoice_id =  DB::table('tasks')
@@ -483,8 +483,8 @@ class IncidentController extends Controller
                 'rootCause' => $rootCause,
                 'subRootCause' => $subRootCause,
                 'pendingRootCause' => $pendingRootCause,
-                'relocationServices'=> $relocationServices,
-                'supervisors'=> $supervisors,
+                'relocationServices' => $relocationServices,
+                'supervisors' => $supervisors,
                 'ticketRequest' => $ticketRequest,
                 'teamAssign' => $teamAssign,
                 'supervisorAssign' => $supervisorAssign,
@@ -553,15 +553,15 @@ class IncidentController extends Controller
         if ($id) {
             $customer = DB::table('incidents')
                 ->join('customers', 'incidents.customer_id', '=', 'customers.id')
-                ->join('customer_addresses','customers.id','customer_addresses.customer_id')
+                ->join('customer_addresses', 'customers.id', 'customer_addresses.customer_id')
                 ->leftJoin('sn_ports', 'sn_ports.customer_id', '=', 'customers.id')
-                ->leftJoin('sn_splitters','sn_splitters.id', '=', 'sn_ports.sn_splitter_id')
-                ->leftJoin('dn_splitters','dn_splitters.id', '=','sn_ports.dn_splitter_id')
-                ->leftJoin('sn_splitters as new_sn','new_sn.id', '=', 'incidents.new_sn_splitter_id')
-                ->leftJoin('dn_splitters as new_dn','new_dn.id', '=','incidents.new_dn_splitter_id')
+                ->leftJoin('sn_splitters', 'sn_splitters.id', '=', 'sn_ports.sn_splitter_id')
+                ->leftJoin('dn_splitters', 'dn_splitters.id', '=', 'sn_ports.dn_splitter_id')
+                ->leftJoin('sn_splitters as new_sn', 'new_sn.id', '=', 'incidents.new_sn_splitter_id')
+                ->leftJoin('dn_splitters as new_dn', 'new_dn.id', '=', 'incidents.new_dn_splitter_id')
                 ->where('incidents.id', '=', $id)
-                ->where('customer_addresses.is_current',1)
-                ->select('customers.*','customer_addresses.*', 'sn_splitters.name as sn_splitter_name', 'dn_splitters.name as dn_splitter_name', 'sn_splitters.location as sn_location','dn_splitters.location as dn_location','sn_ports.port_number as port_number','new_sn.name as new_sn_name','new_sn.location as new_sn_location','new_dn.name as new_dn_name','new_dn.location as new_dn_location','incidents.new_port_number','incidents.type')
+                ->where('customer_addresses.is_current', 1)
+                ->select('customers.*', 'customer_addresses.*', 'sn_splitters.name as sn_splitter_name', 'dn_splitters.name as dn_splitter_name', 'sn_splitters.location as sn_location', 'dn_splitters.location as dn_location', 'sn_ports.port_number as port_number', 'new_sn.name as new_sn_name', 'new_sn.location as new_sn_location', 'new_dn.name as new_dn_name', 'new_dn.location as new_dn_location', 'incidents.new_port_number', 'incidents.type')
                 ->get();
             return response()->json($customer, 200);
         }
@@ -593,35 +593,35 @@ class IncidentController extends Controller
             return response()->json($files, 200);
         }
     }
-        public function getCustomerFile($id)
-        {
-            $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
-            if ($id) {
-                $query = FileUpload::with('user')
-                    ->where('file_uploads.customer_id', '=', $id);
+    public function getCustomerFile($id)
+    {
+        $user = User::with('role')->where('users.id', '=', Auth::user()->id)->first();
+        if ($id) {
+            $query = FileUpload::with('user')
+                ->where('file_uploads.customer_id', '=', $id);
 
-                if ($user->user_type == 'subcon') {
-                    $query->where('file_uploads.created_by', '=', $user->id);
-                }
-
-                $files = $query->orderBy('file_uploads.id', 'DESC')->get();
-
-                $files = $files->filter(function ($file) use ($user) {
-                    $file_extension = method_exists($file, 'getFileTypeAttribute') ? $file->getFileTypeAttribute() : '';
-                    if ($user->user_type == 'isp' && in_array(strtolower($file_extension), ['kml', 'kmz'])) {
-                        return false;
-                    }
-                    return true;
-                })->values();
-
-                $files->each(function ($file) {
-                    $file->user_name = $file->user ? $file->user->name : 'Unknown';
-                    $file->file_extension = method_exists($file, 'getFileTypeAttribute') ? $file->getFileTypeAttribute() : '';
-                });
-
-                return response()->json($files, 200);
+            if ($user->user_type == 'subcon') {
+                $query->where('file_uploads.created_by', '=', $user->id);
             }
+
+            $files = $query->orderBy('file_uploads.id', 'DESC')->get();
+
+            $files = $files->filter(function ($file) use ($user) {
+                $file_extension = method_exists($file, 'getFileTypeAttribute') ? $file->getFileTypeAttribute() : '';
+                if ($user->user_type == 'isp' && in_array(strtolower($file_extension), ['kml', 'kmz'])) {
+                    return false;
+                }
+                return true;
+            })->values();
+
+            $files->each(function ($file) {
+                $file->user_name = $file->user ? $file->user->name : 'Unknown';
+                $file->file_extension = method_exists($file, 'getFileTypeAttribute') ? $file->getFileTypeAttribute() : '';
+            });
+
+            return response()->json($files, 200);
         }
+    }
     public function deleteFile(Request $request, $id)
     {
         if ($request->has('id')) {
@@ -641,24 +641,26 @@ class IncidentController extends Controller
     }
     public function addTask(Request $request)
     {
-    
 
-        Validator::make($request->all(), [
-            'incident_id' => ['required'],
-            'assigned' => ['required'], 
-            'target' => ['required'],
-            'description' => ['required'],
-            'status' => ['required'],
-            'comment' => ['required_if:status,2,3', 'nullable', 'string'],
-            'root_causes_id' => ['required_if:status,3', 'nullable'],
-            'sub_root_causes_id' => ['required_if:status,3', 'nullable'],
-            'complete_date' => ['required_if:status,3', 'nullable'],
-        ],
-        [
-            'comment.required_if' => 'Please write comment before closing the task',
-            'root_causes_id.required_if' => 'Please Choose Main Root Cause for Pending Task',
-            'sub_root_causes_id.required_if' => 'Please Choose Sub Root Cause for Pending Task',
-        ]
+
+        Validator::make(
+            $request->all(),
+            [
+                'incident_id' => ['required'],
+                'assigned' => ['required'],
+                'target' => ['required'],
+                'description' => ['required'],
+                'status' => ['required'],
+                'comment' => ['required_if:status,2,3', 'nullable', 'string'],
+                'root_causes_id' => ['required_if:status,3', 'nullable'],
+                'sub_root_causes_id' => ['required_if:status,3', 'nullable'],
+                'complete_date' => ['required_if:status,3', 'nullable'],
+            ],
+            [
+                'comment.required_if' => 'Please write comment before closing the task',
+                'root_causes_id.required_if' => 'Please Choose Main Root Cause for Pending Task',
+                'sub_root_causes_id.required_if' => 'Please Choose Sub Root Cause for Pending Task',
+            ]
         )->validate();
         $task = new Task();
         $task->incident_id = $request->incident_id;
@@ -669,7 +671,7 @@ class IncidentController extends Controller
         $task->comment = $request->comment;
         $task->root_causes_id = $request->root_causes_id;
         $task->sub_root_causes_id = $request->sub_root_causes_id;
-        $task->complete_date = $request->complete_date??null;
+        $task->complete_date = $request->complete_date ?? null;
         $task->created_at = NOW();
         $task->updated_at = NOW();
         $task->save();
@@ -694,26 +696,28 @@ class IncidentController extends Controller
     public function editTask(Request $request, $id)
     {
 
-        Validator::make($request->all(), [
-            'incident_id' => ['required'],
-            'assigned' => ['required'], 
-            'target' => ['required'],
-            'description' => ['required'],
-            'status' => ['required'],
-            'comment' => ['required_if:status,2,3', 'nullable', 'string'],
-            'root_causes_id' => ['required_if:status,3', 'nullable'],
-            'sub_root_causes_id' => ['required_if:status,3', 'nullable'],
-            'complete_date' => ['required_if:status,2', 'nullable'],
-        ],
-        [
-            'comment.required_if' => 'Please write comment before closing the task',
-            'root_causes_id.required_if' => 'Please Choose Main Root Cause for Pending Task',
-            'sub_root_causes_id.required_if' => 'Please Choose Sub Root Cause for Pending Task',
-        ]
+        Validator::make(
+            $request->all(),
+            [
+                'incident_id' => ['required'],
+                'assigned' => ['required'],
+                'target' => ['required'],
+                'description' => ['required'],
+                'status' => ['required'],
+                'comment' => ['required_if:status,2,3', 'nullable', 'string'],
+                'root_causes_id' => ['required_if:status,3', 'nullable'],
+                'sub_root_causes_id' => ['required_if:status,3', 'nullable'],
+                'complete_date' => ['required_if:status,2', 'nullable'],
+            ],
+            [
+                'comment.required_if' => 'Please write comment before closing the task',
+                'root_causes_id.required_if' => 'Please Choose Main Root Cause for Pending Task',
+                'sub_root_causes_id.required_if' => 'Please Choose Sub Root Cause for Pending Task',
+            ]
         )->validate();
         if ($request->has('id')) {
             $task = Task::find($request->input('id'));
-            
+
             // Store original values before updating
             $originalValues = [
                 'incident_id' => $task->incident_id,
@@ -726,7 +730,7 @@ class IncidentController extends Controller
                 'sub_root_causes_id' => $task->sub_root_causes_id,
                 'complete_date' => $task->complete_date,
             ];
-       
+
             $task->incident_id = $request->incident_id;
             $task->assigned = $request->assigned['id'];
             $task->target = $request->target;
@@ -750,7 +754,7 @@ class IncidentController extends Controller
                 'sub_root_causes_id' => $request->sub_root_causes_id,
                 'complete_date' => $request->complete_date,
             ];
-            
+
             $hasChanges = false;
             foreach ($originalValues as $field => $value) {
                 if ($value != $newValues[$field]) {
@@ -758,21 +762,21 @@ class IncidentController extends Controller
                     break;
                 }
             }
-                // If changes detected, create TaskHistory record
-                if ($hasChanges) {
-                    TaskHistory::create([
-                        'task_id' => $task->id,
-                        'incident_id' => $task->incident_id,
-                        'assigned' => $task->assigned,
-                        'target' => $task->target,
-                        'status' => $task->status,
-                        'description' => $task->description,
-                        'comment' => $task->comment,
-                        'root_causes_id' => $task->root_causes_id,
-                        'sub_root_causes_id' => $task->sub_root_causes_id,
-                        'complete_date' => $task->complete_date,
-                    ]);
-                }
+            // If changes detected, create TaskHistory record
+            if ($hasChanges) {
+                TaskHistory::create([
+                    'task_id' => $task->id,
+                    'incident_id' => $task->incident_id,
+                    'assigned' => $task->assigned,
+                    'target' => $task->target,
+                    'status' => $task->status,
+                    'description' => $task->description,
+                    'comment' => $task->comment,
+                    'root_causes_id' => $task->root_causes_id,
+                    'sub_root_causes_id' => $task->sub_root_causes_id,
+                    'complete_date' => $task->complete_date,
+                ]);
+            }
             $data = array();
 
             $data['incident_id'] = $request->incident_id;
@@ -854,7 +858,7 @@ class IncidentController extends Controller
             $incident = new Incident();
             // $incident->code = $request->code;
             $user = User::with('role')->where('id', Auth::id())->first();
-            if($user->user_type != 'isp'){
+            if ($user->user_type != 'isp') {
                 throw new \Exception('You are not allowed to create incident');
             }
             $isp = Isp::where('id', $user->isp_id)->first();
@@ -866,13 +870,13 @@ class IncidentController extends Controller
             $incident->priority = $request->priority;
             $incident->topic = $request->topic;
             $incident->status = $request->status;
-            $incident->partner_id = $request->partner_id?? null;
-             $incident->start_date = $request->start_date?? null;
+            $incident->partner_id = $request->partner_id ?? null;
+            $incident->start_date = $request->start_date ?? null;
             if ($request->type == 'plan_change') {
 
                 $incident->new_bandwidth = $request->new_bandwidth;
                 $incident->new_maintenance_service_id = $request->new_maintenance_plan_id;
-                
+
                 // $myDateTime = new DateTime;
                 // $newtime = clone $myDateTime;
                 // if ($request->start_date)
@@ -885,9 +889,9 @@ class IncidentController extends Controller
                 //     $newtime->modify('first day of this month');
                 //     $incident->start_date = $newtime->format('Y-m-j h:m:s');
                 // }
-            } 
+            }
 
-           
+
             $incident->suspension_incident_id = $request->suspension_incident_id;
 
             $incident->end_date = $request->end_date;
@@ -914,21 +918,20 @@ class IncidentController extends Controller
             if (isset($request->resolved_time) && $request->status == 5)
                 $incident->resolved_time = $request->resolved_time;
 
-            if (isset($request->supervisor_id)){
-                if($user->role?->incident_oss == 1 ){
+            if (isset($request->supervisor_id)) {
+                if ($user->role?->incident_oss == 1) {
                     $incident->supervisor_id = $request->supervisor_id;
                     $incident->assigned_by = $user->id;
                 }
-                
             }
-               
+
             $incident->date = $request->date;
             $incident->time = $request->time;
             $incident->description = $request->description;
-            $incident->relocation_service_id = $request->relocation_service_id?? null;
+            $incident->relocation_service_id = $request->relocation_service_id ?? null;
             $incident->save();
-            $incident->code = 'T-' . str_pad($incident->id, 4, "0", STR_PAD_LEFT).'-' . $isp->short_code;
-            $incident->edge_code =null;
+            $incident->code = 'T-' . str_pad($incident->id, 4, "0", STR_PAD_LEFT) . '-' . $isp->short_code;
+            $incident->edge_code = null;
             $incident->update();
 
 
@@ -980,7 +983,7 @@ class IncidentController extends Controller
             'type' => ['required'],
             'status' => ['required'],
             'description' => ['required'],
- 
+
             'new_bandwidth' => ['required_if:type,plan_change'],
             'new_maintenance_plan_id' => ['required_if:type,plan_change'],
         ], [
@@ -998,15 +1001,15 @@ class IncidentController extends Controller
         });
         $validator->validate();
 
-    
+
         $user = User::with('role')->where('id', Auth::id())->first();
         if ($request->has('id')) {
             $old_incident = Incident::find($request->input('id'));
 
-         //   $update = $this->checkUpdate($old_incident, $request->request);
+            //   $update = $this->checkUpdate($old_incident, $request->request);
             // Compare each relevant field to check for changes
-            
-          //  if ($update) {
+
+            //  if ($update) {
             //     $data = array();
             //     $data['incident_id'] = $request->input('id');
             //     $data['action'] = 'Incident Update :' . $update;
@@ -1016,17 +1019,17 @@ class IncidentController extends Controller
             // }
 
 
-         //   if ($update) {
+            //   if ($update) {
 
 
-                $incident = Incident::find($request->input('id'));
-                // Check if incident->code matches "T-0015-MGT" or "T-0015"
-                if (!$incident->edge_code && $user->user_type == 'internal'){
-                   $customer = Customer::with('city')->find($incident->customer_id);
-                   if($customer){
+            $incident = Incident::find($request->input('id'));
+            // Check if incident->code matches "T-0015-MGT" or "T-0015"
+            if (!$incident->edge_code && $user->user_type == 'internal') {
+                $customer = Customer::with('city')->find($incident->customer_id);
+                if ($customer) {
                     $maintenance = MaintenanceService::where('id', $customer->maintenance_service_id)->first();
-                    if($maintenance && $maintenance->short_code){
-                        
+                    if ($maintenance && $maintenance->short_code) {
+
                         $prefix_1 = 'RT';
                         // service_complaint - RT
                         // plan_change - PC 
@@ -1051,57 +1054,65 @@ class IncidentController extends Controller
                                 $prefix_1 = 'TE';
                                 break;
                             case 'relocation':
-                                    $prefix_1 = 'RL';
-                                    break;
+                                $prefix_1 = 'RL';
+                                break;
                             default:
                                 $prefix_1 = 'RT'; // Default to RT if type is not recognized
                                 break;
                         }
 
                         $today = date('Ymd');
-                 //       $prefix_2 = strtoupper(substr($maintenance->short_code, 0, 2));
-                        $pattern = '^[A-Z]{2}-' .$customer->city->short_code. $today . '-([0-9]{4})$';
+                        //       $prefix_2 = strtoupper(substr($maintenance->short_code, 0, 2));
+                        $pattern = '^[A-Z]{2}-' . $customer->city->short_code . $today . '-([0-9]{4})$';
                         $maxCode = Incident::where('edge_code', 'REGEXP', $pattern)
-                                            ->orderByDesc('edge_code')
-                                            ->value('edge_code');
+                            ->orderByDesc('edge_code')
+                            ->value('edge_code');
                         $nextNumber = 1;
                         if ($maxCode) {
-                            preg_match('/'.$pattern.'/', $maxCode, $matches);
+                            preg_match('/' . $pattern . '/', $maxCode, $matches);
                             if (isset($matches[1])) {
                                 $nextNumber = intval($matches[1]) + 1;
                             }
                         }
-                       
-                     //   $incident->edge_code = $prefix_1.'-' . $prefix_2 . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-                        $incident->edge_code = $prefix_1.'-' .$customer->city->short_code. $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-                       
-                    }
-                   }
-                   
-                   
-                }
 
-                $incident->code = $request->code;
-                $incident->customer_id = $request->customer_id;
-                $incident->incharge_id = $request->incharge_id['id'];
-                $incident->type = $request->type;
-                $incident->priority = $request->priority;
-                $incident->topic = $request->topic;
-                $incident->status = $request->status;
-            
-                $incident->start_date = $request->start_date?? null;
-                if ($request->type == 'plan_change') {
+                        //   $incident->edge_code = $prefix_1.'-' . $prefix_2 . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                        $incident->edge_code = $prefix_1 . '-' . $customer->city->short_code . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                    }
+                }
+            }
+
+            $incident->code = $request->code;
+            $incident->customer_id = $request->customer_id;
+            $incident->incharge_id = $request->incharge_id['id'];
+            $incident->type = $request->type;
+            $incident->priority = $request->priority;
+            $incident->topic = $request->topic;
+            $incident->status = $request->status;
+
+            $incident->start_date = $request->start_date ?? null;
+            if ($request->type == 'plan_change' || $request->type == 'suspension' || $request->type == 'resume') {
 
                 $incident->new_bandwidth = $request->new_bandwidth;
                 $incident->new_maintenance_service_id = $request->new_maintenance_plan_id;
-                if($request->partner_id ){
-                      $incident->partner_id = $request->partner_id;
-                
-                      if($incident->status == 1){
-                        $incident->status = 10;
-                      }
+                if ($request->partner_id) {
+                    $incident->partner_id = $request->partner_id;
+                    if ($incident->status == 1) {
+                        switch ($request->type) {
+                            case 'suspension':
+                                $incident->status = 7; // Waiting to Suspense
+                                break;
+                            case 'resume':
+                                $incident->status = 8; // Waiting to Reopen
+                                break;
+                            case 'plan_change':
+                                $incident->status = 10; // Waiting to Plan Change
+                            default:
+                                $incident->status = 1; // Request
+                                break;
+                        }
+                    }
                 }
-                  
+
                 // $myDateTime = new DateTime;
                 // $newtime = clone $myDateTime;
                 // if ($request->start_date)
@@ -1114,59 +1125,58 @@ class IncidentController extends Controller
                 //     $newtime->modify('first day of this month');
                 //     $incident->start_date = $newtime->format('Y-m-j h:m:s');
                 // }
-             } 
-                $incident->end_date = $request->end_date;
-                if (!empty($request->new_township)) {
-                    $incident->new_township = $request->new_township['id'];
+            }
+            $incident->end_date = $request->end_date;
+            if (!empty($request->new_township)) {
+                $incident->new_township = $request->new_township['id'];
+            }
+
+            $incident->new_address = $request->new_address;
+            if (!empty($request->latitude) && !empty($request->longitude))
+                $incident->location = $request->latitude . ',' . $request->longitude;
+            if (!empty($request->package_id)) {
+                $incident->package_id = $request->package_id['id'];
+            }
+            $incident->date = $request->date;
+            $incident->time = $request->time;
+
+            if (isset($request->close_date) && $request->status == 3)
+                $incident->close_date = $request->close_date;
+
+            if (isset($request->close_time) && $request->status == 3)
+                $incident->close_time = $request->close_time;
+
+            if (isset($request->resolved_date) && $request->status == 5)
+                $incident->resolved_date = $request->resolved_date;
+
+            if (isset($request->resolved_time) && $request->status == 5)
+                $incident->resolved_time = $request->resolved_time;
+
+            if (isset($request->supervisor_id)) {
+
+                if ($user->role?->incident_oss == 1) {
+                    $incident->supervisor_id = $request->supervisor_id;
+                    $incident->assigned_by = $user->id;
                 }
+            }
+            $incident->description = $request->description;
 
-                $incident->new_address = $request->new_address;
-                if (!empty($request->latitude) && !empty($request->longitude))
-                    $incident->location = $request->latitude . ',' . $request->longitude;
-                if (!empty($request->package_id)) {
-                    $incident->package_id = $request->package_id['id'];
-                }
-                $incident->date = $request->date;
-                $incident->time = $request->time;
+            $incident->root_cause_id = $request->root_cause_id;
+            $incident->sub_root_cause_id = $request->sub_root_cause_id;
+            $incident->rca_notes = $request->rca_notes;
+            $incident->relocation_service_id = $request->relocation_service_id ?? null;
+            //  broadcast(new UpdateIncident($request->input('id'),$request->status))->toOthers();
 
-                if (isset($request->close_date) && $request->status == 3)
-                    $incident->close_date = $request->close_date;
-
-                if (isset($request->close_time) && $request->status == 3)
-                    $incident->close_time = $request->close_time;
-
-                if (isset($request->resolved_date) && $request->status == 5)
-                    $incident->resolved_date = $request->resolved_date;
-
-                if (isset($request->resolved_time) && $request->status == 5)
-                    $incident->resolved_time = $request->resolved_time;
-            
-                if (isset($request->supervisor_id)){
-                   
-                    if($user->role?->incident_oss == 1 ){
-                        $incident->supervisor_id = $request->supervisor_id;
-                        $incident->assigned_by = $user->id;
-                    }
-                   
-                }
-                $incident->description = $request->description;
-
-                $incident->root_cause_id = $request->root_cause_id;
-                $incident->sub_root_cause_id = $request->sub_root_cause_id;
-                $incident->rca_notes = $request->rca_notes;
-                $incident->relocation_service_id = $request->relocation_service_id?? null;
-                //  broadcast(new UpdateIncident($request->input('id'),$request->status))->toOthers();
-
-                $incident->closed_by = Auth::user()->id;
-                $incident->update();
-                // $notiUsers  = User::whereHas('role', function ($query) {
-                //     $query->where('enable_incident_notification', 1);
-                // })->get();
-                // $notificationMessage = ($request->status == 4) ? 'Incident Deleted' : 'Incident Updated';
-                // $notificationAction = ($request->status == 4) ? 'deleted' : 'updated';
-                // Send notification to users
-                // Notification::send($notiUsers, new NewIncidentNotification($incident, $notificationMessage, $notificationAction));
-          //  }
+            $incident->closed_by = Auth::user()->id;
+            $incident->update();
+            // $notiUsers  = User::whereHas('role', function ($query) {
+            //     $query->where('enable_incident_notification', 1);
+            // })->get();
+            // $notificationMessage = ($request->status == 4) ? 'Incident Deleted' : 'Incident Updated';
+            // $notificationAction = ($request->status == 4) ? 'deleted' : 'updated';
+            // Send notification to users
+            // Notification::send($notiUsers, new NewIncidentNotification($incident, $notificationMessage, $notificationAction));
+            //  }
 
             return redirect()->route('incident.index')->with('message', 'Incident Updated Successfully.');
         }
@@ -1184,13 +1194,11 @@ class IncidentController extends Controller
             $status = "Deleted";
         } else if ($data == 5) {
             $status = "Resolved";
-        }else if ($data == 6) {
+        } else if ($data == 6) {
             $status = "Supervisor Assign";
-        }
-        else if ($data == 7) {
+        } else if ($data == 7) {
             $status = "Waiting to Suspense";
-        }
-        else if ($data == 8) {
+        } else if ($data == 8) {
             $status = "Waiting to Reopen";
         }
         return $status;
@@ -1232,10 +1240,29 @@ class IncidentController extends Controller
     {
         $updatedFields = [];
         $fieldsToCompare = [
-            'code','edge_code', 'priority', 'date', 'time', 'incharge_id', 'type', 'status', 'description',
-            'customer_id', 'topic', 'root_cause_id', 'sub_root_cause_id', 'rca_notes',
-            'package_id', 'new_township', 'supervisor_id', 'start_date', 'end_date',
-            'new_address', 'latitude', 'longitude', 'relocation_service_id'
+            'code',
+            'edge_code',
+            'priority',
+            'date',
+            'time',
+            'incharge_id',
+            'type',
+            'status',
+            'description',
+            'customer_id',
+            'topic',
+            'root_cause_id',
+            'sub_root_cause_id',
+            'rca_notes',
+            'package_id',
+            'new_township',
+            'supervisor_id',
+            'start_date',
+            'end_date',
+            'new_address',
+            'latitude',
+            'longitude',
+            'relocation_service_id'
         ];
 
         foreach ($fieldsToCompare as $field) {

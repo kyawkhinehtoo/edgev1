@@ -235,7 +235,7 @@ export default {
 
            
            
-            { name: "Port Sharing Setup", route: "port-sharing-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
+            { name: "Network Point Setup", route: "port-sharing-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
             { name: "Maintenance Setup", route: "maintenance-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
             { name: "Installation Setup", route: "installation-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
             { name: "Discount Setup", route: "discount-setup.index", icon: "fas fa-percentage mr-2" ,show : true,show : true},
@@ -273,7 +273,7 @@ export default {
           links: [
             { name: "Dashboard", route: "dashboard", icon: "fas fa-tv mr-2" , show : true},
             { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2",show : true },
-            { name: "Nearby SN ", route: "sn.nearby", icon: "fas fa-circle-info mr-2" ,show: this.$page.props?.role?.check_sn == 1 },
+            { name: "Feasibility Checker ", route: "sn.nearby", icon: "fas fa-circle-info mr-2" ,show: this.$page.props?.role?.check_sn == 1 },
             { name: "Service Request", route: "servicerequest.index", icon: "fas fa-tasks mr-2", show: this.$page.props?.role?.service_request == 1 },
             { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600" ,show : true},
           ],
@@ -299,6 +299,7 @@ export default {
             { name: "Home", route: "home", icon: "fas fa-home mr-2",show : true },
             { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2",show : true },
             { name: "DN SN Report", route: "dnSnReport", icon: "fas fa-tower-broadcast mr-2",show : true },
+              { name: "Incident Panel", route: "incident.index", icon: "fas fa-arrow-up-right-from-square mr-2 text-blue-600" ,show : true},
           ],
         },
         {

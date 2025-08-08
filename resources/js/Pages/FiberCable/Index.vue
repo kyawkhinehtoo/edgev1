@@ -19,7 +19,7 @@ const props = defineProps({
 const typeLabels = {
   feeder: 'Feeder',
   sub_feeder: 'Sub Feeder',
-  destributed_route: 'Distributed Route'
+  distributed_route: 'Distributed Route'
 }
 
 const form = ref({
@@ -101,12 +101,21 @@ const search = () => {
 
           <div class="flex justify-between mb-6">
             <h3 class="text-lg font-medium">Fiber Cable List</h3>
-            <Link
-              :href="route('fiber-cables.create')"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Add New Fiber Cable
-            </Link>
+            <div class="flex space-x-3">
+              <a
+                href="http://edge.test/odnFiberCableImportView"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                target="_blank"
+              >
+                Excel Import
+              </a>
+              <Link
+                :href="route('fiber-cables.create')"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Add New Fiber Cable
+              </Link>
+            </div>
           </div>
 
           <table class="min-w-full divide-y divide-gray-200 text-xs">

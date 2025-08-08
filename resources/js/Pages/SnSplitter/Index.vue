@@ -2,7 +2,7 @@
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Badge from '@/Components/Badge.vue'
-
+import Pagination from "@/Components/Pagination";
 const props = defineProps({
   snSplitters: Object
 })
@@ -21,12 +21,22 @@ const props = defineProps({
         <div class="bg-white shadow-xl sm:rounded-lg p-6">
           <div class="flex justify-between mb-6">
             <h3 class="text-lg font-medium">SN Splitter List</h3>
-            <Link
-              :href="route('sn-splitters.create')"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Add New SN Splitter
-            </Link>
+            <div class="flex items-center space-x-3">
+              <a
+                :href="route('odnSnImportView')"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                target="_blank"
+              >
+                <i class="fas fa-upload mr-2"></i>
+                Import ODN SNs
+              </a>
+              <Link
+                :href="route('sn-splitters.create')"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Add New SN Splitter
+              </Link>
+            </div>
           </div>
 
           <table class="min-w-full divide-y divide-gray-200">
@@ -35,6 +45,7 @@ const props = defineProps({
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SN Box</th>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fiber Cable</th>
+                <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fiber Color</th>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Core Number</th>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                 <th class="px-3 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -46,6 +57,12 @@ const props = defineProps({
                 <td class="px-3 py-4 whitespace-nowrap">{{ snSplitter.name }}</td>
                 <td class="px-3 py-4 whitespace-nowrap">{{ snSplitter.sn_box?.name }}</td>
                 <td class="px-3 py-4 whitespace-nowrap">{{ snSplitter.fiber_type=='distributed_route'?snSplitter.fiber_cable?.name:'Patch Chord' }}</td>
+                <td class="px-3 py-4 whitespace-nowrap">
+                  <span v-if="snSplitter.fiber_color" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 capitalize">
+                    {{ snSplitter.fiber_color }}
+                  </span>
+                  <span v-else class="text-gray-400 text-xs">No color</span>
+                </td>
                 <td class="px-3 py-4 whitespace-nowrap">{{ snSplitter.core_number??'-' }}</td>
                 <td class="px-3 py-4 whitespace-nowrap">{{ snSplitter.location }}</td>
                 <td class="px-3 py-4 whitespace-nowrap">
@@ -72,6 +89,11 @@ const props = defineProps({
             </tbody>
           </table>
         </div>
+          <span v-if="snSplitters.total" class="block mt-4 text-xs text-gray-600">
+            {{ snSplitters.data.length }} SN Splitter in Current Page. Total Number of SN Splitter: {{ snSplitters.total }}
+          </span>
+
+          <pagination class="mt-6" v-if="snSplitters.links" :links="snSplitters.links" />
       </div>
     </div>
   </AppLayout>

@@ -66,8 +66,15 @@ class CoreAssignmentController extends Controller
                 'required',
                 'exists:fiber_cables,id',
                 Rule::unique('core_assignments')->where(function ($query) use ($request) {
-                    return $query->where('source_id', $request->source_id)
-                                ->where('dest_id', $request->dest_id);
+                             return $query->where('source_id', $request->source_id)
+                                ->where('jc_id', $request->jc_id)
+                                ->where('dest_id', $request->dest_id)
+                                ->where('source_port', $request->source_port_id)
+                                ->where('dest_port', $request->dest_port_id)
+                                ->where('status', $request->status_id)
+                                ->where('dest_id', $request->dest_id)
+                                ->where('source_color', $request->source_color_id)
+                                ->where('dest_color', $request->dest_color_id);
                 })
             ],
             'source_color_id' => 'required|string|max:255',
@@ -133,7 +140,14 @@ class CoreAssignmentController extends Controller
                 'exists:fiber_cables,id',
                 Rule::unique('core_assignments')->where(function ($query) use ($request) {
                     return $query->where('source_id', $request->source_id)
-                                ->where('dest_id', $request->dest_id);
+                                ->where('jc_id', $request->jc_id)
+                                ->where('dest_id', $request->dest_id)
+                                ->where('source_port', $request->source_port_id)
+                                ->where('dest_port', $request->dest_port_id)
+                                ->where('status', $request->status_id)
+                                ->where('dest_id', $request->dest_id)
+                                ->where('source_color', $request->source_color_id)
+                                ->where('dest_color', $request->dest_color_id);
                 })->ignore($coreAssignment->id)
             ],
             'source_color_id' => 'required|string|max:255',

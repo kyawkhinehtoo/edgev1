@@ -24,6 +24,9 @@ const form = useForm({
   odb_id: props.odbFiberCable.odb_id,
   fiber_cable: props.fiberCables.find(cable => cable.id === props.odbFiberCable.fiber_cable_id),
   fiber_cable_id: props.odbFiberCable.fiber_cable_id,
+  fiber_cable_color: props.odbFiberCable.fiber_cable_color || '',
+  fiber_cable_port: props.odbFiberCable.fiber_cable_port,
+  fiber_cable_port_all: props.odbFiberCable.fiber_cable_port ? { value: props.odbFiberCable.fiber_cable_port, label: `Port ${props.odbFiberCable.fiber_cable_port}` } : null,
   pop_device:  props.popDevices?.filter(device => device.id == props.odbFiberCable.pop_device_id),
   pop_device_id:props.odbFiberCable.pop_device_id,
   odb_port_all: props.odbFiberCable.odb_port ? { value: props.odbFiberCable.odb_port, label: `Port ${props.odbFiberCable.odb_port}` } : null,
@@ -73,7 +76,8 @@ const handleOdbSelect = (selectedOdb) => {
 const statusOptions = [
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
-  { value: 'maintenance', label: 'Maintenance' }
+  { value: 'maintenance', label: 'Maintenance' },
+  { value: 'plan', label: 'Plan' }
 ]
 
 const submit = () => {
@@ -157,6 +161,42 @@ const submit = () => {
                     @update:modelValue="cable => { form.fiber_cable_id = cable?.id }"
                   />
                   <div v-if="form.errors.fiber_cable_id" class="text-red-500 text-sm mt-1">{{ form.errors.fiber_cable_id }}</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Fiber Cable Color</label>
+                  <select
+                    v-model="form.fiber_cable_color"
+                    class="block w-full rounded-md border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option value="">Select Color</option>
+                    <option value="blue">Blue</option>
+                    <option value="orange">Orange</option>
+                    <option value="green">Green</option>
+                    <option value="brown">Brown</option>
+                    <option value="gray">Gray</option>
+                    <option value="white">White</option>
+                    <option value="red">Red</option>
+                    <option value="black">Black</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="purple">Purple</option>
+                    <option value="pink">Pink</option>
+                    <option value="aqua">Aqua</option>
+                  </select>
+                  <div v-if="form.errors.fiber_cable_color" class="text-red-500 text-sm mt-1">{{ form.errors.fiber_cable_color }}</div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Fiber Cable Port No. <span class="text-red-600">*</span></label>
+                  <multiselect
+                    v-model="form.fiber_cable_port_all"
+                    :options="portOptions"
+                    track-by="value"
+                    label="label"
+                    placeholder="Select Port"
+                    :searchable="true"
+                    :allow-empty="false"
+                    @update:modelValue="form.fiber_cable_port = $event?.value"
+                  />
+                  <div v-if="form.errors.fiber_cable_port" class="text-red-500 text-sm mt-1">{{ form.errors.fiber_cable_port }}</div>
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-gray-700">ODB Port No. <span class="text-red-600">*</span></label>

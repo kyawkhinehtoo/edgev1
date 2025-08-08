@@ -23,18 +23,29 @@
         <strong>Excel Format Requirements:</strong>
         <ul>
             <li><strong>SN Name:</strong> Name of the SN Box (required)</li>
-            <li><strong>DN Splitter Name:</strong> Reference to the parent DN Splitter (required)</li>
-            <li><strong>Location:</strong> Coordinates in latitude,longitude format</li>
-            <li><strong>Box Type:</strong> "sn_box" or "sn_splitter" (default: "sn_box")</li>
-            <li><strong>Status:</strong> Status of the SN Box (default: "Active")</li>
+            <li><strong>DN Splitter:</strong> Name of the parent DN Splitter (required)</li>
+            <li><strong>Location:</strong> Coordinates in latitude,longitude format (required)</li>
+            <li><strong>Status:</strong> "active" or "inactive" (default: "active")</li>
         </ul>
         <hr>
-        <strong>Optional SN Splitter Fields (when Box Type = "sn_splitter"):</strong>
+        <strong>SN Splitter Fields (Optional):</strong>
         <ul>
-            <li><strong>Splitter Type:</strong> "1x2", "1x4", "1x8", "1x16", "1x32"</li>
-            <li><strong>Input Fiber Type:</strong> "SM" or "MM" (default: "SM")</li>
-            <li><strong>Output Fiber Type:</strong> "SM" or "MM" (default: "SM")</li>
-            <li><strong>Loss Rate:</strong> Loss rate in dB (optional)</li>
+            <li><strong>SN Splitter Name:</strong> Name of the SN Splitter (optional)</li>
+            <li><strong>Fiber Type:</strong> "patch_chord" or "distributed_route" (default: "patch_chord")</li>
+            <li><strong>Port Number:</strong> Port number (1-8, default: 1)</li>
+            <li><strong>Fiber Cable:</strong> Name of the fiber cable (required if fiber_type = "distributed_route")</li>
+            <li><strong>Fiber Core Color:</strong> Format: "Color Number" (e.g., "Blue 1", "Orange 2")</li>
+      
+        </ul>
+        <hr>
+        <strong>Fiber Core Color Format:</strong>
+        <ul>
+            <li><strong>Format:</strong> "Color Number" (e.g., "Blue 1", "Orange 2")</li>
+            <li><strong>Supported Colors:</strong> Blue, Orange, Green, Brown, Gray, White, Red, Black, Yellow, Purple, Pink, Aqua</li>
+            <li><strong>Core Numbers:</strong> Any positive integer (e.g., 1, 2, 3, 12, 24)</li>
+            <li><strong>Examples:</strong> "Blue 1", "Orange 12", "Green 5", "Purple 24"</li>
+            <li><strong>Color Only:</strong> You can also specify just "Blue" without a number</li>
+            <li><strong>Priority:</strong> If both "Fiber Core Color" and "Core Number" are provided, "Fiber Core Color" takes priority</li>
         </ul>
     </div>
 

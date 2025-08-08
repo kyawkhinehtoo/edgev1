@@ -79,7 +79,7 @@
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500">Package</p>
-                            <p class="mt-1">{{ customer.bandwidth }} Mbps</p>
+                            <p class="mt-1">{{ customer.service_type }} {{ customer.bandwidth }} Mbps</p>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500">Installation Timeline</p>
@@ -118,30 +118,38 @@
                             <p class="text-sm font-medium text-gray-500">POP ID</p>
                             <p class="mt-1">{{ snPort?.pop.site_name }}</p>
                         </div>
-                        <div>
+                        <template v-if="customer.service_type == 'FTTH'">
+                              <div>
                             <p class="text-sm font-medium text-gray-500">DN Name</p>
-                            <p class="mt-1">{{ snPort?.dn_splitter.name }}</p>
+                            <p class="mt-1">{{ snPort?.dn_splitter?.name }}</p>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500">DN Location</p>
-                            <p class="mt-1">{{ snPort?.dn_splitter.location }}</p>
+                            <p class="mt-1">{{ snPort?.dn_splitter?.location }}</p>
                         </div>
 
 
 
                         <div>
                             <p class="text-sm font-medium text-gray-500">SN Name</p>
-                            <p class="mt-1">{{ snPort?.sn_splitter.name }}</p>
+                            <p class="mt-1">{{ snPort?.sn_splitter?.name }}</p>
                         </div>
                         <div>
                             <p class="text-sm font-medium text-gray-500">SN Location</p>
-                            <p class="mt-1">{{ snPort?.sn_splitter.location }}</p>
+                            <p class="mt-1">{{ snPort?.sn_splitter?.location }}</p>
                         </div>
 
                         <div>
                             <p class="text-sm font-medium text-gray-500">SN Port No.</p>
                             <p class="mt-1">SN Port {{ snPort?.port_number }}</p>
                         </div>
+                        </template>
+                        <template v-else>
+                            <div>
+                            <p class="text-sm font-medium text-gray-500">Cabinet/ DN Box</p>
+                            <p class="mt-1"> {{ snPort?.dn_box?.name }}</p>
+                        </div>
+                        </template>
 
                         <div>
                             <p class="text-sm font-medium text-gray-500">PPPOE User Name</p>

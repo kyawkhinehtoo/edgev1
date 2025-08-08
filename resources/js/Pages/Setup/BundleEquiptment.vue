@@ -33,17 +33,19 @@
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Type</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Details</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-gray-200 text-xs">
               <tr v-for="(row, index) in equiptments.data" :key="row.id">
                 <td class="px-6 py-4 whitespace-nowrap">{{ index + 1 }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">{{ row.name }}</td>
                 <td class="px-6 py-4 whitespace-nowrap uppercase">{{ row.type }}</td>
                 <td class="px-6 py-4">{{ row.detail }}</td>
                 <td class="px-6 py-4">{{ row.price }} MMK</td>
+                <td class="px-6 py-4">{{ row.date }}</td>
                 <td class="px-6 py-4">{{ row.is_active?'Active':'Disabled' }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <a href="#" @click="edit(row)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
@@ -141,6 +143,17 @@
 
                       </div>
                       <div class="mb-4">
+                        <label for="date" class="block text-gray-700 text-sm font-bold mb-2">Date :</label>
+                        <div class=" flex rounded-md shadow-sm">
+                        <input type="date"
+                          class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                          id="date" placeholder="Enter Date" v-model="form.date">
+                        
+                          </div>
+                        <div v-if="$page.props.errors.date" class="text-red-500">{{ $page.props.errors.date[0] }}</div>
+
+                      </div>
+                      <div class="mb-4">
                         <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Is Active :</label>
                         <input
                           type="checkbox"
@@ -211,6 +224,7 @@ export default {
     const form = reactive({
       id: null,
       name: null,
+      date: null,
       detail: null,
     })
     const search = ref('')
@@ -219,6 +233,7 @@ export default {
 
     function resetForm() {
       form.name = null
+      form.date = null
       form.detail = null
       form.type = 'ftth'
       form.price = null
@@ -274,6 +289,7 @@ export default {
       form.id = data.id
       form.name = data.name
       form.type = data.type
+      form.date = data.date
       form.detail = data.detail
       form.price = data.price
       form.is_active = data.is_active ? true : false

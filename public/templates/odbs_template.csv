@@ -1,6 +1,6 @@
-odb_name,odf_name,total_ports,status,fiber_cable,odb_port,pop_device,olt_port,olt_cable_label,description,connection_status
-ODB-001,ODF-Main-01,96,active,Sub-Feeder-01,1,OLT-Device-01,1,OLT-ODF-Cable-01,Main distribution connection,active
-ODB-002,ODF-Main-01,48,active,Dist-Route-01,2,OLT-Device-01,2,OLT-ODF-Cable-02,Secondary connection,active
-ODB-003,ODF-Secondary-01,24,maintenance,Secondary-Dist-01,1,OLT-Device-02,1,OLT-ODF-Cable-03,Under maintenance,inactive
-ODB-004,ODF-Main-01,96,active,,,,,,
-ODB-005,ODF-Backup-01,72,inactive,,,,,,
+odb_name,odf_name,total_ports,status,fiber_cable,feeder_core_color,odb_port,pop_device,olt_port,olt_cable_label,description,connection_status
+ODB-001,ODF-Main-01,96,active,Sub-Feeder-01,Blue 1,1,OLT-Device-01,1,OLT-ODF-Cable-01,Main distribution connection,active
+ODB-002,ODF-Main-01,48,active,Dist-Route-01,Orange 2,2,OLT-Device-01,2,OLT-ODF-Cable-02,Secondary connection,active
+ODB-003,ODF-Secondary-01,24,maintenance,Secondary-Dist-01,Green 3,1,OLT-Device-02,1,OLT-ODF-Cable-03,Under maintenance,inactive
+ODB-004,ODF-Main-01,96,active,,,,,,,
+ODB-005,ODF-Backup-01,72,inactive,,,,,,,

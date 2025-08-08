@@ -26,7 +26,7 @@ class DnSplitterController extends Controller
     {
         $pops = Pop::all();
         $popDevices = PopDevice::all();
-        $dnBoxes = DnBox::where('status', 'active')->get();
+        $dnBoxes = DnBox::all();
         $fiberCables = FiberCable::get();
 
         return Inertia::render('DnSplitter/Create', [
@@ -68,7 +68,7 @@ class DnSplitterController extends Controller
                     }
                 }
             ],
-            'status' => 'required|string|in:active,inactive'
+            'status' => 'required|string|in:active,inactive,plan'
         ]);
 
         DnSplitter::create($validated);
@@ -79,12 +79,12 @@ class DnSplitterController extends Controller
 
     public function edit(DnSplitter $dnSplitter)
     {
-        $dnBoxes = DnBox::where('status', 'active')->get();
+        $dnBoxes = DnBox::all();
         $fiberCables = FiberCable::get();
         $pops = Pop::all();
         
         // Load the popDevice relation
-        $dnSplitter->load('popDevice', 'popDevice.pop');
+        $dnSplitter->load('dnBox','popDevice', 'popDevice.pop');
 
         return Inertia::render('DnSplitter/Edit', [
             'dnSplitter' => $dnSplitter,
@@ -125,7 +125,7 @@ class DnSplitterController extends Controller
                     }
                 }
             ],
-            'status' => 'required|string|in:active,inactive'
+           'status' => 'required|string|in:active,inactive,plan'
         ]);
 
         $dnSplitter->update($validated);

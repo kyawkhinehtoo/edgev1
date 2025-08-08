@@ -17,6 +17,7 @@ use App\Models\Role;
 use App\Models\SnPorts;
 use App\Models\DnPorts;
 use App\Models\CustomerHistory;
+use App\Models\DnBox;
 use App\Models\FileUpload;
 use App\Models\InstallationService;
 use App\Models\Isp;
@@ -67,7 +68,7 @@ class CustomerController extends Controller
         $isps = Isp::get();
         $dn = DnPorts::get();
 
-        
+        $dnBoxes = DnBox::get();
 
         $onuSerials = Customer::where('customers.deleted', '=', 0)
             ->orWhereNull('customers.deleted')
@@ -392,6 +393,7 @@ class CustomerController extends Controller
             'onuSerials' => $onuSerials,
             'isps' => $isps,
             'partners' => $partners,
+            'dnBoxes' => $dnBoxes,
             
         ]);
     }
@@ -411,8 +413,15 @@ class CustomerController extends Controller
         $projects = Project::get();
         $pops = Pop::get();
           $user = User::with('role')->find(Auth::user()->id);
-        $bundle_equiptments = BundleEquiptment::get();
-         $oldCustomers = Customer::join('status','customers.status_id','status.id')->where(function ($query) {
+        $bundle_equiptments = BundleEquiptment::get()->map(function ($item) {
+            $item['$isDisabled'] = ($item->is_active !== 1);
+            return $item;
+        });
+        $dnBoxes = DnBox::get()->map(function ($item) {
+              $item['$isDisabled'] = ($item->status !== 'active');
+            return $item;
+        });
+        $oldCustomers = Customer::join('status','customers.status_id','status.id')->where(function ($query) {
             $query->where('customers.deleted', '=', 0)
                 ->orWhereNull('customers.deleted');
             })
@@ -481,6 +490,7 @@ class CustomerController extends Controller
                 'maintenanceServices' => $maintenanceServices,
                 'cities' => $cities,
                 'oldCustomers' => $oldCustomers,
+                'dnBoxes' => $dnBoxes,
             ]
         );
     }
@@ -599,7 +609,6 @@ class CustomerController extends Controller
             $customer->old_customer_id = $request->old_customer_id;
             $customer->name = $request->name;
             $customer->phone_1 = $request->phone_1;
-
             $customer->isp_id = $isp ? $isp->id : null;
             $customer->ftth_id = $auto_ftth_id ?? '';
             $customer->isp_ftth_id = $request->isp_ftth_id ?? '';
@@ -773,7 +782,7 @@ class CustomerController extends Controller
                 return abort(403, 'Unauthorized access.');
             }
         }
-        $customer = Customer::with('currentAddress.township','status','city', 'partner', 'isp', 'snPort', 'snPort.snSplitter', 'snPort.snSplitter.snBox.dnSplitter.fiberCable', 'installationService', 'maintenanceService', 'portSharingService', 'supervisor')
+        $customer = Customer::with('currentAddress.township','status','city', 'partner', 'isp', 'snPort', 'snPort.snSplitter','snPort.dnBox' ,'snPort.snSplitter.snBox.dnSplitter.fiberCable', 'installationService', 'maintenanceService', 'portSharingService', 'supervisor')
             ->where(function ($query) {
                 $query->where('deleted', 0)->orWhereNull('deleted');
             })->find($id);
@@ -786,10 +795,16 @@ class CustomerController extends Controller
             ->where('roles.installation_supervisor', 1)
             ->groupBy('users.id', 'users.name')
             ->get();
-        $snPort =  SnPort::with('SnSplitter', 'DnSplitter', 'pop', 'popDevice')->where('customer_id', $id)->first();
-        $bundle_equiptments = BundleEquiptment::get();
+        $snPort =  SnPort::with('snSplitter', 'dnSplitter', 'pop', 'popDevice', 'dnBox')->where('customer_id', $id)->first();
+         $bundle_equiptments = BundleEquiptment::get()->map(function ($item) {
+            $item['$isDisabled'] = ($item->is_active !== 1);
+            return $item;
+        });
 
-
+        $dnBoxes = DnBox::get()->map(function ($item) {
+            $item['$isDisabled'] = ($item->status !== 'active');
+            return $item;
+        });
 
         $installationServices = InstallationService::where('type', 'new')->get();
         $portSharingServices = PortSharingService::get();
@@ -908,6 +923,7 @@ class CustomerController extends Controller
                 'cities' => $cities,
                 'checkListSummary' => $checkListSummary,
                 'oldCustomers' => $oldCustomers,
+                'dnBoxes' => $dnBoxes,
             ]
         );
     }
@@ -1175,6 +1191,23 @@ class CustomerController extends Controller
                         $snPort = new SnPort();
                         $snPort->customer_id = $customer->id;
                         $snPort->pop_id = $popId;
+                        $snPort->status = 'active';
+                        $snPort->save();
+                    }
+                    
+                }
+                if (!empty($request->dn_box_id)) {
+                    $dnBoxId = $request->dn_box_id;
+                    $snPort = SnPort::where('customer_id', $customer->id)
+                        ->first();
+                    if ($snPort) {
+                        $snPort->dn_box_id = $dnBoxId;
+                        $snPort->status = 'active';
+                        $snPort->update();
+                    } else {
+                        $snPort = new SnPort();
+                        $snPort->customer_id = $customer->id;
+                        $snPort->dn_box_id = $dnBoxId;
                         $snPort->status = 'active';
                         $snPort->save();
                     }

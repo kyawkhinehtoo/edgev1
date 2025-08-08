@@ -4,6 +4,7 @@ import { Link, router } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import Badge from '@/Components/Badge.vue'
 import Multiselect from "@suadelabs/vue3-multiselect";
+import Pagination from "@/Components/Pagination";
 const props = defineProps({
   coreAssignments: Object,
   fiberCables: Array,
@@ -62,7 +63,7 @@ const deleteCoreAssignment = (id) => {
           <!-- Search Filters -->
           <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700">Source Cable</label>
+              <label class="block text-xs font-medium text-gray-700">Source Cable</label>
               <multiselect deselect-label="Selected already" :options="fiberCables" track-by="id"
               label="name" v-model="form.source" :allow-empty="true" :multiple="false" tabindex="1"
               @update:modelValue="form.source_id = $event?.id" >
@@ -70,7 +71,7 @@ const deleteCoreAssignment = (id) => {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700">Destination Cable</label>
+              <label class="block text-xs font-medium text-gray-700">Destination Cable</label>
               <multiselect deselect-label="Selected already" :options="fiberCables" track-by="id"
               label="name" v-model="form.dest" :allow-empty="true" :multiple="false" tabindex="2"
               @update:modelValue="form.dest_id = $event?.id" >
@@ -78,7 +79,7 @@ const deleteCoreAssignment = (id) => {
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700">Connection Node</label>
+              <label class="block text-xs font-medium text-gray-700">Connection Node</label>
               <multiselect deselect-label="Selected already" :options="jcBoxes" track-by="id"
               label="name" v-model="form.jc" :allow-empty="true" :multiple="false" tabindex="2"
               @update:modelValue="form.jc_id = $event?.id" >
@@ -93,61 +94,117 @@ const deleteCoreAssignment = (id) => {
 
           <div class="flex justify-between mb-6">
             <h3 class="text-lg font-medium">Core Assignment List</h3>
-            <Link
-              :href="route('core-assignments.create')"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Add New Core Assignment
-            </Link>
+            <div class="flex space-x-3">
+              <a
+                href="http://edge.test/odnJcImportView"
+                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                target="_blank"
+              >
+                Import Core Assignment
+              </a>
+              <Link
+                :href="route('core-assignments.create')"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Add New Core Assignment
+              </Link>
+            </div>
           </div>
 
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source Cable</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source Details</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination Cable</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination Details</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Connection Node</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200 text-sm">
-              <tr v-for="assignment in coreAssignments.data" :key="assignment.id">
-                <td class="px-6 py-4 whitespace-nowrap">{{ assignment.source_fiber_cable?.name }}</td>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source Cable</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source Details</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination Cable</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destination Details</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Connection Node</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="assignment in coreAssignments.data" :key="assignment.id" class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-xs font-medium text-gray-900">
+                      {{ assignment.source_fiber_cable?.name }}
+                    </div>
+                  </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  Color: <Badge :color="assignment.source_color" :text="assignment.source_color" /> <br>
-                  Port: {{ assignment.source_port }}
+                  <div class="flex flex-col space-y-1">
+                    <div class="flex items-center space-x-2">
+                      <span class="text-xs text-gray-500">Color:</span>
+                      <div class="flex items-center space-x-1">
+                        <div 
+                          class="w-4 h-4 rounded-full border border-gray-300" 
+                          :style="{ backgroundColor: assignment.source_color }"
+                        ></div>
+                        <span class="text-xs font-medium">{{ assignment.source_color }}</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <span class="text-xs text-gray-500">Port:</span>
+                      <span class="text-xs font-medium">{{ assignment.source_port }}</span>
+                    </div>
+                  </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ assignment.destination_fiber_cable?.name }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  Color: <Badge :color="assignment.dest_color" :text="assignment.dest_color" /><br>
-                  Port: {{ assignment.dest_port }}
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">{{ assignment.jc_box?.name }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <Badge :color="assignment.status === 'active' ? 'green' : 'red'" :text="assignment.status" />
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <Link
-                    :href="route('core-assignments.edit', assignment.id)"
-                    class="text-indigo-600 hover:text-indigo-900 mr-3"
-                  >
-                    Edit
-                  </Link>
-                  <Link
-                    
-                    as="button"
-                    class="text-red-600 hover:text-red-900"
-                    @click="deleteCoreAssignment(assignment.id)"
-                  >
-                    Delete
-                  </Link>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-xs font-medium text-gray-900">
+                      {{ assignment.destination_fiber_cable?.name }}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex flex-col space-y-1">
+                      <div class="flex items-center space-x-2">
+                        <span class="text-xs text-gray-500">Color:</span>
+                        <div class="flex items-center space-x-1">
+                          <div 
+                            class="w-4 h-4 rounded-full border border-gray-300" 
+                            :style="{ backgroundColor: assignment.dest_color }"
+                          ></div>
+                          <span class="text-xs font-medium">{{ assignment.dest_color }}</span>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                        <span class="text-xs text-gray-500">Port:</span>
+                        <span class="text-xs font-medium">{{ assignment.dest_port }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-xs text-gray-900">
+                      {{ assignment.jc_box?.name }}
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <Badge :color="assignment.status === 'active' ? 'green' : 'red'" :text="assignment.status" />
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-xs font-medium">
+                    <div class="flex space-x-2">
+                      <Link
+                        :href="route('core-assignments.edit', assignment.id)"
+                        class="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        class="text-red-600 hover:text-red-900"
+                        @click="deleteCoreAssignment(assignment.id)"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <span v-if="coreAssignments.total" class="block mt-4 text-xs text-gray-600">
+            {{ coreAssignments.data.length }} Core Assignment in Current Page. Total Number of Core Assignment: {{ coreAssignments.total }}
+          </span>
+
+          <pagination class="mt-6" v-if="coreAssignments.links" :links="coreAssignments.links" />
         </div>
       </div>
     </div>

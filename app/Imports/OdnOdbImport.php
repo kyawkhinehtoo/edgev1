@@ -35,7 +35,7 @@ class OdnOdbImport implements ToModel, WithHeadingRow
             }
 
             // Validate status
-            $validStatuses = ['active', 'inactive', 'maintenance'];
+            $validStatuses = ['active','plan', 'inactive', 'maintenance'];
             $status = strtolower(trim($row['status'] ?? 'active'));
             if (!in_array($status, $validStatuses)) {
                 Storage::append('odn_odb_import.log', "Invalid status: " . $row['status'] . " for ODB: " . $row['odb_name']);
@@ -80,6 +80,17 @@ class OdnOdbImport implements ToModel, WithHeadingRow
                         }
                     }
 
+                    // Parse Feeder Core Color (e.g., "Blue 1" -> color: blue, port: 1)
+                    if (!empty($row['feeder_core_color'])) {
+                        $coreColorData = $this->parseFeederCoreColor(trim($row['feeder_core_color']));
+                        if ($coreColorData['color']) {
+                            $connectionData['fiber_cable_color'] = $coreColorData['color'];
+                        }
+                        if ($coreColorData['port']) {
+                            $connectionData['fiber_cable_port'] = $coreColorData['port'];
+                        }
+                    }
+
                     if (!empty($row['olt_port'])) {
                         $connectionData['olt_port'] = (int)$row['olt_port'];
                     }
@@ -117,5 +128,51 @@ class OdnOdbImport implements ToModel, WithHeadingRow
             Storage::append('odn_odb_import.log', "Error importing row: " . $e->getMessage() . " - Row data: " . json_encode($row));
             return null;
         }
+    }
+
+    /**
+     * Parse Feeder Core Color string like "Blue 1" into color and port
+     * 
+     * @param string $feederCoreColor
+     * @return array
+     */
+    private function parseFeederCoreColor($feederCoreColor)
+    {
+        $result = ['color' => null, 'port' => null];
+        
+        if (empty($feederCoreColor)) {
+            return $result;
+        }
+
+        // Split by space and get the last part as potential port number
+        $parts = explode(' ', $feederCoreColor);
+        
+        if (count($parts) >= 2) {
+            // Get the last part as potential port number
+            $lastPart = array_pop($parts);
+            
+            // Check if last part is a number
+            if (is_numeric($lastPart) && (int)$lastPart > 0) {
+                $result['port'] = (int)$lastPart;
+                
+                // Join remaining parts as color name
+                $colorName = implode(' ', $parts);
+                $result['color'] = strtolower(trim($colorName));
+            } else {
+                // If last part is not a number, treat whole string as color
+                $result['color'] = strtolower(trim($feederCoreColor));
+            }
+        } else {
+            // Single word, treat as color only
+            $result['color'] = strtolower(trim($feederCoreColor));
+        }
+
+        // Validate color against known fiber cable colors
+        $validColors = ['blue', 'orange', 'green', 'brown', 'gray', 'white', 'red', 'black', 'yellow', 'purple', 'pink', 'aqua'];
+        if ($result['color'] && !in_array($result['color'], $validColors)) {
+            Storage::append('odn_odb_import.log', "Unknown fiber cable color: " . $result['color'] . ". Original value: " . $feederCoreColor);
+        }
+
+        return $result;
     }
 }

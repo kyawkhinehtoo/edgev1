@@ -1,7 +1,7 @@
 <template>
     <app-layout>
         <template #header>
-            <h2 class="font-semibold text-xl text-white leading-tight">Port Sharing Services Setup</h2>
+            <h2 class="font-semibold text-xl text-white leading-tight">Network Point Services Setup</h2>
         </template>
 
         <div class="py-2">

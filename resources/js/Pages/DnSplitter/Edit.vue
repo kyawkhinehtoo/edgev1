@@ -156,6 +156,7 @@ watch(
                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
                   <option value="active">Active</option>
+                  <option value="plan">Plan</option>
                   <option value="inactive">Inactive</option>
                 </select>
                 <div v-if="form.errors.status" class="text-red-500 text-sm mt-1">{{ form.errors.status }}</div>

@@ -790,7 +790,7 @@ class DashboardController extends Controller
             $date_to = now()->endOfWeek()->format('Y-m-d');
         }
         $service_types = $request->input('service_types', ['ALL']); // Default to ALL if not provided
-        $selected_port_sharing_service = $request->input('selected_port_sharing_service', 'ALL'); // New parameter for port sharing service filter
+        $selected_installation_service = $request->input('selected_installation_service', 'ALL'); // New parameter for installation service filter
 
         $user = User::with('role')->find(Auth::id());
         if (!$user || $user->user_type != 'isp') {
@@ -817,32 +817,52 @@ class DashboardController extends Controller
             ->when(!in_array('ALL', $service_types), function ($query) use ($service_types) {
                 return $query->whereIn('port_sharing_services.type', $service_types);
             })
-            ->when($selected_port_sharing_service !== 'ALL', function ($query) use ($selected_port_sharing_service) {
-                return $query->where('port_sharing_services.id', $selected_port_sharing_service);
+            ->when($selected_installation_service !== 'ALL', function ($query) use ($selected_installation_service) {
+                return $query->where('customers.installation_service_id', $selected_installation_service);
             })
             ->select('port_sharing_services.id', 'port_sharing_services.name')
             ->groupBy('port_sharing_services.id', 'port_sharing_services.name')
             ->get();
 
+        // Get all installation services for dropdown filter
+        $installation_services = DB::table('installation_services')
+            ->join('customers', 'installation_services.id', '=', 'customers.installation_service_id')
+            ->where('customers.isp_id', $user->isp_id)
+            ->where(function ($query) {
+                return $query->where('customers.deleted', '=', 0)
+                    ->orwherenull('customers.deleted');
+            })
+            ->select('installation_services.id', 'installation_services.name')
+            ->groupBy('installation_services.id', 'installation_services.name')
+            ->get();
+
         // Build matrix: for each port sharing service, count total customers
         $matrix = [];
-        foreach ($port_sharing_services as $service) {
+        foreach ($installation_services as $service) {
             $row = [
-                'port_sharing_service_id' => $service->id,
-                'port_sharing_service_name' => $service->name,
+                'installation_service_id' => $service->id,
+                'installation_service_name' => $service->name,
             ];
             
             $query = DB::table('customers')
                 ->join('status', 'customers.status_id', '=', 'status.id')
                 ->where('customers.isp_id', $user->isp_id)
-                ->where('customers.port_sharing_service_id', $service->id)
+                // ->where('customers.installation_service_id', $service->id)
                 ->whereIn('status.type', $status_types) // Only count the specified status types
                 ->where(function ($query) {
                     return $query->where('customers.deleted', '=', 0)
                         ->orwherenull('customers.deleted');
                 });
             
-            // Service type filter is already applied by filtering port_sharing_services above
+            // Apply service type filter
+            if (!in_array('ALL', $service_types)) {
+                $query->whereIn('customers.service_type', $service_types);
+            }
+            
+            // Apply installation service filter if specified
+            if ($selected_installation_service !== 'ALL') {
+                $query->where('customers.installation_service_id', $selected_installation_service);
+            }
             
             if ($date_from) {
                 $query->whereDate('customers.installation_date', '>=', $date_from);
@@ -868,13 +888,12 @@ class DashboardController extends Controller
         
         // Apply service type filter
         if (!in_array('ALL', $service_types)) {
-            $query->join('port_sharing_services as pss', 'customers.port_sharing_service_id', '=', 'pss.id')
-                  ->whereIn('pss.type', $service_types);
+            $query->whereIn('customers.service_type', $service_types);
         }
         
-        // Apply port sharing service filter
-        if ($selected_port_sharing_service !== 'ALL') {
-            $query->where('customers.port_sharing_service_id', $selected_port_sharing_service);
+        // Apply installation service filter
+        if ($selected_installation_service !== 'ALL') {
+            $query->where('customers.installation_service_id', $selected_installation_service);
         }
         
         if ($date_from) {
@@ -910,14 +929,12 @@ class DashboardController extends Controller
             
             // Apply service type filter
             if (!in_array('ALL', $service_types)) {
-                $query->join('port_sharing_services as pss', 'customers.port_sharing_service_id', '=', 'pss.id')
-                      ->whereIn('pss.type', $service_types);
+                $query->whereIn('customers.service_type', $service_types);
             }
             
-            // Apply port sharing service filter
-            if ($selected_port_sharing_service !== 'ALL') {
-             //   dd($selected_port_sharing_service);
-                $query->where('customers.port_sharing_service_id', $selected_port_sharing_service);
+            // Apply installation service filter
+            if ($selected_installation_service !== 'ALL') {
+                $query->where('customers.installation_service_id', $selected_installation_service);
             }
             
             if ($date_from) {
@@ -948,13 +965,12 @@ class DashboardController extends Controller
         
         // Apply service type filter
         if (!in_array('ALL', $service_types)) {
-            $query->join('port_sharing_services as pss', 'customers.port_sharing_service_id', '=', 'pss.id')
-                  ->whereIn('pss.type', $service_types);
+            $query->whereIn('customers.service_type', $service_types);
         }
         
-        // Apply port sharing service filter
-        if ($selected_port_sharing_service !== 'ALL') {
-            $query->where('customers.port_sharing_service_id', $selected_port_sharing_service);
+        // Apply installation service filter
+        if ($selected_installation_service !== 'ALL') {
+            $query->where('customers.installation_service_id', $selected_installation_service);
         }
         
         if ($date_from) {
@@ -996,13 +1012,12 @@ class DashboardController extends Controller
             
             // Apply service type filter
             if (!in_array('ALL', $service_types)) {
-                $query->join('port_sharing_services as pss', 'customers.port_sharing_service_id', '=', 'pss.id')
-                      ->whereIn('pss.type', $service_types);
+                $query->whereIn('customers.service_type', $service_types);
             }
             
-            // Apply port sharing service filter
-            if ($selected_port_sharing_service !== 'ALL') {
-                $query->where('customers.port_sharing_service_id', $selected_port_sharing_service);
+            // Apply installation service filter
+            if ($selected_installation_service !== 'ALL') {
+                $query->where('customers.installation_service_id', $selected_installation_service);
             }
             
             if ($date_from) {
@@ -1031,13 +1046,12 @@ class DashboardController extends Controller
         
         // Apply service type filter
         if (!in_array('ALL', $service_types)) {
-            $query->join('port_sharing_services as pss', 'customers.port_sharing_service_id', '=', 'pss.id')
-                  ->whereIn('pss.type', $service_types);
+            $query->whereIn('customers.service_type', $service_types);
         }
         
-        // Apply port sharing service filter
-        if ($selected_port_sharing_service !== 'ALL') {
-            $query->where('customers.port_sharing_service_id', $selected_port_sharing_service);
+        // Apply installation service filter
+        if ($selected_installation_service !== 'ALL') {
+            $query->where('customers.installation_service_id', $selected_installation_service);
         }
         
         if ($date_from) {
@@ -1144,7 +1158,15 @@ class DashboardController extends Controller
                             ->orwherenull('customers.deleted');
                     });
                 
-                // Service type filter is already applied by filtering port_sharing_services above
+                // Apply service type filter
+                if (!in_array('ALL', $service_types)) {
+                    $query->whereIn('customers.service_type', $service_types);
+                }
+                
+                // Apply installation service filter if specified
+                if ($selected_installation_service !== 'ALL') {
+                    $query->where('customers.installation_service_id', $selected_installation_service);
+                }
                 
                 if ($date_from) {
                     $query->whereDate('customers.installation_date', '>=', $date_from);
@@ -1173,7 +1195,7 @@ class DashboardController extends Controller
             'installation_services' => $installation_services,
             'port_sharing_services' => $port_sharing_services,
             'service_types' => $service_types,
-            'selected_port_sharing_service' => $selected_port_sharing_service,
+            'selected_installation_service' => $selected_installation_service,
             'months' => $months,
             'chart_data' => $chart_data,
             'date_from' => $date_from,

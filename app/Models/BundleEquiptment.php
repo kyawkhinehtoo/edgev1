@@ -32,7 +32,7 @@ class BundleEquiptment extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'type','detail', 'price','is_active','created_at', 'updated_at'
+        'name', 'type','detail','date', 'price','is_active','created_at', 'updated_at'
     ];
 
     /**
@@ -59,7 +59,7 @@ class BundleEquiptment extends Model
      * @var array
      */
     protected $dates = [
-        'created_at', 'updated_at'
+        'date','created_at', 'updated_at'
     ];
 
     /**

@@ -11,6 +11,8 @@ class OdbFiberCable extends Model
     protected $fillable = [
         'odb_id',
         'fiber_cable_id',
+        'fiber_cable_color',
+        'fiber_cable_port',
         'pop_device_id', // nullable
         'odb_port',
         'olt_port', // nullable
@@ -22,6 +24,7 @@ class OdbFiberCable extends Model
     protected $casts = [
         'odb_port' => 'integer',
         'olt_port' => 'integer',
+        'fiber_cable_port' => 'integer',
         'status' => 'string'
     ];
 

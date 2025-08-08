@@ -285,21 +285,25 @@
                     <p v-show="$page.props.errors.service_type" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.service_type }}</p>
                   </div>
-                  <template v-if="form.service_type=='FTTH'"> 
-                     <div class="col-span-1 sm:col-span-2">
+                  <div class="col-span-1 sm:col-span-2">
                     <label for="installation_service_id" class="block text-sm font-medium text-gray-700"><span
                         class="text-red-500">*</span>
                       Installation </label>
-                    <div class="mt-1 flex rounded-md shadow-sm" v-if="installationServices">
-                      <multiselect deselect-label="Selected already" :options="installationServices" track-by="id" label="name"
+                    <div class="mt-1 flex rounded-md shadow-sm" v-if="filteredInstallationServices.length > 0">
+                      <multiselect deselect-label="Selected already" :options="filteredInstallationServices" track-by="id" label="name"
                         v-model="form.installation_service" :allow-empty="false" 
                         @update:modelValue="form.installation_service_id = $event?.id"
                         :disabled="checkPerm('installation_service_id')">
                       </multiselect>
                     </div>
+                    <div class="mt-1 border-gray-200 border p-2 rounded-md text-gray-600" v-else>
+                      No installation services available for {{ form.service_type }}
+                    </div>
                     <p v-show="$page.props.errors.installation_service_id" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.installation_service_id }}</p>
                   </div>
+                  
+                  <template v-if="form.service_type=='FTTH'">
                  
                   <div class="col-span-1 md:col-span-2">
                     <label for="bundle" class="block text-sm font-medium text-gray-700">
@@ -308,7 +312,9 @@
                     <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
                       <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
                         label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
-                        :multiple="true" :taggable="false"></multiselect>
+                        :multiple="true" :taggable="false">
+                        <template v-slot:singleLabel="{ option }"><strong>{{ option.name }}</strong></template>
+                      </multiselect>
                     </div>
                     <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.bundles }}</p>
@@ -318,12 +324,15 @@
                     <label for="package" class="block text-sm font-medium text-gray-700"><span
                         class="text-red-500">*</span>
                       Maintenance </label>
-                    <div class="mt-1 flex rounded-md shadow-sm " v-if="maintenanceServices">
-                      <multiselect deselect-label="Selected already" :options="maintenanceServices" track-by="id" label="name"
+                    <div class="mt-1 flex rounded-md shadow-sm " v-if="filteredMaintenanceServices.length > 0">
+                      <multiselect deselect-label="Selected already" :options="filteredMaintenanceServices" track-by="id" label="name"
                         v-model="form.maintenance_service" :allow-empty="false"
                         @update:modelValue="form.maintenance_service_id = $event?.id"
                         :disabled="checkPerm('maintenance_service_id')" :class="text-xs">
                       </multiselect>
+                    </div>
+                    <div class="mt-1 border-gray-200 border p-2 rounded-md text-gray-600" v-else>
+                      No maintenance services available for {{ form.service_type }}
                     </div>
                     <p v-show="$page.props.errors.maintenance_service_id" class="mt-2 text-sm text-red-500">{{
                       $page.props.errors.maintenance_service_id }}</p>
@@ -415,7 +424,7 @@
 <script>
 import AppLayout from "@/Layouts/AppLayout";
 import Multiselect from "@suadelabs/vue3-multiselect";
-import { reactive, ref, onMounted, watch } from "vue";
+import { reactive, ref, onMounted, watch, computed } from "vue";
 import { router,Link,useForm } from '@inertiajs/vue3';
 export default {
   name: "AddCustomer",
@@ -449,6 +458,26 @@ export default {
     let res_packages = ref("");
     const filteredTownships = ref([]);
 
+    // Create filtered maintenance services based on service type
+    const filteredMaintenanceServices = computed(() => {
+      if (!props.maintenanceServices || !form.service_type) {
+        return [];
+      }
+      return props.maintenanceServices.filter(service => 
+        service.service_type?.toLowerCase() === form.service_type?.toLowerCase() || service.service_type?.toLowerCase() === 'all'
+      );
+    });
+
+    // Create filtered installation services based on service type
+    const filteredInstallationServices = computed(() => {
+      if (!props.installationServices || !form.service_type) {
+        return [];
+      }
+      return props.installationServices.filter(service => 
+        service.service_type?.toLowerCase() === form.service_type?.toLowerCase() || service.service_type?.toLowerCase() === 'all'
+      );
+    });
+
     const form = useForm({
       id: null,
       customer_installation_type: "new_installation",
@@ -481,6 +510,7 @@ export default {
       service_type: "FTTH",
       pppoe_username: "",
       pppoe_password: "",
+
     });
 
     function resetForm() {
@@ -508,6 +538,17 @@ export default {
       (newCity) => {
         getTownshipByCityId(newCity?.id);
         form.township = ''; // Reset township when city changes
+      }
+    );
+
+    // Watch for service type changes and reset maintenance service
+    watch(
+      () => form.service_type,
+      (newServiceType) => {
+        form.maintenance_service = '';
+        form.maintenance_service_id = '';
+        form.installation_service = '';
+        form.installation_service_id = '';
       }
     );
 
@@ -556,7 +597,18 @@ export default {
   
 
     });
-    return { form, submit, resetForm, isNumber, checkPerm, res_packages, filteredTownships, getTownshipByCityId };
+    return { 
+      form, 
+      submit, 
+      resetForm, 
+      isNumber, 
+      checkPerm, 
+      res_packages, 
+      filteredTownships, 
+      getTownshipByCityId,
+      filteredMaintenanceServices,
+      filteredInstallationServices 
+    };
   },
 };
 </script>

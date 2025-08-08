@@ -23,10 +23,12 @@
         <strong>Excel Format Requirements:</strong>
         <ul>
             <li><strong>ODB Name:</strong> Name of the ODB (required)</li>
-            <li><strong>Location:</strong> Coordinates in latitude,longitude format</li>
-            <li><strong>Type:</strong> "wall", "pole", or "underground" (default: "wall")</li>
-            <li><strong>Port Count:</strong> Number of ports (default: 8)</li>
-            <li><strong>Status:</strong> Status of the ODB (default: "Active")</li>
+            <li><strong>ODF Name:</strong> Name of the parent ODF (required)</li>
+            <li><strong>Total Ports:</strong> Number of ports (1-96, default: 96)</li>
+            <li><strong>Status:</strong> "active", "plan", "inactive", or "maintenance" (default: "active")</li>
+            <li><strong>Fiber Cable:</strong> Name of the feeder cable (optional)</li>
+            <li><strong>Feeder Core Color:</strong> Format: "Color Number" (e.g., "Blue 1", "Orange 2")</li>
+            <li><strong>ODB Port:</strong> Port number on the ODB (required if fiber cable specified)</li>
         </ul>
         <hr>
         <strong>ODF (Optical Distribution Frame) Dependency:</strong>
@@ -37,8 +39,22 @@
         <strong>Fiber Cable Connection (Optional):</strong>
         <ul>
             <li><strong>Fiber Cable Name:</strong> Cable connected to this ODB</li>
-            <li><strong>Connected Core:</strong> Core number in the cable</li>
-            <li><strong>Connected Color:</strong> Core color in the cable</li>
+            <li><strong>Feeder Core Color:</strong> Color and port number (e.g., "Blue 1", "Orange 2")</li>
+            <li><strong>ODB Port:</strong> Port number on the ODB</li>
+            <li><strong>POP Device:</strong> OLT device name (optional)</li>
+            <li><strong>OLT Port:</strong> Port number on the OLT (optional)</li>
+            <li><strong>OLT Cable Label:</strong> Label for OLT to ODF cable (optional)</li>
+            <li><strong>Description:</strong> Additional notes (optional)</li>
+            <li><strong>Connection Status:</strong> "active", "inactive", or "maintenance" (default: "active")</li>
+        </ul>
+        <hr>
+        <strong>Feeder Core Color Format:</strong>
+        <ul>
+            <li><strong>Format:</strong> "Color Number" (e.g., "Blue 1", "Orange 2")</li>
+            <li><strong>Supported Colors:</strong> Blue, Orange, Green, Brown, Gray, White, Red, Black, Yellow, Purple, Pink, Aqua</li>
+            <li><strong>Port Numbers:</strong> Any positive integer (e.g., 1, 2, 3, 12, 24)</li>
+            <li><strong>Examples:</strong> "Blue 1", "Orange 12", "Green 5", "Purple 24"</li>
+            <li><strong>Color Only:</strong> You can also specify just "Blue" without a number</li>
         </ul>
     </div>
 

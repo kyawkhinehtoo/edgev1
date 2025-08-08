@@ -12,6 +12,7 @@ class SnPort extends Model
         'dn_splitter_id',
         'pop_device_id',
         'pop_id',
+        'dn_box_id',
         'port_number',
         'customer_id',
         'status'
@@ -31,6 +32,10 @@ class SnPort extends Model
     public function pop()  
     {
         return $this->belongsTo(Pop::class, 'pop_id');
+    }
+    public function dnBox()
+    {
+        return $this->belongsTo(DnBox::class, 'dn_box_id');
     }
     public function customer()
     {

@@ -16,6 +16,7 @@ const form = useForm({
   sn_id: props.snSplitter.sn_id,
   fiber: props.fiberCables.find(cable => cable.id === props.snSplitter.fiber_id),
   fiber_id: props.snSplitter.fiber_id,
+  fiber_color: props.snSplitter.fiber_color || '',
   core: { id: props.snSplitter.core_number?.toString(), name: props.snSplitter?.core_number?.toString() },
   core_number: props.snSplitter.core_number,
   location: props.snSplitter.location,
@@ -130,7 +131,7 @@ const submit = () => {
                 </div>
                 <div v-if="form.errors.fiber_type" class="text-red-500 text-sm mt-1">{{ form.errors.fiber_type }}</div>
               </div>
-              <div class="grid grid-cols-2 gap-2" v-if="form.fiber_type == 'distributed_route'">
+              <div class="grid grid-cols-3 gap-2" v-if="form.fiber_type == 'distributed_route'">
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Source Fiber Cable</label>
                   <multiselect
@@ -143,6 +144,29 @@ const submit = () => {
                     @update:modelValue="form.fiber_id = $event?.id"
                   />
                   <div v-if="form.errors.fiber_id" class="text-red-500 text-sm mt-1">{{ form.errors.fiber_id }}</div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Fiber Color</label>
+                  <select
+                    v-model="form.fiber_color"
+                    class="block w-full rounded-md border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option value="">Select Color</option>
+                    <option value="blue">Blue</option>
+                    <option value="orange">Orange</option>
+                    <option value="green">Green</option>
+                    <option value="brown">Brown</option>
+                    <option value="gray">Gray</option>
+                    <option value="white">White</option>
+                    <option value="red">Red</option>
+                    <option value="black">Black</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="purple">Purple</option>
+                    <option value="pink">Pink</option>
+                    <option value="aqua">Aqua</option>
+                  </select>
+                  <div v-if="form.errors.fiber_color" class="text-red-500 text-sm mt-1">{{ form.errors.fiber_color }}</div>
                 </div>
 
                 <div>

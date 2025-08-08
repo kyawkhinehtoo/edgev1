@@ -31,9 +31,9 @@ class OdnDnImport implements ToModel, WithHeadingRow
             $dnBox = DnBox::firstOrCreate(
                 ['name' => $row['cabinet']],
                 [
-                    'type' => 'distribution_node',
+                    'type' => 'cabinet',
                     'status' => 'active',
-                    'location' => '16.8661,96.1951', // Default location, you can modify this
+                    'location' =>  $row['location'] ?? '16.8661,96.1951',
                     'description' => 'Imported DN Box'
                 ]
             );
@@ -79,7 +79,7 @@ class OdnDnImport implements ToModel, WithHeadingRow
                     'core_number' => $coreNumber,
                     'core_color' => $coreColor,
                     'location' => $row['location'] ?? '16.8661,96.1951',
-                    'status' => strtolower($row['status']) === 'active' ? 'active' : 'inactive'
+                    'status' => strtolower($row['status']) === 'active' ? 'active' : 'plan'
                 ]
             );
 

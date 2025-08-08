@@ -97,10 +97,21 @@ class OdnSnImport implements ToModel, WithHeadingRow
                         }
                     }
 
-                    if (!empty($row['core_number'])) {
-                        $coreNumber = (int)$row['core_number'];
-                        if ($coreNumber >= 1) {
-                            $snSplitterData['core_number'] = $coreNumber;
+                    // if (!empty($row['core_number'])) {
+                    //     $coreNumber = (int)$row['core_number'];
+                    //     if ($coreNumber >= 1) {
+                    //         $snSplitterData['core_number'] = $coreNumber;
+                    //     }
+                    // }
+
+                    // Parse fiber color and core (e.g., "Blue 1" -> color: blue, core: 1)
+                    if (!empty($row['fiber_core_color'])) {
+                        $coreColorData = $this->parseFiberCoreColor(trim($row['fiber_core_color']));
+                        if ($coreColorData['color']) {
+                            $snSplitterData['fiber_color'] = $coreColorData['color'];
+                        }
+                        if ($coreColorData['core']) {
+                            $snSplitterData['core_number'] = $coreColorData['core'];
                         }
                     }
                 }
@@ -125,5 +136,51 @@ class OdnSnImport implements ToModel, WithHeadingRow
             Storage::append('odn_sn_import.log', "Error importing row: " . $e->getMessage() . " - Row data: " . json_encode($row));
             return null;
         }
+    }
+
+    /**
+     * Parse Fiber Core Color string like "Blue 1" into color and core number
+     * 
+     * @param string $fiberCoreColor
+     * @return array
+     */
+    private function parseFiberCoreColor($fiberCoreColor)
+    {
+        $result = ['color' => null, 'core' => null];
+        
+        if (empty($fiberCoreColor)) {
+            return $result;
+        }
+
+        // Split by space and get the last part as potential core number
+        $parts = explode(' ', $fiberCoreColor);
+        
+        if (count($parts) >= 2) {
+            // Get the last part as potential core number
+            $lastPart = array_pop($parts);
+            
+            // Check if last part is a number
+            if (is_numeric($lastPart) && (int)$lastPart > 0) {
+                $result['core'] = (int)$lastPart;
+                
+                // Join remaining parts as color name
+                $colorName = implode(' ', $parts);
+                $result['color'] = strtolower(trim($colorName));
+            } else {
+                // If last part is not a number, treat whole string as color
+                $result['color'] = strtolower(trim($fiberCoreColor));
+            }
+        } else {
+            // Single word, treat as color only
+            $result['color'] = strtolower(trim($fiberCoreColor));
+        }
+
+        // Validate color against known fiber cable colors
+        $validColors = ['blue', 'orange', 'green', 'brown', 'gray', 'white', 'red', 'black', 'yellow', 'purple', 'pink', 'aqua'];
+        if ($result['color'] && !in_array($result['color'], $validColors)) {
+            Storage::append('odn_sn_import.log', "Unknown fiber cable color: " . $result['color'] . ". Original value: " . $fiberCoreColor);
+        }
+
+        return $result;
     }
 }

@@ -59,7 +59,7 @@ class DnBoxController extends Controller
             'type' => 'required|string|in:dnbox,cabinet',
             'township_id' => 'nullable|exists:townships,id',
             'description' => 'nullable|string|max:1000',
-            'status' => 'required|string|in:active,inactive'
+            'status' => 'required|string|in:active,inactive,plan'
         ], [
             'location.regex' => 'Location must be in valid latitude,longitude format (e.g. 16.8661, 96.1951).'
         ]);
@@ -108,7 +108,7 @@ class DnBoxController extends Controller
             'type' => 'required|string|in:dnbox,cabinet',
             'township_id' => 'nullable|exists:townships,id',
             'description' => 'nullable|string|max:1000',
-            'status' => 'required|string|in:active,inactive'
+           'status' => 'required|string|in:active,inactive,plan'
         ], [
             'location.regex' => 'Location must be in valid latitude,longitude format (e.g. 16.8661, 96.1951).'
         ]);

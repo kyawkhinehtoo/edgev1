@@ -337,9 +337,11 @@
                           Additional Materials Request (Leave blank for own materials)
                         </label>
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="bundle_equiptments.length !== 0">
-                          <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
-                            label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
-                            :multiple="true" :taggable="false"></multiselect>
+                         <multiselect deselect-label="Selected already" :options="bundle_equiptments" track-by="id"
+                        label="name" v-model="form.bundles" :allow-empty="true" :disabled="checkPerm('bundle')"
+                        :multiple="true" :taggable="false">
+                        <template v-slot:singleLabel="{ option }"><strong>{{ option.name }}</strong></template>
+                      </multiselect>
                         </div>
                         <p v-show="$page.props.errors.bundles" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.bundles }}</p>
@@ -458,8 +460,8 @@
                             $page.props.errors.partner_id
                           }}</p>
                         </div>
-
-                        <div class="col-span-1 sm:col-span-1">
+                        <template v-if="form.service_type == 'FTTH'" >
+                          <div class="col-span-1 sm:col-span-1">
                           <label for="pop_device_id" class="block text-sm font-medium text-gray-700"> Choose OLT</label>
                           <div class="mt-1 flex rounded-md shadow-sm">
                             <multiselect deselect-label="Selected already" :options="popDevices" track-by="id"
@@ -492,6 +494,25 @@
                           <div class="mt-1 flex rounded-md shadow-sm w-full" v-if="snPortNoOptions.length !== 0">
                             <multiselect deselect-label="Selected already" :options="snPortNoOptions" track-by="id"
                               label="name" v-model="form.splitter_no" :allow-empty="true">
+                              <template v-slot:singleLabel="{ option }"><strong>{{ option.name }}
+                                  {{ option.language }}</strong></template>
+                            </multiselect>
+
+                          </div>
+                          <p v-show="$page.props.errors.splitter_no" class="mt-2 text-sm text-red-500 w-full">{{
+                            $page.props.errors.splitter_no }}</p>
+
+                        </div>
+                        </template>
+                        
+
+                        <div class="col-span-1 sm:col-span-1" v-if="form.service_type !== 'FTTH'" >
+                          <label for="splitter_no" class="block text-sm font-medium text-gray-700"> Cabinet/DN Box  </label>
+                          <div class="mt-1 flex rounded-md shadow-sm w-full" v-if="dnBoxes && dnBoxes?.length !== 0">
+                            <multiselect deselect-label="Selected already" :options="dnBoxes" track-by="id"
+                              label="name" v-model="form.dn_box" :allow-empty="true" 
+                              @update:modelValue="form.dn_box_id = $event?.id"
+                              >
                               <template v-slot:singleLabel="{ option }"><strong>{{ option.name }}
                                   {{ option.language }}</strong></template>
                             </multiselect>
@@ -592,7 +613,7 @@
 
                         </div> -->
                       </div>
-                      <div v-if="form.sn_id">
+                      <div v-if="form.sn_id || form.dn_box_id">
 
 
                         <hr class="my-4 md:min-w-full" />
@@ -1293,6 +1314,7 @@ export default {
     supervisors: Object,
     cities: Object,
     checkListSummary: Object,
+    dnBoxes: Object,
   },
   setup(props) {
     provide('role', props.role);
@@ -1431,6 +1453,8 @@ export default {
       drop_cable_collected_by: props.customer.drop_cable_collected_by || '',
       service_activation_date: props.customer.service_activation_date || '',
       service_termination_date: props.customer.service_termination_date || '',
+      dn_box: props.customer.sn_port?.dn_box || null,
+      dn_box_id: props.customer.sn_port?.dn_box_id || null,
     });
     const form2 = useForm({
       ...Object.fromEntries(

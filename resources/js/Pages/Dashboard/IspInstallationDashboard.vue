@@ -39,7 +39,7 @@
           </div>
         </div>
         
-        <!-- Service Type Filter Section -->
+        <!-- Filter Section -->
         <div class="bg-white shadow-xl sm:rounded-lg p-6">
           <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <!-- Service Type Filter -->
@@ -64,24 +64,24 @@
                 <span class="text-indigo-600">{{ selectedServiceNames.join(', ') }}</span>
               </div>
             </div>
-             <!-- Port Sharing Service Filter -->
+             <!-- Installation Service Filter -->
             <div>
-              <h3 class="text-lg font-bold mb-3">Port Sharing Service</h3>
+              <h3 class="text-lg font-bold mb-3">Installation Service</h3>
               <select 
-                v-model="selected_port_sharing_service" 
-                @change="handlePortSharingServiceChange"
+                v-model="selected_installation_service" 
+                @change="handleInstallationServiceChange"
                 class="border rounded px-3 py-2 bg-white text-gray-900 focus:ring-indigo-500 focus:border-indigo-500 w-full"
               >
                 <option value="ALL">ALL</option>
-                <option v-for="p_service in port_sharing_services" :key="p_service.id" :value="p_service.id">
-                  {{ p_service.name }}
+                <option v-for="service in installation_services" :key="service.id" :value="service.id">
+                  {{ service.name }}
                 </option>
               </select>
               <div class="mt-2 text-xs text-gray-500">
                 <span class="font-semibold">Selected:</span> 
                 <span class="text-indigo-600">
-                  {{ selected_port_sharing_service === 'ALL' ? 'ALL' : 
-                     (port_sharing_services.find(s => s.id == selected_port_sharing_service)?.name || selected_port_sharing_service) }}
+                  {{ selected_installation_service === 'ALL' ? 'ALL' : 
+                     (installation_services.find(s => s.id == selected_installation_service)?.name || selected_installation_service) }}
                 </span>
               </div>
             </div>
@@ -105,21 +105,21 @@
           </div>
         </div>
 
-        <!-- All Customer Status Dashboard -->
+        <!-- Installation Service Dashboard -->
         <div class="bg-white shadow-xl sm:rounded-lg p-6">
           <div class="mb-6">
-            <h3 class="text-lg font-bold mb-2">Customer installation_service? Dashboard </h3>
+            <h3 class="text-lg font-bold mb-2">Customer Installation Service Dashboard</h3>
           
             <table class="min-w-full divide-y divide-gray-200 mb-8">
               <thead>
                 <tr>
-                  <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Port Sharing Service</th>
+                  <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Installation Service</th>
                   <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase">Total Customers</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="row in matrix" :key="row.port_sharing_service_id">
-                  <td class="px-6 py-4 whitespace-nowrap font-bold">{{ row.port_sharing_service_name }}</td>
+                <tr v-for="row in matrix" :key="row.installation_service_id">
+                  <td class="px-6 py-4 whitespace-nowrap font-bold">{{ row.installation_service_name }}</td>
                   <td class="px-6 py-4 whitespace-nowrap">{{ row.total }}</td>
                 </tr>
                 <tr class="bg-gray-100 font-bold">
@@ -271,12 +271,12 @@
         <!-- Customer Trends Chart -->
         <div class="bg-white shadow-xl sm:rounded-lg p-6">
           <div class="mb-6">
-            <h3 class="text-lg font-bold mb-2">Customer Trends by Port Sharing Service (Monthly)</h3>
+            <h3 class="text-lg font-bold mb-2">Customer Trends by Installation Service (Monthly)</h3>
             <LineChart
-              chart-id="port-sharing-service-trends-chart"
-              title="Total Customers by Port Sharing Service Over Time"
+              chart-id="installation-service-trends-chart"
+              title="Total Customers by Installation Service Over Time"
               :labels="chartLabels"
-              :datasets="getPortSharingServiceDatasets()"
+              :datasets="getInstallationServiceDatasets()"
               :key="key"
             />
           </div>
@@ -307,15 +307,11 @@ export default {
         sla_matrix: Array,
         sla_grand_total: Object,
         installation_services: Array,
-        port_sharing_services: {
-            type: Array,
-            default: () => [],
-        },
         service_types: {
             type: Array,
             default: () => ['ALL'],
         },
-        selected_port_sharing_service: {
+        selected_installation_service: {
             type: [String, Number],
             default: 'ALL',
         },
@@ -328,7 +324,7 @@ export default {
         const date_from = ref(props.date_from || '');
         const date_to = ref(props.date_to || '');
         const service_types = ref([...props.service_types]);
-        const selected_port_sharing_service = ref(props.selected_port_sharing_service || 'ALL'); // Initialize from props
+        const selected_installation_service = ref(props.selected_installation_service || 'ALL');
         const key = ref(0);
         
         const chartLabels = computed(() => {
@@ -366,7 +362,7 @@ export default {
             return colors[index % colors.length];
         }
 
-        function getPortSharingServiceDatasets() {
+        function getInstallationServiceDatasets() {
             const firstMonth = props.months[0];
             const serviceNames = firstMonth && props.chart_data[firstMonth]
                 ? Object.keys(props.chart_data[firstMonth])
@@ -406,8 +402,8 @@ export default {
             applyFilter();
         }
 
-        function handlePortSharingServiceChange() {
-            applyPortSharingServiceFilter();
+        function handleInstallationServiceChange() {
+            applyInstallationServiceFilter();
         }
 
         function applyDateFilter() {
@@ -426,12 +422,12 @@ export default {
             });
         }
 
-        function applyPortSharingServiceFilter() {
+        function applyInstallationServiceFilter() {
             router.post(route('isp.installation.dashboard'), {
                 date_from: date_from.value,
                 date_to: date_to.value,
                 service_types: service_types.value,
-                selected_port_sharing_service: selected_port_sharing_service.value,
+                selected_installation_service: selected_installation_service.value,
             }, {
                 onSuccess: () => {
                     key.value++;
@@ -443,18 +439,18 @@ export default {
             date_from,
             date_to,
             service_types,
-            selected_port_sharing_service,
+            selected_installation_service,
             isAllSelected,
             selectedServiceNames,
             chartLabels,
             getStatusColor,
             getServiceColor,
-            getPortSharingServiceDatasets,
+            getInstallationServiceDatasets,
             handleServiceTypeChange,
-            handlePortSharingServiceChange,
+            handleInstallationServiceChange,
             applyDateFilter,
             applyFilter,
-            applyPortSharingServiceFilter,
+            applyInstallationServiceFilter,
             key
         };
     },

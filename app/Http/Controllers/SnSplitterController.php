@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SnSplitter;
 use App\Models\SnBox;
 use App\Models\FiberCable;
+use App\Models\DnBox;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -47,6 +48,7 @@ class SnSplitterController extends Controller
             'port_number' => 'required|integer|min:1|max:8', // Add validation for 'port_number'
             'fiber_type' => 'required|string|in:patch_chord,distributed_route',
             'fiber_id' => 'nullable|required_if:fiber_type,distributed_route|exists:fiber_cables,id',
+            'fiber_color' => 'nullable|required_if:fiber_type,distributed_route|string|max:50',
             'core_number' => 'nullable|required_if:fiber_type,distributed_route|integer|min:1',
             'location' => [
                 'required',
@@ -100,6 +102,7 @@ class SnSplitterController extends Controller
             'port_number' => 'required|integer|min:1|max:8', // Add validation for 'port_number'
             'fiber_type' => 'required|string|in:patch_chord,distributed_route',
             'fiber_id' => 'nullable|required_if:fiber_type,distributed_route|exists:fiber_cables,id',
+            'fiber_color' => 'nullable|required_if:fiber_type,distributed_route|string|max:50',
             'core_number' => 'nullable|required_if:fiber_type,distributed_route|integer|min:1',
             'location' => [
                 'required',
@@ -148,22 +151,36 @@ class SnSplitterController extends Controller
         if (!$user->role->check_sn) {
               abort(403, 'Unauthorized access.');
         }
+        $type = $request->input('type', 'sn_splitter');
         $location = $request->input('location');
         $radius = $request->input('radius', 10); // default 10km
+        $perPage = $request->input('per_page', 10);
+        
         if (!$location) {
             return Inertia::render('SnSplitter/Nearby', [
-                'splitters' => [],
+                'splitters' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage),
+                'dnBoxes' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage),
                 'location' => null,
                 'radius' => $radius,
+                'type' => $type,
                 'error' => 'Location is required.'
             ]);
         }
-        $perPage = $request->input('per_page', 10);
-        $splitters = \App\Models\SnSplitter::nearby($location, $radius)->paginate($perPage);
+        
+        if ($type == 'sn_splitter') {
+            $splitters = \App\Models\SnSplitter::nearby($location, $radius)->paginate($perPage);
+            $dnBoxes = new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
+        } else {
+            $dnBoxes = \App\Models\DnBox::nearby($location, $radius)->paginate($perPage);
+            $splitters = new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
+        }
+        
         return Inertia::render('SnSplitter/Nearby', [
             'splitters' => $splitters,
+            'dnBoxes' => $dnBoxes,
             'location' => $location,
             'radius' => $radius,
+            'type' => $type,
             'error' => null
         ]);
     }

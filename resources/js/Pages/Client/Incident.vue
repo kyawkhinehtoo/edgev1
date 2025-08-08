@@ -411,11 +411,10 @@
 
                       <!-- supervisor  -->
                       <template v-if="user.role?.incident_oss">
-                        <div class="py-2 col-span-1 sm:col-span-1">
+                        <template v-if="form.type != 'plan_change' && form.type!='suspension' && form.type!='resume'" >
+                           <div class="py-2 col-span-1 sm:col-span-1">
                           <div class="mt-1 flex">
-                            <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> <span
-                                v-if="form.type != 'plan_change'">Assign Supervisor : </span> <span v-else>Assign Team :
-                              </span></label>
+                            <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign Supervisor : </label>
                           </div>
                         </div>
                         <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type != 'plan_change'">
@@ -427,16 +426,26 @@
                           <p v-if="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
                             $page.props.errors.supervisor_id }}</p>
                         </div>
-                        <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type == 'plan_change'">
+                        </template>
+                       <template v-else>
+                         <div class="py-2 col-span-1 sm:col-span-1">
+                          <div class="mt-1 flex">
+                            <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign Team :
+                            </label>
+                          </div>
+                        </div>
+                         <div class="py-2 col-span-4 sm:col-span-4">
                           <div class="mt-1 flex rounded-md shadow-sm">
                             <select name="partner" id="partner" v-model="form.partner_id"   class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300">
                               <option value="default">Please Assign Partner</option>
                               <option :value="form.customer_partner_id">{{ form.customer_partner_name }}</option>
                             </select>
                           </div>
-                          <p v-if="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
-                            $page.props.errors.supervisor_id }}</p>
+                          <p v-if="$page.props.errors.partner_id" class="mt-2 text-sm text-red-500">{{
+                            $page.props.errors.partner_id }}</p>
                         </div>
+                       </template>
+                       
                       </template>
 
                       <!-- end of supervsior -->
