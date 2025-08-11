@@ -187,22 +187,37 @@ class BillingController extends Controller
                         if ($customer->service_activation_date && $customer->service_activation_date->format('Y-m') == $billingPeriod) {
                         
                             $totalPortLeasingCustomer++;
-                            $daysUsed = round($customer->service_activation_date->diffInDays($lastDayOfMonth) + 1);
+                            
+                            // Check if customer is also terminated in the same month
+                            $isTerminatedSameMonth = $customer->service_termination_date && 
+                                                    $customer->service_termination_date->format('Y-m') == $billingPeriod;
+                            
+                            if ($isTerminatedSameMonth) {
+                                // Customer installed and terminated in same month - charge only for active days
+                                $daysUsed = $customer->service_activation_date->diffInDays($customer->service_termination_date) + 1;
+                                $daysUsed = round($daysUsed);
+                                $endDate = $customer->service_termination_date;
+                                $description = "Prorated MRC for {$customer->name} (Installed & Terminated same month - {$daysUsed} days)";
+                            } else {
+                                // Normal new installation - charge from activation to end of month
+                                $daysUsed = round($customer->service_activation_date->diffInDays($lastDayOfMonth) + 1);
+                                $endDate = $lastDayOfMonth;
+                                $description = "Prorated MRC for {$customer->name} ({$daysUsed} days)";
+                            }
+                            
                             $proratedMRC = ($mrc / $cal_days) * $daysUsed;
                             $proratedMRC = $proratedMRC?round($proratedMRC):0;
 
-
-                            
                             TempInvoiceItem::create([
                                 'temp_invoice_id' => $tempInvoice->id,
                                 'customer_id' => $customer->id,
                                 'type' => 'ProRatedPortLeasing',
                                 'start_date' => $customer->service_activation_date,
-                                'end_date' => $lastDayOfMonth,
+                                'end_date' => $endDate,
                                 'quantity' => 1,
                                 'unit_price' => $mrc / $cal_days,
                                 'total_amount' => $proratedMRC,
-                                'description' => "Prorated MRC for {$customer->name} ({$daysUsed} days)",
+                                'description' => $description,
                             ]);
                         
                             $totalPortLeasingAmount += $proratedMRC;
@@ -251,6 +266,16 @@ class BillingController extends Controller
                         $totalPortLeasingCustomer++;
                         $isTerminated = $customer->service_termination_date && $customer->service_termination_date->format('Y-m') == $billingPeriod;
                         $isSuspended = $customer->status->type == 'suspense';
+                        
+                        // Skip if customer was installed in the same month (already processed above)
+                        $isInstalledSameMonth = $customer->service_activation_date && 
+                                               $customer->service_activation_date->format('Y-m') == $billingPeriod;
+                        
+                        if ($isInstalledSameMonth) {
+                            // Skip - already processed in new installation section
+                            continue;
+                        }
+                        
                         // Prorated if terminated
                         if ($isTerminated) {
                             $daysUsed = round($customer->service_termination_date->diffInDays($firstDayOfMonth) + 1);
@@ -493,7 +518,7 @@ class BillingController extends Controller
                 CASE 
                     WHEN tii.type = 'FullPortLeasing' THEN CONCAT('MRC ', p.name)
                     WHEN tii.type = 'ProRatedPortLeasing' THEN 'MRC ProRated'
-                    WHEN tii.type = 'NewInstallation' THEN CONCAT('New Installation for ', i.sla_hours, ' hour')
+                    WHEN tii.type = 'NewInstallation' THEN 'New Installation'
                     WHEN tii.type = 'Materials' THEN 'Materials'
                     WHEN tii.type = 'Maintenance' THEN 'Maintenance'
                     WHEN tii.type = 'Suspension' THEN 'Suspension'

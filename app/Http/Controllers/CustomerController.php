@@ -1090,6 +1090,7 @@ class CustomerController extends Controller
                      continue;
                 }
                 if ($value == 'bandwidth') {
+
                     if ($request->bandwidth) {
                         $bandwidth = (int) $request->bandwidth;
                         $selectedService = PortSharingService::where('max_speed', '>=', $bandwidth)
@@ -1237,7 +1238,7 @@ class CustomerController extends Controller
                 if (!\Schema::hasColumn('customers', is_object($value) ? '' : $value)) {
                     continue;
                 }
-                if ($value != 'id' && $value != 'created_at' && $value != 'updated_at' && $value != 'deleted')
+                if ($value != 'id' && $value != 'created_at' && $value != 'updated_at' && $value != 'deleted' && $value != 'port_sharing_service_id')
                     $customer->$value = $request->$value;
             }// end of foreach loop
 
