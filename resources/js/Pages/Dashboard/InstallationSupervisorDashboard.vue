@@ -71,7 +71,7 @@
         </div>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
           <div v-for="(label, key) in installation_statuses" :key="key" 
                class="bg-white overflow-hidden shadow rounded-lg">
             <div class="p-5">
@@ -181,9 +181,9 @@
                       {{ row.team_assigned > 0 ? row.team_assigned : '' }}
                     </div>
                     <div v-if="row.total > 0"
-                         class="bg-blue-500 flex items-center justify-center text-xs text-white font-bold"
-                         :style="{ width: `${(row.installation_complete / row.total) * 100}%` }">
-                      {{ row.installation_complete > 0 ? row.installation_complete : '' }}
+                         class="bg-gray-500 flex items-center justify-center text-xs text-white font-bold"
+                         :style="{ width: `${(row.installation_started / row.total) * 100}%` }">
+                      {{ row.installation_started > 0 ? row.installation_started : '' }}
                     </div>
                     <div v-if="row.total > 0"
                          class="bg-purple-500 flex items-center justify-center text-xs text-white font-bold"
@@ -195,6 +195,11 @@
                          :style="{ width: `${(row.supervisor_approved / row.total) * 100}%` }">
                       {{ row.supervisor_approved > 0 ? row.supervisor_approved : '' }}
                     </div>
+                      <div v-if="row.total > 0"
+                         class="bg-blue-500 flex items-center justify-center text-xs text-white font-bold"
+                         :style="{ width: `${(row.installation_complete / row.total) * 100}%` }">
+                      {{ row.installation_complete > 0 ? row.installation_complete : '' }}
+                    </div>
                   </div>
                 </div>
                 
@@ -204,8 +209,8 @@
                     Team Assigned
                   </span>
                   <span class="flex items-center">
-                    <div class="w-3 h-3 bg-blue-500 rounded mr-1"></div>
-                    Installation Complete
+                    <div class="w-3 h-3 bg-gray-500 rounded mr-1"></div>
+                    Installation Started
                   </span>
                   <span class="flex items-center">
                     <div class="w-3 h-3 bg-purple-500 rounded mr-1"></div>
@@ -214,6 +219,10 @@
                   <span class="flex items-center">
                     <div class="w-3 h-3 bg-green-500 rounded mr-1"></div>
                     Supervisor Approved
+                  </span>
+                  <span class="flex items-center">
+                    <div class="w-3 h-3 bg-blue-500 rounded mr-1"></div>
+                    Installation Complete
                   </span>
                 </div>
               </div>

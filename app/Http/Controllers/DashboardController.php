@@ -1956,9 +1956,10 @@ class DashboardController extends Controller
         // Define installation status types
         $installation_statuses = [
             'team_assigned' => 'Team Assigned',
-            'installation_complete' => 'Installation Complete',
+            'installation_started' => 'Installation Started',
             'photo_upload_complete' => 'Photo Upload Complete',
-            'supervisor_approved' => 'Supervisor Approved'
+            'supervisor_approved' => 'Supervisor Approved',
+            'installation_complete' => 'Installation Complete',
         ];
         
         // Build supervisor matrix
