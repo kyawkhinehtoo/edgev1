@@ -150,12 +150,12 @@ class IncidentController extends Controller
                 $query->where('incidents.supervisor_id', $user->id);
             })
             ->whereNotIn('incidents.status', [3, 4])
-            ->groupBy('incidents.id')
-            ->count('incidents.id');
+          //  ->groupBy('incidents.id')
+            ->count();
 
         $ticketRequest = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
-            ->whereIn('incidents.status', [1, 5, 6, 7, 8, 9, 10,11])
+            ->whereIn('incidents.status', [1])
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
                     $query->where('incidents.partner_id', '=', $user->partner_id);
