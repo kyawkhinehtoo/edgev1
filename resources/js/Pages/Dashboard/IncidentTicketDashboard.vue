@@ -316,15 +316,10 @@
               <form @submit.prevent="applyFilters" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Filter by ISP</label>
-                  <select 
-                    v-model="filters.isp_id"
-                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  >
-                    <option value="">All ISPs</option>
-                    <option v-for="isp in isps" :key="isp.id" :value="isp.id">
-                      {{ isp.name }}
-                    </option>
-                  </select>
+                  
+                  <multiselect deselect-label="Selected already" :options="isps" track-by="id"
+                            label="name" v-model="filters.isp_id" :allow-empty="false"  :multiple="true" :taggable="false"
+                            ></multiselect>
                 </div>
                 
                 <div class="flex items-end">
@@ -357,9 +352,7 @@
                     <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Team Assigned
                     </th>
-                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Pending Team Assign
-                    </th>
+                   
                     <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Photo Upload Complete
                     </th>
@@ -389,9 +382,7 @@
                     <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
                       {{ isp_grand_total.team_assigned_tickets }}
                     </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
-                      {{ isp_grand_total.pending_team_assign }}
-                    </td>
+                  
                     <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
                       {{ isp_grand_total.photo_upload_completed }}
                     </td>
@@ -431,11 +422,7 @@
                         {{ row.team_assigned_tickets }}
                       </span>
                     </td>
-                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        {{ row.pending_team_assign }}
-                      </span>
-                    </td>
+                  
                     <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
                       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                         {{ row.photo_upload_completed }}
@@ -476,17 +463,17 @@
               <h4 class="text-md font-medium text-gray-800 mb-3">Supervisor Dashboard</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-blue-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-blue-900">Supervisor Assign (Status 6)</div>
+                  <div class="text-sm font-medium text-blue-900">Supervisor Assign </div>
                   <div class="text-xs text-blue-700 mt-1">Tickets assigned to supervisor</div>
                 </div>
                 
                 <div class="bg-green-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-green-900">Team Assigned (Status 2)</div>
+                  <div class="text-sm font-medium text-green-900">Team Assigned</div>
                   <div class="text-xs text-green-700 mt-1">Tickets assigned to field team</div>
                 </div>
                 
                 <div class="bg-yellow-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-yellow-900">Pending Team Assign (Status 1)</div>
+                  <div class="text-sm font-medium text-yellow-900">Pending Team Assign</div>
                   <div class="text-xs text-yellow-700 mt-1">Awaiting team assignment</div>
                 </div>
                 
@@ -501,12 +488,12 @@
                 </div>
                 
                 <div class="bg-orange-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-orange-900">Resolve Opened (Status 5)</div>
+                  <div class="text-sm font-medium text-orange-900">Resolve Opened</div>
                   <div class="text-xs text-orange-700 mt-1">Resolved but still open</div>
                 </div>
                 
                 <div class="bg-gray-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-gray-900">Ticket Closed (Status 3)</div>
+                  <div class="text-sm font-medium text-gray-900">Ticket Closed </div>
                   <div class="text-xs text-gray-700 mt-1">Completed and closed tickets</div>
                 </div>
               </div>
@@ -517,32 +504,32 @@
               <h4 class="text-md font-medium text-gray-800 mb-3">Team Workload Dashboard</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div class="bg-yellow-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-yellow-900">Task WIP (Status 1)</div>
+                  <div class="text-sm font-medium text-yellow-900">Task WIP </div>
                   <div class="text-xs text-yellow-700 mt-1">Tasks currently in progress</div>
                 </div>
                 
                 <div class="bg-green-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-green-900">Photo Upload Complete (Status 4)</div>
+                  <div class="text-sm font-medium text-green-900">Photo Upload Complete </div>
                   <div class="text-xs text-green-700 mt-1">Tasks with photos uploaded</div>
                 </div>
                 
                 <div class="bg-red-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-red-900">Photo Upload Rejected (Status 5)</div>
+                  <div class="text-sm font-medium text-red-900">Photo Upload Rejected </div>
                   <div class="text-xs text-red-700 mt-1">Tasks with rejected photos</div>
                 </div>
                 
                 <div class="bg-blue-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-blue-900">Supervisor Approved (Status 2)</div>
+                  <div class="text-sm font-medium text-blue-900">Supervisor Approved</div>
                   <div class="text-xs text-blue-700 mt-1">Tasks approved by supervisor</div>
                 </div>
                 
                 <div class="bg-orange-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-orange-900">Incident WIP (Status 1)</div>
+                  <div class="text-sm font-medium text-orange-900">Incident WIP </div>
                   <div class="text-xs text-orange-700 mt-1">Incidents currently in progress</div>
                 </div>
                 
                 <div class="bg-gray-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-gray-900">Incident Closed (Status 3)</div>
+                  <div class="text-sm font-medium text-gray-900">Incident Closed </div>
                   <div class="text-xs text-gray-700 mt-1">Completed incidents</div>
                 </div>
               </div>
@@ -554,23 +541,20 @@
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-yellow-50 p-4 rounded-lg">
                   <div class="text-sm font-medium text-yellow-900">Request Tickets</div>
-                  <div class="text-xs text-yellow-700 mt-1">New ticket requests (Status 1)</div>
+                  <div class="text-xs text-yellow-700 mt-1">New ticket requests </div>
                 </div>
                 
                 <div class="bg-blue-50 p-4 rounded-lg">
                   <div class="text-sm font-medium text-blue-900">Supervisor Assign</div>
-                  <div class="text-xs text-blue-700 mt-1">Tickets assigned to supervisors (Status 6)</div>
+                  <div class="text-xs text-blue-700 mt-1">Tickets assigned to supervisors </div>
                 </div>
                 
                 <div class="bg-green-50 p-4 rounded-lg">
                   <div class="text-sm font-medium text-green-900">Team Assigned</div>
-                  <div class="text-xs text-green-700 mt-1">Tickets assigned to teams (Status 2)</div>
+                  <div class="text-xs text-green-700 mt-1">Tickets assigned to teams </div>
                 </div>
                 
-                <div class="bg-yellow-50 p-4 rounded-lg">
-                  <div class="text-sm font-medium text-yellow-900">Pending Team Assign</div>
-                  <div class="text-xs text-yellow-700 mt-1">Awaiting team assignment</div>
-                </div>
+          
                 
                 <div class="bg-purple-50 p-4 rounded-lg">
                   <div class="text-sm font-medium text-purple-900">Photo Upload Complete</div>
@@ -584,12 +568,12 @@
                 
                 <div class="bg-orange-50 p-4 rounded-lg">
                   <div class="text-sm font-medium text-orange-900">Resolve Opened</div>
-                  <div class="text-xs text-orange-700 mt-1">Resolved but not closed (Status 5)</div>
+                  <div class="text-xs text-orange-700 mt-1">Resolved but not closed </div>
                 </div>
                 
                 <div class="bg-gray-50 p-4 rounded-lg">
                   <div class="text-sm font-medium text-gray-900">Ticket Closed</div>
-                  <div class="text-xs text-gray-700 mt-1">Completed and closed tickets (Status 3)</div>
+                  <div class="text-xs text-gray-700 mt-1">Completed and closed tickets </div>
                 </div>
               </div>
             </div>
@@ -603,6 +587,7 @@
 <script setup>
 import { ref } from 'vue'
 import { router } from '@inertiajs/vue3'
+import Multiselect from '@suadelabs/vue3-multiselect'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps({
@@ -617,7 +602,7 @@ const props = defineProps({
   supervisors: Array,
   supervisor_id: [String, Number],
   subcom_id: [String, Number],
-  isp_id: [String, Number],
+  isp_id: Array,
   date_from: String,
   date_to: String,
 })
@@ -627,7 +612,7 @@ const filters = ref({
   date_to: props.date_to || '',
   supervisor_id: props.supervisor_id || '',
   subcom_id: props.subcom_id || '',
-  isp_id: props.isp_id || '',
+  isp_id: props.isp_id || [],
 })
 
 const getSupervisorRowColor = (index) => {

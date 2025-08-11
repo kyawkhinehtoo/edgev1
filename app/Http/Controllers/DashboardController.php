@@ -2105,6 +2105,18 @@ class DashboardController extends Controller
         }
         $subcom_id = $request->get('subcom_id');
         $isp_id = $request->get('isp_id');
+        
+        // Handle multiselect ISP filter - extract IDs from objects if needed
+        if ($isp_id && is_array($isp_id)) {
+            // If it's an array of objects (from vue multiselect), extract the IDs
+            $isp_id = collect($isp_id)->pluck('id')->filter()->toArray();
+            
+            // If no valid IDs found, set to null to show all ISPs
+            if (empty($isp_id)) {
+                $isp_id = null;
+            }
+        }
+        
         $date_from = $request->get('date_from');
         $date_to = $request->get('date_to');
 
@@ -2345,10 +2357,13 @@ class DashboardController extends Controller
 
         // Build ISP Ticket Status Matrix
         $isps_query = DB::table('isps')
-            ->orderBy('name');
+            ->join('customers', 'isps.id', '=', 'customers.isp_id')
+            ->join('incidents','incidents.customer_id','customers.id')
+            ->select('isps.*')
+            ->orderBy('isps.name');
 
         if ($isp_id) {
-            $isps_query->where('id', $isp_id);
+            $isps_query->whereIn('isps.id', $isp_id);
         }
 
         $isps = $isps_query->get();
@@ -2390,8 +2405,7 @@ class DashboardController extends Controller
             $team_assigned_query = clone $isp_total_query;
             $row['team_assigned_tickets'] = $team_assigned_query->where('incidents.status', 2)->count();
 
-            // Pending Team Assign (status = 1) - same as request tickets
-            $row['pending_team_assign'] = $row['request_tickets'];
+  
 
             // Photo Upload Completed (tasks with completed status)
             $photo_upload_query = DB::table('incidents')
@@ -2453,7 +2467,7 @@ class DashboardController extends Controller
             'request_tickets' => 0,
             'supervisor_assign_tickets' => 0,
             'team_assigned_tickets' => 0,
-            'pending_team_assign' => 0,
+       
             'photo_upload_completed' => 0,
             'photo_approved' => 0,
             'resolve_opened' => 0,
@@ -2465,11 +2479,17 @@ class DashboardController extends Controller
             $isp_grand_total['request_tickets'] += $row['request_tickets'];
             $isp_grand_total['supervisor_assign_tickets'] += $row['supervisor_assign_tickets'];
             $isp_grand_total['team_assigned_tickets'] += $row['team_assigned_tickets'];
-            $isp_grand_total['pending_team_assign'] += $row['pending_team_assign'];
+
             $isp_grand_total['photo_upload_completed'] += $row['photo_upload_completed'];
             $isp_grand_total['photo_approved'] += $row['photo_approved'];
             $isp_grand_total['resolve_opened'] += $row['resolve_opened'];
             $isp_grand_total['ticket_closed'] += $row['ticket_closed'];
+        }
+
+        // Prepare selected ISPs for multiselect
+        $selected_isps = [];
+        if ($isp_id && is_array($isp_id)) {
+            $selected_isps = DB::table('isps')->whereIn('id', $isp_id)->orderBy('name')->get();
         }
 
         return Inertia::render("Dashboard/IncidentTicketDashboard", [
@@ -2484,7 +2504,7 @@ class DashboardController extends Controller
             'supervisors' => $supervisors,
             'supervisor_id' => $supervisor_id,
             'subcom_id' => $subcom_id,
-            'isp_id' => $isp_id,
+            'isp_id' => $selected_isps,
             'date_from' => $date_from,
             'date_to' => $date_to,
         ]);
