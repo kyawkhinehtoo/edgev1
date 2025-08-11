@@ -74,9 +74,7 @@
                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                       Total Ticket
                     </th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                      Request Tickets
-                    </th>
+              
                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                       Supervisor Assign Tickets
                     </th>
@@ -110,9 +108,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold">
                       {{ row.total_ticket }}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-                      {{ row.request_tickets }}
-                    </td>
+                   
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
                       {{ row.supervisor_assign_tickets }}
                     </td>
@@ -144,9 +140,7 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-600">
                       {{ grand_total.total_ticket }}
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
-                      {{ grand_total.request_tickets }}
-                    </td>
+               
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold">
                       {{ grand_total.supervisor_assign_tickets }}
                     </td>
@@ -310,6 +304,166 @@
           </div>
         </div>
 
+        <!-- ISP Ticket Status Matrix -->
+        <div class="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
+          <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Ticket Status Matrix by ISP
+            </h3>
+            
+            <!-- ISP Filter -->
+            <div class="mb-4">
+              <form @submit.prevent="applyFilters" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700">Filter by ISP</label>
+                  <select 
+                    v-model="filters.isp_id"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option value="">All ISPs</option>
+                    <option v-for="isp in isps" :key="isp.id" :value="isp.id">
+                      {{ isp.name }}
+                    </option>
+                  </select>
+                </div>
+                
+                <div class="flex items-end">
+                  <button 
+                    type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                  >
+                    Apply ISP Filter
+                  </button>
+                </div>
+              </form>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                      ISP Name
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Total Tickets   
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Request Tickets
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Supervisor Assign
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Team Assigned
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Pending Team Assign
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Photo Upload Complete
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Photo Approved
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Resolve Opened
+                    </th>
+                    <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ticket Closed
+                    </th>
+                  </tr>
+                    <tr class="font-bold">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r">
+                      Grand Total
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-600">
+                      {{ isp_grand_total.total_tickets }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
+                      {{ isp_grand_total.request_tickets }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
+                      {{ isp_grand_total.supervisor_assign_tickets }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
+                      {{ isp_grand_total.team_assigned_tickets }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
+                      {{ isp_grand_total.pending_team_assign }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
+                      {{ isp_grand_total.photo_upload_completed }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
+                      {{ isp_grand_total.photo_approved }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
+                      {{ isp_grand_total.resolve_opened }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center font-bold">
+                      {{ isp_grand_total.ticket_closed }}
+                    </td>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr v-for="(row, index) in isp_matrix" :key="row.isp_id" :class="getIspRowColor(index)">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r">
+                      {{ row.isp_name }}
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ row.total_tickets }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        {{ row.request_tickets }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ row.supervisor_assign_tickets }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {{ row.team_assigned_tickets }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        {{ row.pending_team_assign }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {{ row.photo_upload_completed }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        {{ row.photo_approved }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                        {{ row.resolve_opened }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-center">
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        {{ row.ticket_closed }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+               
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- Status Legend -->
         <div class="mt-6 bg-white shadow overflow-hidden sm:rounded-lg">
           <div class="px-4 py-5 sm:p-6">
@@ -393,6 +547,52 @@
                 </div>
               </div>
             </div>
+
+            <!-- ISP Matrix Legend -->
+            <div class="mb-6">
+              <h4 class="text-md font-medium text-gray-800 mb-3">ISP Ticket Status Matrix</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                  <div class="text-sm font-medium text-yellow-900">Request Tickets</div>
+                  <div class="text-xs text-yellow-700 mt-1">New ticket requests (Status 1)</div>
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg">
+                  <div class="text-sm font-medium text-blue-900">Supervisor Assign</div>
+                  <div class="text-xs text-blue-700 mt-1">Tickets assigned to supervisors (Status 6)</div>
+                </div>
+                
+                <div class="bg-green-50 p-4 rounded-lg">
+                  <div class="text-sm font-medium text-green-900">Team Assigned</div>
+                  <div class="text-xs text-green-700 mt-1">Tickets assigned to teams (Status 2)</div>
+                </div>
+                
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                  <div class="text-sm font-medium text-yellow-900">Pending Team Assign</div>
+                  <div class="text-xs text-yellow-700 mt-1">Awaiting team assignment</div>
+                </div>
+                
+                <div class="bg-purple-50 p-4 rounded-lg">
+                  <div class="text-sm font-medium text-purple-900">Photo Upload Complete</div>
+                  <div class="text-xs text-purple-700 mt-1">Tasks with completed photos</div>
+                </div>
+                
+                <div class="bg-indigo-50 p-4 rounded-lg">
+                  <div class="text-sm font-medium text-indigo-900">Photo Approved</div>
+                  <div class="text-xs text-indigo-700 mt-1">Tasks with approved photos</div>
+                </div>
+                
+                <div class="bg-orange-50 p-4 rounded-lg">
+                  <div class="text-sm font-medium text-orange-900">Resolve Opened</div>
+                  <div class="text-xs text-orange-700 mt-1">Resolved but not closed (Status 5)</div>
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg">
+                  <div class="text-sm font-medium text-gray-900">Ticket Closed</div>
+                  <div class="text-xs text-gray-700 mt-1">Completed and closed tickets (Status 3)</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -410,10 +610,14 @@ const props = defineProps({
   grand_total: Object,
   team_workload_matrix: Array,
   team_grand_total: Object,
+  isp_matrix: Array,
+  isp_grand_total: Object,
   subcoms: Array,
+  isps: Array,
   supervisors: Array,
   supervisor_id: [String, Number],
   subcom_id: [String, Number],
+  isp_id: [String, Number],
   date_from: String,
   date_to: String,
 })
@@ -423,6 +627,7 @@ const filters = ref({
   date_to: props.date_to || '',
   supervisor_id: props.supervisor_id || '',
   subcom_id: props.subcom_id || '',
+  isp_id: props.isp_id || '',
 })
 
 const getSupervisorRowColor = (index) => {
@@ -443,6 +648,18 @@ const getSubcomRowColor = (index) => {
     'bg-pink-50',    // Subcom 4
     'bg-indigo-50',  // Subcom 5
     'bg-yellow-50'   // Subcom 6
+  ]
+  return colors[index % colors.length] || 'bg-white'
+}
+
+const getIspRowColor = (index) => {
+  const colors = [
+    'bg-red-50',     // ISP 1
+    'bg-cyan-50',    // ISP 2
+    'bg-emerald-50', // ISP 3
+    'bg-violet-50',  // ISP 4
+    'bg-amber-50',   // ISP 5
+    'bg-teal-50'     // ISP 6
   ]
   return colors[index % colors.length] || 'bg-white'
 }

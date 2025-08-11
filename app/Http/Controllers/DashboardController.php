@@ -2104,6 +2104,7 @@ class DashboardController extends Controller
             $supervisor_id = $user->id; // If the user is an installation supervisor, filter by their own ID
         }
         $subcom_id = $request->get('subcom_id');
+        $isp_id = $request->get('isp_id');
         $date_from = $request->get('date_from');
         $date_to = $request->get('date_to');
 
@@ -2160,10 +2161,7 @@ class DashboardController extends Controller
 
             $row['total_ticket'] = $total_query->count();
 
-             // Request Tickets (status = 2)
-            $request_ticket_query = clone $total_query;
-            $row['request_tickets'] = $request_ticket_query->where('incidents.status', 1)->count();
-
+           
             // Supervisor Assign Tickets (status = 6)
             $supervisor_assign_query = clone $total_query;
             $row['supervisor_assign_tickets'] = $supervisor_assign_query->where('incidents.status', 6)->count();
@@ -2223,7 +2221,6 @@ class DashboardController extends Controller
         // Calculate grand totals
         $grand_total = [
             'total_ticket' => 0,
-            'request_tickets' => 0,
             'supervisor_assign_tickets' => 0,
             'team_assigned_tickets' => 0,
             'pending_team_assign' => 0,
@@ -2234,7 +2231,6 @@ class DashboardController extends Controller
         ];
 
         foreach ($supervisor_matrix as $row) {
-            $grand_total['request_tickets'] += $row['request_tickets'];
             $grand_total['supervisor_assign_tickets'] += $row['supervisor_assign_tickets'];
             $grand_total['team_assigned_tickets'] += $row['team_assigned_tickets'];
             $grand_total['pending_team_assign'] += $row['pending_team_assign'];
@@ -2347,15 +2343,148 @@ class DashboardController extends Controller
             $team_grand_total['incident_closed'] += $row['incident_closed'];
         }
 
+        // Build ISP Ticket Status Matrix
+        $isps_query = DB::table('isps')
+            ->orderBy('name');
+
+        if ($isp_id) {
+            $isps_query->where('id', $isp_id);
+        }
+
+        $isps = $isps_query->get();
+
+        $isp_matrix = [];
+        foreach ($isps as $isp) {
+            $row = [
+                'isp_id' => $isp->id,
+                'isp_name' => $isp->name,
+            ];
+
+            // Total tickets for this ISP
+            $isp_total_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->where('customers.isp_id', $isp->id)
+                ->where(function ($q) {
+                    return $q->where('customers.deleted', '=', 0)
+                        ->orWhereNull('customers.deleted');
+                });
+
+            if ($date_from) {
+                $isp_total_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $isp_total_query->whereDate('incidents.date', '<=', $date_to);
+            }
+
+            $row['total_tickets'] = $isp_total_query->count();
+
+            // Request Tickets (status = 1)
+            $request_query = clone $isp_total_query;
+            $row['request_tickets'] = $request_query->where('incidents.status', 1)->count();
+
+            // Supervisor Assign Tickets (status = 6)
+            $supervisor_assign_query = clone $isp_total_query;
+            $row['supervisor_assign_tickets'] = $supervisor_assign_query->where('incidents.status', 6)->count();
+
+            // Team Assigned Tickets (status = 2)
+            $team_assigned_query = clone $isp_total_query;
+            $row['team_assigned_tickets'] = $team_assigned_query->where('incidents.status', 2)->count();
+
+            // Pending Team Assign (status = 1) - same as request tickets
+            $row['pending_team_assign'] = $row['request_tickets'];
+
+            // Photo Upload Completed (tasks with completed status)
+            $photo_upload_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->join('tasks', 'incidents.id', '=', 'tasks.incident_id')
+                ->where('customers.isp_id', $isp->id)
+                ->where('tasks.status', 'completed')
+                ->where(function ($q) {
+                    return $q->where('customers.deleted', '=', 0)
+                        ->orWhereNull('customers.deleted');
+                });
+
+            if ($date_from) {
+                $photo_upload_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $photo_upload_query->whereDate('incidents.date', '<=', $date_to);
+            }
+
+            $row['photo_upload_completed'] = $photo_upload_query->distinct('incidents.id')->count('incidents.id');
+
+            // Photo Approved (tasks with approved status)
+            $photo_approved_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->leftJoin('tasks', 'incidents.id', '=', 'tasks.incident_id')
+                ->where('customers.isp_id', $isp->id)
+                ->where(function ($q) {
+                    return $q->where('tasks.status', 'approved')
+                        ->orWhere('incidents.status', 4); // Assuming status 4 represents photo approved
+                })
+                ->where(function ($q) {
+                    return $q->where('customers.deleted', '=', 0)
+                        ->orWhereNull('customers.deleted');
+                });
+
+            if ($date_from) {
+                $photo_approved_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $photo_approved_query->whereDate('incidents.date', '<=', $date_to);
+            }
+
+            $row['photo_approved'] = $photo_approved_query->distinct('incidents.id')->count('incidents.id');
+
+            // Resolve Opened (status = 5)
+            $resolve_opened_query = clone $isp_total_query;
+            $row['resolve_opened'] = $resolve_opened_query->where('incidents.status', 5)->count();
+
+            // Ticket Closed (status = 3)
+            $ticket_closed_query = clone $isp_total_query;
+            $row['ticket_closed'] = $ticket_closed_query->where('incidents.status', 3)->count();
+
+            $isp_matrix[] = $row;
+        }
+
+        // Calculate ISP grand totals
+        $isp_grand_total = [
+            'total_tickets' => 0,
+            'request_tickets' => 0,
+            'supervisor_assign_tickets' => 0,
+            'team_assigned_tickets' => 0,
+            'pending_team_assign' => 0,
+            'photo_upload_completed' => 0,
+            'photo_approved' => 0,
+            'resolve_opened' => 0,
+            'ticket_closed' => 0,
+        ];
+
+        foreach ($isp_matrix as $row) {
+            $isp_grand_total['total_tickets'] += $row['total_tickets'];
+            $isp_grand_total['request_tickets'] += $row['request_tickets'];
+            $isp_grand_total['supervisor_assign_tickets'] += $row['supervisor_assign_tickets'];
+            $isp_grand_total['team_assigned_tickets'] += $row['team_assigned_tickets'];
+            $isp_grand_total['pending_team_assign'] += $row['pending_team_assign'];
+            $isp_grand_total['photo_upload_completed'] += $row['photo_upload_completed'];
+            $isp_grand_total['photo_approved'] += $row['photo_approved'];
+            $isp_grand_total['resolve_opened'] += $row['resolve_opened'];
+            $isp_grand_total['ticket_closed'] += $row['ticket_closed'];
+        }
+
         return Inertia::render("Dashboard/IncidentTicketDashboard", [
             'supervisor_matrix' => $supervisor_matrix,
             'grand_total' => $grand_total,
             'team_workload_matrix' => $team_workload_matrix,
             'team_grand_total' => $team_grand_total,
+            'isp_matrix' => $isp_matrix,
+            'isp_grand_total' => $isp_grand_total,
             'subcoms' => DB::table('subcoms')->where('disabled', 0)->orderBy('name')->get(),
+            'isps' => DB::table('isps')->orderBy('name')->get(),
             'supervisors' => $supervisors,
             'supervisor_id' => $supervisor_id,
             'subcom_id' => $subcom_id,
+            'isp_id' => $isp_id,
             'date_from' => $date_from,
             'date_to' => $date_to,
         ]);
