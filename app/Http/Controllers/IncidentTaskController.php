@@ -139,8 +139,8 @@ class IncidentTaskController extends Controller
     public function getTaskChecklistValues($task_id){
 
         $task = Task::with('incident')->findOrFail($task_id);
-      
-        $subconCheckList = SubconChecklist::where('service_type', $task->incident->type)->get();
+        $service_type = ($task->incident->type=='termination')?'termination':'maintenance'; // Default service type, can be changed based on your logic
+        $subconCheckList = SubconChecklist::where('service_type', $service_type)->get();
 
         // Get existing checklist values for this customer
         $checklistValues = SubconChecklistValue::where('task_id', $task_id)->get();
@@ -176,6 +176,7 @@ class IncidentTaskController extends Controller
         $user = User::with('role')->find(Auth::user()->id);
         $task = Task::with('incident','incident.customer')->where('id', $taskId)->firstOrFail();
         $service_type = ($task->incident->type=='termination')?'termination':'maintenance'; // Default service type, can be changed based on your logic
+   
         $groups = SubconChecklistsGroup::with([
             'checklists' => function ($query) use ($service_type) {
                 $query->where('service_type', $service_type);
@@ -184,14 +185,14 @@ class IncidentTaskController extends Controller
                 $query->where('task_id', $taskId);
             }
         ])
-        ->where('category', $task->incident->type)
+        ->where('category', $service_type)
         ->get();
-        
+
         $isSupervisor = $user->role?->incident_supervisor ?? false;
        
         $status = $task?->status ?? null;
         $showValues = !$isSupervisor || in_array($status, [2,4,5]);
-
+    
         $result = $groups->map(function ($group) use ($showValues) {
             $total = count($group->checklists);
             $approved = $requested = $rejected = $remaining = $skip = 0;

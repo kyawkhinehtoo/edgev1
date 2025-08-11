@@ -266,12 +266,25 @@ export default {
           ],
         },
         {
+          name: "dashboard",
+          label: "Dashboard ",
+          icon:"fas fa-users",
+          isOpen: false,
+          links: [
+            { name: "Dashboard", route: "dashboard", icon: "fas fa-tv mr-2" , show : true},
+
+            { name: "Installation", route: "installation-supervisor-dashboard", icon: "fas fa-users-cog mr-2", show: this.supervisorAndOss() },
+            { name: "Retification", route: "incident-ticket-dashboard", icon: "fas fa-ticket-alt mr-2", show: this.supervisorAndOss() },
+            { name: "Retification RCA", route: "rca-dashboard", icon: "fas fa-search mr-2", show: this.supervisorAndOss() },
+            { name: "Retification Reporting", route: "oss-team-dashboard", icon: "fas fa-chart-bar mr-2", show: this.supervisorAndOss() },
+          ],
+        },
+         {
           name: "user",
           label: "Operation ",
           icon:"fas fa-users",
           isOpen: false,
           links: [
-            { name: "Dashboard", route: "dashboard", icon: "fas fa-tv mr-2" , show : true},
             { name: "Customer", route: "customer.index", icon: "fas fa-users mr-2",show : true },
             { name: "Feasibility Checker ", route: "sn.nearby", icon: "fas fa-circle-info mr-2" ,show: this.$page.props?.role?.check_sn == 1 },
             { name: "Service Request", route: "servicerequest.index", icon: "fas fa-tasks mr-2", show: this.$page.props?.role?.service_request == 1 },
@@ -343,10 +356,12 @@ export default {
       ],
     };
   },
+ 
   computed: {
     isAdmin() {
       return this.$page.props?.role?.id === 1 || this.$page.props?.role?.id === 2;
     },
+
     filteredPanels() {
       return this.panels.filter(panel => {
         switch (panel.name) {
@@ -370,12 +385,19 @@ export default {
             return this.$page.props.login_type == 'subcon';
           case 'servicerequest':
             return this.$page.props?.role?.service_request;
+          case 'dashboard':
+            return this.supervisorAndOss();
           return false;
         }
       });
     }
   },
   methods: {
+    supervisorAndOss() {
+      let hasAccess = this.$page.props?.role?.installation_oss || this.$page.props?.role?.incident_oss || this.$page.props?.role?.installation_supervisor || this.$page.props?.role?.incident_supervisor;
+      console.log("Supervisor and OSS Access: ", hasAccess);
+      return hasAccess;
+    },
     toggleSidebar() {
       this.sidebarOpen = !this.sidebarOpen;
     },

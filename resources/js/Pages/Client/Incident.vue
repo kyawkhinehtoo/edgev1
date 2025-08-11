@@ -30,7 +30,7 @@
               <option value="termination">Termination</option>
             </select>
           </div>
-          
+
           <div class="flex w-full">
             <span
               class="z-10  font-normal text-gray-400 absolute bg-transparent rounded text-base items-center justify-center  self-center p-2">
@@ -411,41 +411,62 @@
 
                       <!-- supervisor  -->
                       <template v-if="user.role?.incident_oss">
-                        <template v-if="form.type != 'plan_change' && form.type!='suspension' && form.type!='resume' && form.type!='termination'  " >
-                           <div class="py-2 col-span-1 sm:col-span-1">
-                          <div class="mt-1 flex">
-                            <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign Supervisor : </label>
+                        <template
+                          v-if="form.type != 'plan_change' && form.type != 'suspension' && form.type != 'resume' && form.type != 'termination'">
+                          <div class="py-2 col-span-1 sm:col-span-1">
+                            <div class="mt-1 flex">
+                              <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign
+                                Supervisor : </label>
+                            </div>
                           </div>
-                        </div>
-                        <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type != 'plan_change'">
-                          <div class="mt-1 flex rounded-md shadow-sm" v-if="supervisors?.length !== 0">
-                            <multiselect deselect-label="Selected already" :options="supervisors" track-by="id"
-                              label="name" v-model="form.supervisor" :allow-empty="true"
-                              @update:modelValue="form.supervisor_id = $event?.id"></multiselect>
+                          <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type != 'plan_change'">
+                            <div class="mt-1 flex rounded-md shadow-sm" v-if="supervisors?.length !== 0">
+                              <multiselect deselect-label="Selected already" :options="supervisors" track-by="id"
+                                label="name" v-model="form.supervisor" :allow-empty="true"
+                                @update:modelValue="form.supervisor_id = $event?.id"></multiselect>
+                            </div>
+                            <p v-if="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.supervisor_id }}</p>
                           </div>
-                          <p v-if="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
-                            $page.props.errors.supervisor_id }}</p>
-                        </div>
                         </template>
-                       <template v-else>
-                         <div class="py-2 col-span-1 sm:col-span-1">
-                          <div class="mt-1 flex">
-                            <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign Team :
-                            </label>
+                        <template v-else>
+                          <div class="py-2 col-span-1 sm:col-span-1">
+                            <div class="mt-1 flex">
+                              <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign
+                                Team :
+                              </label>
+                            </div>
                           </div>
-                        </div>
-                         <div class="py-2 col-span-4 sm:col-span-4">
-                          <div class="mt-1 flex rounded-md shadow-sm">
-                            <select name="partner" id="partner" v-model="form.partner_id"   class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300">
-                              <option value="default">Please Assign Partner</option>
-                              <option :value="form.customer_partner_id">{{ form.customer_partner_name }}</option>
-                            </select>
+                          <div class="py-2 col-span-4 sm:col-span-4">
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <select name="partner" id="partner" v-model="form.partner_id"
+                                class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300">
+                                <option value="default">Please Assign Partner</option>
+                                <option :value="form.customer_partner_id">{{ form.customer_partner_name }}</option>
+                              </select>
+                            </div>
+                            <p v-if="$page.props.errors.partner_id" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.partner_id }}</p>
                           </div>
-                          <p v-if="$page.props.errors.partner_id" class="mt-2 text-sm text-red-500">{{
-                            $page.props.errors.partner_id }}</p>
-                        </div>
-                       </template>
-                       
+                        </template>
+                         <template
+                          v-if="form.type == 'termination' && form.status== 5 ">
+                          <div class="py-2 col-span-1 sm:col-span-1">
+                            <div class="mt-1 flex">
+                              <label for="incharge" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Assign
+                                Supervisor : </label>
+                            </div>
+                          </div>
+                          <div class="py-2 col-span-4 sm:col-span-4" v-if="form.type != 'plan_change'">
+                            <div class="mt-1 flex rounded-md shadow-sm" v-if="supervisors?.length !== 0">
+                              <multiselect deselect-label="Selected already" :options="supervisors" track-by="id"
+                                label="name" v-model="form.supervisor" :allow-empty="true"
+                                @update:modelValue="form.supervisor_id = $event?.id"></multiselect>
+                            </div>
+                            <p v-if="$page.props.errors.supervisor_id" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.supervisor_id }}</p>
+                          </div>
+                        </template>
                       </template>
 
                       <!-- end of supervsior -->
@@ -459,7 +480,7 @@
                         <div class="mt-1 flex">
                           <select v-model="form.type"
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            required  @change="form.topic = null, changeType(form.type)" :disabled="checkDisable()">
+                            required @change="form.topic = null, changeType(form.type)" :disabled="checkDisable()">
                             <option value="default">Please Choose Ticket Type</option>
                             <option value="service_complaint">Service Complaint</option>
                             <!-- <option value="relocation">Relocation Request</option> -->
@@ -545,15 +566,20 @@
                             class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                             :disabled="checkDisableType()">
                             <option value="1">Request</option>
-                            <option value="6" :disabled="user.user_type != 'internal' || form.type =='plan_change'  ">Supervisor Assign</option>
+                            <option value="6" :disabled="user.user_type != 'internal' || form.type == 'plan_change'">
+                              Supervisor Assign
+                            </option>
                             <option value="2" disabled>Team Assign</option>
-                            <option value="5" :disabled="user.user_type != 'partner'">Resolved Open</option>
+
                             <option value="7" disabled>Waiting to Suspend</option>
                             <option value="8" disabled>Waiting to Reopen</option>
                             <option value="9" disabled>Waiting to Terminate</option>
-                            <option value="11" disabled>Waiting to Dismantle</option>
-                            <option value="10" :disabled="user.user_type != 'partner'">Waiting to Plan Change</option>
-                            <option value="3">Closed</option>
+                            <option value="11" :disabled="user.user_type != 'internal' || form.type != 'termination'" >Waiting to Dismantle</option>
+                            <option value="10" :disabled="(user.user_type != 'partner' || form.type != 'plan_change')">
+                              Waiting to Plan Change
+                            </option>
+                            <option value="5" :disabled="user.user_type != 'partner'">Resolved Open</option>
+                            <option value="3" :disabled="user.user_type != 'isp'">Closed</option>
                           </select>
                         </div>
                         <p v-if="$page.props.errors.status" class="mt-2 text-sm text-red-500">{{
@@ -572,7 +598,7 @@
                         <div class="mt-1 flex rounded-md shadow-sm">
                           <input type="date" v-model="form.close_date" name="close_date" id="close_date"
                             class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            :disabled="checkDisable()" />
+                            />
                         </div>
                         <p v-if="$page.props.errors.close_date" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.close_date }}</p>
@@ -581,7 +607,7 @@
                         <div class="mt-1 flex rounded-md shadow-sm">
                           <input type="time" v-model="form.close_time" name="close_time"
                             class="form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            :disabled="checkDisable()" />
+                             />
                         </div>
                         <p v-if="$page.props.errors.close_time" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.close_time }}</p>
@@ -900,15 +926,10 @@
                             class="z-10 -mt-1 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
                             <i class="fas fa-random"></i>
                           </span>
-      
-                         <input 
-                            type="date" 
-                            v-model="form.start_date"
-                            :min="nextMonthFirstDay"
-                            :max="nextMonthFirstDay"
+
+                          <input type="date" v-model="form.start_date" :min="nextMonthFirstDay" :max="nextMonthFirstDay"
                             class="pl-10 form-input focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
-                            :disabled="!user.role?.system_setting"
-                          />
+                            :disabled="!user.role?.system_setting" />
                         </div>
                         <p v-if="$page.props.errors.start_date" class="mt-2 text-sm text-red-500">{{
                           $page.props.errors.start_date }}</p>
@@ -931,45 +952,45 @@
                           $page.props.errors.description }}</p>
                       </div>
                       <!-- end of detail -->
-                      <template v-if="editMode && form.status == 3">
+                      <template v-if="editMode && (form.status == 5 || form.status == 3 )">
                         <!--  RCA -->
                         <div class="col-span-5">
                           <hr />
                         </div>
-                         <template v-if="form.type === 'service_complaint' ">
-                        <div class="py-2 col-span-1 sm:col-span-1">
-                          <div class="mt-1 flex">
-                            <label for="rca" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> RCA :
-                            </label>
+                        <template v-if="form.type === 'service_complaint'">
+                          <div class="py-2 col-span-1 sm:col-span-1">
+                            <div class="mt-1 flex">
+                              <label for="rca" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> RCA :
+                              </label>
+                            </div>
                           </div>
-                        </div>
-                        <div class="py-2 col-span-4 sm:col-span-4">
-                          <div class="mt-1 flex rounded-md shadow-sm" v-if="rootCause?.length !== 0">
-                            <multiselect deselect-label="Selected already" :options="rootCause" track-by="id"
-                              label="name" v-model="form.rca" :allow-empty="false" :disabled="checkDisable()"
-                              @update:modelValue="form.root_cause_id = $event?.id"></multiselect>
+                          <div class="py-2 col-span-4 sm:col-span-4">
+                            <div class="mt-1 flex rounded-md shadow-sm" v-if="rootCause?.length !== 0">
+                              <multiselect deselect-label="Selected already" :options="rootCause" track-by="id"
+                                label="name" v-model="form.rca" :allow-empty="false" :disabled="checkDisable()"
+                                @update:modelValue="form.root_cause_id = $event?.id"></multiselect>
+                            </div>
+                            <p v-if="$page.props.errors.root_cause_id" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.root_cause_id }}</p>
                           </div>
-                          <p v-if="$page.props.errors.root_cause_id" class="mt-2 text-sm text-red-500">{{
-                            $page.props.errors.root_cause_id }}</p>
-                        </div>
-                        <!--  RCA-->
-                        <!-- Sub RCA -->
-                        <div class="py-2 col-span-1 sm:col-span-1">
-                          <div class="mt-1 flex">
-                            <label for="sub_rca" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Sub RCA :
-                            </label>
+                          <!--  RCA-->
+                          <!-- Sub RCA -->
+                          <div class="py-2 col-span-1 sm:col-span-1">
+                            <div class="mt-1 flex">
+                              <label for="sub_rca" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Sub RCA :
+                              </label>
+                            </div>
                           </div>
-                        </div>
-                        <div class="py-2 col-span-4 sm:col-span-4">
-                          <div class="mt-1 flex rounded-md shadow-sm" v-if="subRCA?.length !== 0">
-                            <multiselect deselect-label="Selected already" :options="subRCA" track-by="id" label="name"
-                              v-model="form.sub_rca" :allow-empty="false" :disabled="checkDisable()"
-                              @update:modelValue="form.sub_root_cause_id = $event?.id"></multiselect>
+                          <div class="py-2 col-span-4 sm:col-span-4">
+                            <div class="mt-1 flex rounded-md shadow-sm" v-if="subRCA?.length !== 0">
+                              <multiselect deselect-label="Selected already" :options="subRCA" track-by="id"
+                                label="name" v-model="form.sub_rca" :allow-empty="false" :disabled="checkDisable()"
+                                @update:modelValue="form.sub_root_cause_id = $event?.id"></multiselect>
+                            </div>
+                            <p v-if="$page.props.errors.sub_root_cause_id" class="mt-2 text-sm text-red-500">{{
+                              $page.props.errors.sub_root_cause_id }}</p>
                           </div>
-                          <p v-if="$page.props.errors.sub_root_cause_id" class="mt-2 text-sm text-red-500">{{
-                            $page.props.errors.sub_root_cause_id }}</p>
-                        </div>
-                       </template>
+                        </template>
                         <!-- Sub RCA-->
                         <!-- RCA Note -->
                         <template v-if="checkDisable() == false">
@@ -1229,6 +1250,7 @@ export default {
       { id: 8, name: 'Waiting to Reopen' },
       { id: 9, name: 'Waiting To Terminate' },
       { id: 10, name: 'Waiting to Plan Change' },
+      { id: 11, name: 'Waiting to Dismantle' },
       // { id: 11, name: 'Partner Assign' },
       // { id: 12, name: 'Plan Change Complete' },
     ]);
@@ -1260,7 +1282,9 @@ export default {
     function checkDisableType() {
       if (props.user.user_type == 'partner') {
         console.log("user type is partner");
-        if (form.status == 10 || form.status == 5) {
+        //stats 10 == waiting to plan change
+        //status 5 == resolved open
+        if (form.status == 10 || form.status == 5 || form.status == 9) {
 
           return false;
         } else {
@@ -1298,7 +1322,7 @@ export default {
       var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
       var time = today.getHours() + ":" + today.getMinutes();
 
-    
+
       if (!form.close_date && incidentStatus.value != 3)
         form.close_date = date;
       if (!form.close_time && incidentStatus.value != 3)
@@ -1319,11 +1343,11 @@ export default {
       let edit_data = props.incidents_2.filter((d) => d.id == data.id)[0];
       edit(edit_data);
     }
-    
+
     const nextMonthFirstDay = ref('');
     function edit(data) {
-   
-    
+
+
       let lat_long = null;
       selected_id.value = data.id;
 
@@ -1336,7 +1360,7 @@ export default {
       if (data.maintenance_service_type)
         filteredMaintenanceServices.value = props.maintenanceServices.filter(d => d.service_type == data.maintenance_service_type);
 
-    
+
 
       let my_customer = props.customers.filter((d) => d.id == data.customer_id)[0];
       form.id = data.id;
@@ -1458,6 +1482,8 @@ export default {
         status = "Waiting to Terminate";
       } else if (data == 10) {
         status = "Waiting to Plan Change";
+      } else if (data == 11) {
+        status = "Waiting to Dismantle";
       }
       return status;
     }
@@ -1499,23 +1525,23 @@ export default {
       }
       router.get(url, { keyword: search.value }, { preserveState: true });
     };
-    const changeType =(type) => {
+    const changeType = (type) => {
       console.log("changeType : " + type);
-        if(type== 'plan_change'){
-            // Calculate first day of next month in Asia/Yangon timezone
-            const today = new Date();
-            // Get current date in Asia/Yangon
-            const yangonOffset = 6.5 * 60; // UTC+6:30 in minutes
-            const utc = today.getTime() + (today.getTimezoneOffset() * 60000);
-            const yangonDate = new Date(utc + yangonOffset * 60000);
+      if (type == 'plan_change') {
+        // Calculate first day of next month in Asia/Yangon timezone
+        const today = new Date();
+        // Get current date in Asia/Yangon
+        const yangonOffset = 6.5 * 60; // UTC+6:30 in minutes
+        const utc = today.getTime() + (today.getTimezoneOffset() * 60000);
+        const yangonDate = new Date(utc + yangonOffset * 60000);
 
-            // Get first day of next month
-            const firstDayNextMonth = new Date(yangonDate.getFullYear(), yangonDate.getMonth() + 1, 2);
+        // Get first day of next month
+        const firstDayNextMonth = new Date(yangonDate.getFullYear(), yangonDate.getMonth() + 1, 2);
 
-            // Format as YYYY-MM-DD for input type="date"
-            const formatted = firstDayNextMonth.toISOString().split('T')[0];
-            nextMonthFirstDay.value = formatted;
-            form.start_date = nextMonthFirstDay.value;
+        // Format as YYYY-MM-DD for input type="date"
+        const formatted = firstDayNextMonth.toISOString().split('T')[0];
+        nextMonthFirstDay.value = formatted;
+        form.start_date = nextMonthFirstDay.value;
       }
     }
     const changeStatus = () => {
@@ -1551,7 +1577,7 @@ export default {
       if (incidentType.value != "default") {
         url = url + "&type=" + incidentType.value;
       }
-       if (sla_hour.value != "default") {
+      if (sla_hour.value != "default") {
         url = url + "&sla_hour=" + sla_hour.value;
       }
       if (incidentBy.value != "default") {
@@ -1701,7 +1727,7 @@ export default {
 
       priorityColor();
     });
-    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA, clickStatus, checkDisable, updateCustomer, filteredMaintenanceServices, checkDisableType,nextMonthFirstDay,changeType,sla_hour };
+    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA, clickStatus, checkDisable, updateCustomer, filteredMaintenanceServices, checkDisableType, nextMonthFirstDay, changeType, sla_hour };
   },
 };
 </script>

@@ -145,6 +145,10 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::match(['get', 'post'], '/isp-dashboard', [DashboardController::class, 'ispDashboard'])->name('isp.dashboard');
 	Route::match(['get', 'post'], '/isp-installation-dashboard', [DashboardController::class, 'ispInstallationDashboard'])->name('isp.installation.dashboard');
 	Route::match(['get', 'post'], '/isp-maintenance-dashboard', [DashboardController::class, 'ispMaintenanceDashboard'])->name('isp.maintenance.dashboard');
+	Route::match(['get', 'post'], '/oss-team-dashboard', [DashboardController::class, 'ossTeamDashboard'])->name('oss-team-dashboard');
+	Route::match(['get', 'post'], '/installation-supervisor-dashboard', [DashboardController::class, 'installationSupervisorDashboard'])->name('installation-supervisor-dashboard');
+	Route::match(['get', 'post'], '/incident-ticket-dashboard', [DashboardController::class, 'incidentTicketDashboard'])->name('incident-ticket-dashboard');
+	Route::match(['get', 'post'], '/rca-dashboard', [DashboardController::class, 'rcaDashboard'])->name('rca-dashboard');
 	Route::resource('/customer',CustomerController::class);
 	Route::resource('/incident',IncidentController::class);
 	Route::get('/getCustomerHistory/{id}',[CustomerController::class,'getHistory']);

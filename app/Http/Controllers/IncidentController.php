@@ -97,7 +97,7 @@ class IncidentController extends Controller
             ->where('priority', '=', 'critical')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
-                    $query->where('customers.partner_id', '=', $user->partner_id);
+                    $query->where('incidents.partner_id', '=', $user->partner_id);
                 }
                 if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
@@ -117,7 +117,7 @@ class IncidentController extends Controller
             ->where('priority', '=', 'high')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
-                    $query->where('customers.partner_id', '=', $user->partner_id);
+                    $query->where('incidents.partner_id', '=', $user->partner_id);
                 }
                 if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
@@ -137,7 +137,7 @@ class IncidentController extends Controller
             ->where('priority',  'normal')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
-                    $query->where('customers.partner_id', '=', $user->partner_id);
+                    $query->where('incidents.partner_id', '=', $user->partner_id);
                 }
                 if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
@@ -155,10 +155,10 @@ class IncidentController extends Controller
 
         $ticketRequest = Incident::join('customers', 'incidents.customer_id', '=', 'customers.id')
             ->leftjoin('tasks', 'tasks.incident_id', 'incidents.id')
-            ->whereIn('incidents.status', [1, 5, 6, 7, 8, 9, 10])
+            ->whereIn('incidents.status', [1, 5, 6, 7, 8, 9, 10,11])
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
-                    $query->where('customers.partner_id', '=', $user->partner_id);
+                    $query->where('incidents.partner_id', '=', $user->partner_id);
                 }
                 if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
@@ -185,7 +185,7 @@ class IncidentController extends Controller
             ->where('incidents.status', '=', '2')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
-                    $query->where('customers.partner_id', '=', $user->partner_id);
+                    $query->where('incidents.partner_id', '=', $user->partner_id);
                 }
                 if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
@@ -211,7 +211,7 @@ class IncidentController extends Controller
             ->where('incidents.status', '=', '6')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
-                    $query->where('customers.partner_id', '=', $user->partner_id);
+                    $query->where('incidents.partner_id', '=', $user->partner_id);
                 }
                 if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
@@ -242,7 +242,7 @@ class IncidentController extends Controller
             ->where('incidents.status', '=', '3')
             ->when($user->user_type, function ($query, $user_type) use ($user) {
                 if ($user_type == 'partner') {
-                    $query->where('customers.partner_id', '=', $user->partner_id);
+                    $query->where('incidents.partner_id', '=', $user->partner_id);
                 }
                 if ($user_type == 'isp') {
                     $query->where('customers.isp_id', '=', $user->isp_id);
@@ -336,17 +336,17 @@ class IncidentController extends Controller
             ->when($request->status, function ($query, $status) use ($user) {
                 if ($status == 1) {
 
-                    return $query->whereIn('incidents.status', [1, 5, 6, 7, 8, 9, 10]);
+                    return $query->whereIn('incidents.status', [1, 5, 6, 7, 8, 9, 10,11]);
                 }
                 $query->where('incidents.status', '=', $status);
             }, function ($query) use ($user) {
                 if ($user->role?->incident_supervisor == 1) {
-                    return $query->whereRaw('incidents.status in (2,5,6,7,8,9,10)');
+                    return $query->whereRaw('incidents.status in (2,5,6,7,8,9,10,11)');
                 }
                 if ($user->role?->incident_oss == 1) {
-                    return $query->whereRaw('incidents.status in (1,2,5,6,7,8,9,10)');
+                    return $query->whereRaw('incidents.status in (1,2,5,6,7,8,9,10,11)');
                 }
-                return $query->whereRaw('incidents.status in (1,2,3,5,6,7,8,9,10)');
+                return $query->whereRaw('incidents.status in (1,2,3,5,6,7,8,9,10,11)');
             })
             ->when($request->keyword, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
@@ -1090,13 +1090,14 @@ class IncidentController extends Controller
             $incident->status = $request->status;
 
             $incident->start_date = $request->start_date ?? null;
-            if ($request->type == 'plan_change' || $request->type == 'suspension' || $request->type == 'resume') {
+            if ($request->type == 'plan_change' || $request->type == 'suspension' || $request->type == 'resume' || $request->type == 'termination'  ) {
 
                 $incident->new_bandwidth = $request->new_bandwidth;
                 $incident->new_maintenance_service_id = $request->new_maintenance_plan_id;
                 if ($request->partner_id) {
                     $incident->partner_id = $request->partner_id;
                     if ($incident->status == 1) {
+                       // dd($request->type);
                         switch ($request->type) {
                             case 'suspension':
                                 $incident->status = 7; // Waiting to Suspense
@@ -1106,8 +1107,10 @@ class IncidentController extends Controller
                                 break;
                             case 'plan_change':
                                 $incident->status = 10; // Waiting to Plan Change
+                                break;
                             case 'termination':
                                 $incident->status = 9; // Waiting to Terminate
+                                break;
                             default:
                                 $incident->status = 1; // Request
                                 break;
@@ -1169,7 +1172,7 @@ class IncidentController extends Controller
             $incident->relocation_service_id = $request->relocation_service_id ?? null;
             //  broadcast(new UpdateIncident($request->input('id'),$request->status))->toOthers();
 
-            $incident->closed_by = Auth::user()->id;
+           // $incident->closed_by = Auth::user()->id;
             $incident->update();
             // $notiUsers  = User::whereHas('role', function ($query) {
             //     $query->where('enable_incident_notification', 1);

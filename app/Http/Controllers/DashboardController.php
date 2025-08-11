@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Status;
 use App\Models\Township;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -1203,6 +1204,323 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function ossTeamDashboard(Request $request){
+        
+        // Accept both GET and POST for date filter
+        $date_from = $request->input('date_from');
+        $date_to = $request->input('date_to');
+        // If no date_from and date_to, default to current week
+        if (!$date_from && !$date_to) {
+            $date_from = now()->startOfDay()->format('Y-m-d');
+            $date_to = now()->endOfDay()->format('Y-m-d');
+        }
+        $zone_id = $request->input('zone_id');
+        $city_id = $request->input('city_id');
+
+        $user = User::with('role')->find(Auth::id());
+        if (!$user || ($user->user_type != 'internal' && !$user->role?->incident_oss)) {
+            return redirect(route('home'));
+        }
+
+        // Define ticket types based on incident types
+        $ticket_types = [
+            'total_ticket' => 'Total Ticket',
+            'new_installation_ticket' => 'New Installation Ticket', 
+            'rectification_ticket' => 'Rectification Ticket',
+            'suspend_ticket' => 'Suspend Ticket',
+            'plan_change_ticket' => 'Plan Change Ticket'
+        ];
+
+        // Get all cities
+        $cities = DB::table('cities')->orderBy('name')->get();
+
+        // Get zones based on city filter
+        $zones_query = DB::table('zones')->where('is_active', 1);
+        if ($city_id) {
+            $zones_query->where('city_id', $city_id);
+        }
+        $zones = $zones_query->get();
+
+        // Build matrix by Zone
+        $zone_matrix = [];
+        $filtered_zones = $zone_id ? $zones->where('id', $zone_id) : $zones;
+        
+        foreach ($filtered_zones as $zone) {
+            $row = [
+                'zone_id' => $zone->id,
+                'zone_name' => $zone->name,
+            ];
+            
+            // Total Ticket
+            $total_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                ->join('townships', 'customer_addresses.township_id', '=', 'townships.id')
+                ->join('township_zone', 'townships.id', '=', 'township_zone.township_id')
+                ->where('customer_addresses.is_current', 1)
+                ->where('township_zone.zone_id', $zone->id)
+                ->whereNotIn('incidents.status', [4]);
+            
+            // Add city filter to the query
+            if ($city_id) {
+                $total_query->where('townships.city_id', $city_id);
+            }
+            
+            if ($date_from) {
+                $total_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $total_query->whereDate('incidents.date', '<=', $date_to);
+            }
+            
+            $row['total_ticket'] = $total_query->count();
+            
+            // New Installation Ticket (customers with new installation status)
+            $new_installation_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                ->join('townships', 'customer_addresses.township_id', '=', 'townships.id')
+                ->join('township_zone', 'townships.id', '=', 'township_zone.township_id')
+                ->join('status', 'customers.status_id', '=', 'status.id')
+                ->where('customer_addresses.is_current', 1)
+                ->where('township_zone.zone_id', $zone->id)
+                ->where('status.type', 'new')
+                ->whereNotIn('incidents.status', [4]);
+            
+            // Add city filter
+            if ($city_id) {
+                $new_installation_query->where('townships.city_id', $city_id);
+            }
+            
+            if ($date_from) {
+                $new_installation_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $new_installation_query->whereDate('incidents.date', '<=', $date_to);
+            }
+            
+            $row['new_installation_ticket'] = $new_installation_query->count();
+            
+            // Rectification Ticket (service complaints)
+            $rectification_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                ->join('townships', 'customer_addresses.township_id', '=', 'townships.id')
+                ->join('township_zone', 'townships.id', '=', 'township_zone.township_id')
+                ->where('customer_addresses.is_current', 1)
+                ->where('township_zone.zone_id', $zone->id)
+                ->where('incidents.type', 'service_complaint')
+                ->whereNotIn('incidents.status', [4]);
+            
+            // Add city filter
+            if ($city_id) {
+                $rectification_query->where('townships.city_id', $city_id);
+            }
+            
+            if ($date_from) {
+                $rectification_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $rectification_query->whereDate('incidents.date', '<=', $date_to);
+            }
+            
+            $row['rectification_ticket'] = $rectification_query->count();
+            
+            // Suspend Ticket
+            $suspend_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                ->join('townships', 'customer_addresses.township_id', '=', 'townships.id')
+                ->join('township_zone', 'townships.id', '=', 'township_zone.township_id')
+                ->where('customer_addresses.is_current', 1)
+                ->where('township_zone.zone_id', $zone->id)
+                ->where('incidents.type', 'suspension')
+                ->whereNotIn('incidents.status', [4]);
+            
+            // Add city filter
+            if ($city_id) {
+                $suspend_query->where('townships.city_id', $city_id);
+            }
+            
+            if ($date_from) {
+                $suspend_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $suspend_query->whereDate('incidents.date', '<=', $date_to);
+            }
+            
+            $row['suspend_ticket'] = $suspend_query->count();
+            
+            // Plan Change Ticket
+            $plan_change_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                ->join('townships', 'customer_addresses.township_id', '=', 'townships.id')
+                ->join('township_zone', 'townships.id', '=', 'township_zone.township_id')
+                ->where('customer_addresses.is_current', 1)
+                ->where('township_zone.zone_id', $zone->id)
+                ->where('incidents.type', 'plan_change')
+                ->whereNotIn('incidents.status', [4]);
+            
+            // Add city filter
+            if ($city_id) {
+                $plan_change_query->where('townships.city_id', $city_id);
+            }
+            
+            if ($date_from) {
+                $plan_change_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $plan_change_query->whereDate('incidents.date', '<=', $date_to);
+            }
+            
+            $row['plan_change_ticket'] = $plan_change_query->count();
+            
+            $zone_matrix[] = $row;
+        }
+
+        // Build matrix by Township for each zone
+        $township_matrix = [];
+        foreach ($filtered_zones as $zone) {
+            $townships_query = DB::table('townships')
+                ->join('township_zone', 'townships.id', '=', 'township_zone.township_id')
+                ->where('township_zone.zone_id', $zone->id);
+            
+            // Add city filter to townships
+            if ($city_id) {
+                $townships_query->where('townships.city_id', $city_id);
+            }
+            
+            $townships = $townships_query->select('townships.id', 'townships.name')->get();
+                
+            foreach ($townships as $township) {
+                $row = [
+                    'zone_id' => $zone->id,
+                    'zone_name' => $zone->name,
+                    'township_id' => $township->id,
+                    'township_name' => $township->name,
+                ];
+                
+                // Total Ticket
+                $total_query = DB::table('incidents')
+                    ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                    ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                    ->where('customer_addresses.is_current', 1)
+                    ->where('customer_addresses.township_id', $township->id)
+                    ->whereNotIn('incidents.status', [4]);
+                
+                if ($date_from) {
+                    $total_query->whereDate('incidents.date', '>=', $date_from);
+                }
+                if ($date_to) {
+                    $total_query->whereDate('incidents.date', '<=', $date_to);
+                }
+                
+                $row['total_ticket'] = $total_query->count();
+                
+                // New Installation Ticket
+                $new_installation_query = DB::table('incidents')
+                    ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                    ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                    ->join('status', 'customers.status_id', '=', 'status.id')
+                    ->where('customer_addresses.is_current', 1)
+                    ->where('customer_addresses.township_id', $township->id)
+                    ->where('status.type', 'new')
+                    ->whereNotIn('incidents.status', [4]);
+                
+                if ($date_from) {
+                    $new_installation_query->whereDate('incidents.date', '>=', $date_from);
+                }
+                if ($date_to) {
+                    $new_installation_query->whereDate('incidents.date', '<=', $date_to);
+                }
+                
+                $row['new_installation_ticket'] = $new_installation_query->count();
+                
+                // Rectification Ticket
+                $rectification_query = DB::table('incidents')
+                    ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                    ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                    ->where('customer_addresses.is_current', 1)
+                    ->where('customer_addresses.township_id', $township->id)
+                    ->where('incidents.type', 'service_complaint')
+                    ->whereNotIn('incidents.status', [4]);
+                
+                if ($date_from) {
+                    $rectification_query->whereDate('incidents.date', '>=', $date_from);
+                }
+                if ($date_to) {
+                    $rectification_query->whereDate('incidents.date', '<=', $date_to);
+                }
+                
+                $row['rectification_ticket'] = $rectification_query->count();
+                
+                // Suspend Ticket
+                $suspend_query = DB::table('incidents')
+                    ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                    ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                    ->where('customer_addresses.is_current', 1)
+                    ->where('customer_addresses.township_id', $township->id)
+                    ->where('incidents.type', 'suspension')
+                    ->whereNotIn('incidents.status', [4]);
+                
+                if ($date_from) {
+                    $suspend_query->whereDate('incidents.date', '>=', $date_from);
+                }
+                if ($date_to) {
+                    $suspend_query->whereDate('incidents.date', '<=', $date_to);
+                }
+                
+                $row['suspend_ticket'] = $suspend_query->count();
+                
+                // Plan Change Ticket
+                $plan_change_query = DB::table('incidents')
+                    ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                    ->join('customer_addresses', 'customers.id', '=', 'customer_addresses.customer_id')
+                    ->where('customer_addresses.is_current', 1)
+                    ->where('customer_addresses.township_id', $township->id)
+                    ->where('incidents.type', 'plan_change')
+                    ->whereNotIn('incidents.status', [4]);
+                
+                if ($date_from) {
+                    $plan_change_query->whereDate('incidents.date', '>=', $date_from);
+                }
+                if ($date_to) {
+                    $plan_change_query->whereDate('incidents.date', '<=', $date_to);
+                }
+                
+                $row['plan_change_ticket'] = $plan_change_query->count();
+                
+                $township_matrix[] = $row;
+            }
+        }
+
+        // Calculate grand totals
+        $grand_total = [];
+        foreach ($ticket_types as $key => $label) {
+            $grand_total[$key] = 0;
+        }
+        
+        foreach ($zone_matrix as $zone_row) {
+            foreach ($ticket_types as $key => $label) {
+                $grand_total[$key] += $zone_row[$key];
+            }
+        }
+
+        return Inertia::render("Dashboard/OssTeamDashboard", [
+            'ticket_types' => $ticket_types,
+            'zone_matrix' => $zone_matrix,
+            'township_matrix' => $township_matrix,
+            'grand_total' => $grand_total,
+            'zones' => $zones,
+            'cities' => $cities,
+            'city_id' => $city_id,
+            'zone_id' => $zone_id,
+            'date_from' => $date_from,
+            'date_to' => $date_to,
+        ]);
+    }
+
    public function ispMaintenanceDashboard(Request $request){
         
         // Accept both GET and POST for date filter
@@ -1599,6 +1917,528 @@ class DashboardController extends Controller
             'selected_maintenance_service' => $selected_maintenance_service,
             'months' => $months,
             'chart_data' => $chart_data,
+            'date_from' => $date_from,
+            'date_to' => $date_to,
+        ]);
+    }
+
+    public function installationSupervisorDashboard(Request $request)
+    {
+        $user = User::with('role')->find(Auth::id());
+
+        // Get filter parameters
+        $supervisor_id = $request->get('supervisor_id');
+        if ($user->role->installation_supervisor) {
+            $supervisor_id = $user->id; // If the user is an installation supervisor, filter by their own ID
+        }
+        $installation_status = $request->get('installation_status');
+        $subcom_id = $request->get('subcom_id');
+        $date_from = $request->get('date_from');
+        $date_to = $request->get('date_to');
+
+        // Get all installation supervisors (internal users with installation_supervisor role)
+        $supervisors = User::join('roles', 'users.role_id', '=', 'roles.id')
+            ->where('users.user_type', 'internal')
+            ->where('roles.installation_supervisor', 1)
+            ->where(function ($query) {
+                return $query->where('users.disabled', '=', 0)
+                    ->orWhereNull('users.disabled');
+            })
+            ->when($supervisor_id, function ($query) use ($supervisor_id, $user) {
+                if ($user->role->installation_supervisor) {
+                    return $query->where('users.id', $supervisor_id);
+                }
+            })
+            ->select('users.id', 'users.name')
+            ->orderBy('users.name')
+            ->get();
+
+        // Define installation status types
+        $installation_statuses = [
+            'team_assigned' => 'Team Assigned',
+            'installation_complete' => 'Installation Complete',
+            'photo_upload_complete' => 'Photo Upload Complete',
+            'supervisor_approved' => 'Supervisor Approved'
+        ];
+
+        // Build supervisor matrix
+        $supervisor_matrix = [];
+        foreach ($supervisors as $supervisor) {
+            $row = [
+                'supervisor_id' => $supervisor->id,
+                'supervisor_name' => $supervisor->name,
+            ];
+
+            // Count customers for each installation status
+            foreach ($installation_statuses as $status_key => $status_label) {
+                $query = DB::table('customers')
+                    ->join('status', 'customers.status_id', '=', 'status.id')
+                    ->where('customers.supervisor_id', $supervisor->id)
+                    ->where('customers.installation_status', $status_key)
+                    ->where('status.type', 'active')
+                    ->where(function ($q) {
+                        return $q->where('customers.deleted', '=', 0)
+                            ->orWhereNull('customers.deleted');
+                    });
+
+                // Apply date filters if provided
+                if ($date_from) {
+                    $query->whereDate('customers.created_at', '>=', $date_from);
+                }
+                if ($date_to) {
+                    $query->whereDate('customers.created_at', '<=', $date_to);
+                }
+
+                $row[$status_key] = $query->count();
+            }
+
+            // Calculate total for this supervisor
+            $row['total'] = array_sum(array_intersect_key($row, array_flip(array_keys($installation_statuses))));
+
+            $supervisor_matrix[] = $row;
+        }
+
+        // Calculate grand totals
+        $grand_total = [];
+        foreach ($installation_statuses as $status_key => $status_label) {
+            $grand_total[$status_key] = 0;
+        }
+        $grand_total['total'] = 0;
+
+        foreach ($supervisor_matrix as $row) {
+            foreach ($installation_statuses as $status_key => $status_label) {
+                $grand_total[$status_key] += $row[$status_key];
+            }
+            $grand_total['total'] += $row['total'];
+        }
+
+        // Build Team Workload Matrix (Subcoms) - Installation focused
+        $subcoms_query = DB::table('subcoms')
+            ->where('disabled', 0)
+            ->select('id', 'name')
+            ->orderBy('name');
+
+        if ($subcom_id) {
+            $subcoms_query->where('id', $subcom_id);
+        }
+
+        $subcoms = $subcoms_query->get();
+
+        $team_workload_matrix = [];
+        foreach ($subcoms as $subcom) {
+            $row = [
+                'subcom_id' => $subcom->id,
+                'subcom_name' => $subcom->name,
+            ];
+
+            // Total customers assigned to this subcom
+            $total_customers_query = DB::table('customers')
+                ->join('status', 'customers.status_id', '=', 'status.id')
+                ->where('customers.subcom_id', $subcom->id)
+                ->where('status.type', 'active')
+                ->where(function ($q) {
+                    return $q->where('customers.deleted', '=', 0)
+                        ->orWhereNull('customers.deleted');
+                });
+
+            if ($date_from) {
+                $total_customers_query->whereDate('customers.created_at', '>=', $date_from);
+            }
+            if ($date_to) {
+                $total_customers_query->whereDate('customers.created_at', '<=', $date_to);
+            }
+
+            $row['total_customers'] = $total_customers_query->count();
+
+            // Installation Status Counts
+            foreach ($installation_statuses as $status_key => $status_label) {
+                $status_query = clone $total_customers_query;
+                $row[$status_key] = $status_query->where('customers.installation_status', $status_key)->count();
+            }
+
+            $team_workload_matrix[] = $row;
+        }
+
+        // Calculate team workload grand totals
+        $team_grand_total = [
+            'total_customers' => 0,
+        ];
+
+        foreach ($installation_statuses as $status_key => $status_label) {
+            $team_grand_total[$status_key] = 0;
+        }
+
+        foreach ($team_workload_matrix as $row) {
+            $team_grand_total['total_customers'] += $row['total_customers'];
+            foreach ($installation_statuses as $status_key => $status_label) {
+                $team_grand_total[$status_key] += $row[$status_key];
+            }
+        }
+
+        return Inertia::render("Dashboard/InstallationSupervisorDashboard", [
+            'installation_statuses' => $installation_statuses,
+            'supervisor_matrix' => $supervisor_matrix,
+            'grand_total' => $grand_total,
+            'team_workload_matrix' => $team_workload_matrix,
+            'team_grand_total' => $team_grand_total,
+            'subcoms' => DB::table('subcoms')->where('disabled', 0)->orderBy('name')->get(),
+            'supervisors' => $supervisors,
+            'supervisor_id' => $supervisor_id,
+            'installation_status' => $installation_status,
+            'subcom_id' => $subcom_id,
+            'date_from' => $date_from,
+            'date_to' => $date_to,
+        ]);
+    }
+
+    public function incidentTicketDashboard(Request $request)
+    {
+        // Get filter parameters
+         $user = User::with('role')->find(Auth::id());
+
+        // Get filter parameters
+        $supervisor_id = $request->get('supervisor_id');
+        if ($user->role->installation_supervisor) {
+            $supervisor_id = $user->id; // If the user is an installation supervisor, filter by their own ID
+        }
+        $subcom_id = $request->get('subcom_id');
+        $date_from = $request->get('date_from');
+        $date_to = $request->get('date_to');
+
+        // Get all incident supervisors (internal users with incident_supervisor role)
+        $supervisors = User::join('roles', 'users.role_id', '=', 'roles.id')
+            ->where('users.user_type', 'internal')
+            ->where('roles.incident_supervisor', 1)
+            ->where(function ($query) {
+                return $query->where('users.disabled', '=', 0)
+                    ->orWhereNull('users.disabled');
+            })
+            ->where(function ($query) use ($supervisor_id, $user) {
+                if ($user->role->incident_supervisor) {
+                    return $query->where('users.id', $supervisor_id);
+                }
+            })
+            ->select('users.id', 'users.name')
+            ->orderBy('users.name')
+            ->get();
+
+        // Define incident status types based on the image and Incident.vue
+        $incident_statuses = [
+            6 => 'Supervisor Assign',
+            2 => 'Team Assigned',
+            1 => 'Pending Team Assign',
+            4 => 'Photo Upload Completed',
+            2 => 'Photo Approved',
+            5 => 'Resolve Opened',
+            3 => 'Ticket Closed'
+        ];
+
+        // Build supervisor matrix
+        $supervisor_matrix = [];
+        foreach ($supervisors as $supervisor) {
+            $row = [
+                'supervisor_id' => $supervisor->id,
+                'supervisor_name' => $supervisor->name,
+            ];
+
+            // Total tickets for this supervisor
+            $total_query = DB::table('incidents')
+                ->where('incidents.supervisor_id', $supervisor->id);
+
+            if ($date_from) {
+                $total_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $total_query->whereDate('incidents.date', '<=', $date_to);
+            }
+
+            $row['total_ticket'] = $total_query->count();
+
+            // Supervisor Assign Tickets (status = 6)
+            $supervisor_assign_query = clone $total_query;
+            $row['supervisor_assign_tickets'] = $supervisor_assign_query->where('incidents.status', 6)->count();
+
+            // Team Assigned Tickets (status = 2)
+            $team_assigned_query = clone $total_query;
+            $row['team_assigned_tickets'] = $team_assigned_query->where('incidents.status', 2)->count();
+
+            // Pending Team Assign (status = 1)
+            $pending_query = clone $total_query;
+            $row['pending_team_assign'] = $pending_query->where('incidents.status', 1)->count();
+
+            // Photo Upload Completed (tasks with completed status)
+            $photo_upload_query = DB::table('incidents')
+                ->join('tasks', 'incidents.id', '=', 'tasks.incident_id')
+                ->where('incidents.supervisor_id', $supervisor->id)
+                ->where('tasks.status', 'completed');
+
+            if ($date_from) {
+                $photo_upload_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $photo_upload_query->whereDate('incidents.date', '<=', $date_to);
+            }
+
+            $row['photo_upload_completed'] = $photo_upload_query->distinct('incidents.id')->count('incidents.id');
+
+            // Photo Approved (tasks with approved status or incidents with specific status)
+            $photo_approved_query = DB::table('incidents')
+                ->leftJoin('tasks', 'incidents.id', '=', 'tasks.incident_id')
+                ->where('incidents.supervisor_id', $supervisor->id)
+                ->where(function ($q) {
+                    return $q->where('tasks.status', 'approved')
+                        ->orWhere('incidents.status', 4); // Assuming status 4 represents photo approved
+                });
+
+            if ($date_from) {
+                $photo_approved_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $photo_approved_query->whereDate('incidents.date', '<=', $date_to);
+            }
+
+            $row['photo_approved'] = $photo_approved_query->distinct('incidents.id')->count('incidents.id');
+
+            // Resolve Opened (status = 5)
+            $resolve_opened_query = clone $total_query;
+            $row['resolve_opened'] = $resolve_opened_query->where('incidents.status', 5)->count();
+
+            // Ticket Closed (status = 3)
+            $ticket_closed_query = clone $total_query;
+            $row['ticket_closed'] = $ticket_closed_query->where('incidents.status', 3)->count();
+
+            $supervisor_matrix[] = $row;
+        }
+
+        // Calculate grand totals
+        $grand_total = [
+            'total_ticket' => 0,
+            'supervisor_assign_tickets' => 0,
+            'team_assigned_tickets' => 0,
+            'pending_team_assign' => 0,
+            'photo_upload_completed' => 0,
+            'photo_approved' => 0,
+            'resolve_opened' => 0,
+            'ticket_closed' => 0,
+        ];
+
+        foreach ($supervisor_matrix as $row) {
+            $grand_total['total_ticket'] += $row['total_ticket'];
+            $grand_total['supervisor_assign_tickets'] += $row['supervisor_assign_tickets'];
+            $grand_total['team_assigned_tickets'] += $row['team_assigned_tickets'];
+            $grand_total['pending_team_assign'] += $row['pending_team_assign'];
+            $grand_total['photo_upload_completed'] += $row['photo_upload_completed'];
+            $grand_total['photo_approved'] += $row['photo_approved'];
+            $grand_total['resolve_opened'] += $row['resolve_opened'];
+            $grand_total['ticket_closed'] += $row['ticket_closed'];
+        }
+
+        // Build Team Workload Matrix (Subcoms)
+        $subcoms_query = DB::table('subcoms')
+            ->where('disabled', 0)
+            ->select('id', 'name')
+            ->orderBy('name');
+
+        if ($subcom_id) {
+            $subcoms_query->where('id', $subcom_id);
+        }
+
+        $subcoms = $subcoms_query->get();
+
+        $team_workload_matrix = [];
+        foreach ($subcoms as $subcom) {
+            $row = [
+                'subcom_id' => $subcom->id,
+                'subcom_name' => $subcom->name,
+            ];
+
+            // Total tasks assigned to this subcom (through customers)
+            $total_tasks_query = DB::table('tasks')
+                ->join('incidents', 'tasks.incident_id', '=', 'incidents.id')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->where('customers.subcom_id', $subcom->id)
+                ->where(function ($q) {
+                    return $q->where('customers.deleted', '=', 0)
+                        ->orWhereNull('customers.deleted');
+                });
+
+            if ($date_from) {
+                $total_tasks_query->whereDate('tasks.created_at', '>=', $date_from);
+            }
+            if ($date_to) {
+                $total_tasks_query->whereDate('tasks.created_at', '<=', $date_to);
+            }
+
+            $row['total_tasks'] = $total_tasks_query->count();
+
+            // Task Status Counts
+            // WIP (status = 1)
+            $task_wip_query = clone $total_tasks_query;
+            $row['task_wip'] = $task_wip_query->where('tasks.status', '1')->count();
+
+            // Photo Upload Complete (status = 4)
+            $task_photo_complete_query = clone $total_tasks_query;
+            $row['task_photo_complete'] = $task_photo_complete_query->where('tasks.status', '4')->count();
+
+            // Photo Upload Rejected (status = 5)
+            $task_photo_rejected_query = clone $total_tasks_query;
+            $row['task_photo_rejected'] = $task_photo_rejected_query->where('tasks.status', '5')->count();
+
+            // Supervisor Approved (status = 2)
+            $task_approved_query = clone $total_tasks_query;
+            $row['task_approved'] = $task_approved_query->where('tasks.status', '2')->count();
+
+            // Incident Status Counts for this subcom
+            $incident_base_query = DB::table('incidents')
+                ->join('customers', 'incidents.customer_id', '=', 'customers.id')
+                ->where('customers.subcom_id', $subcom->id)
+                ->where(function ($q) {
+                    return $q->where('customers.deleted', '=', 0)
+                        ->orWhereNull('customers.deleted');
+                });
+
+            if ($date_from) {
+                $incident_base_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $incident_base_query->whereDate('incidents.date', '<=', $date_to);
+            }
+
+            // Incident WIP (status = 1)
+            $incident_wip_query = clone $incident_base_query;
+            $row['incident_wip'] = $incident_wip_query->where('incidents.status', 1)->count();
+
+            // Incident Closed (status = 3)
+            $incident_closed_query = clone $incident_base_query;
+            $row['incident_closed'] = $incident_closed_query->where('incidents.status', 3)->count();
+
+            $team_workload_matrix[] = $row;
+        }
+
+        // Calculate team workload grand totals
+        $team_grand_total = [
+            'total_tasks' => 0,
+            'task_wip' => 0,
+            'task_photo_complete' => 0,
+            'task_photo_rejected' => 0,
+            'task_approved' => 0,
+            'incident_wip' => 0,
+            'incident_closed' => 0,
+        ];
+
+        foreach ($team_workload_matrix as $row) {
+            $team_grand_total['total_tasks'] += $row['total_tasks'];
+            $team_grand_total['task_wip'] += $row['task_wip'];
+            $team_grand_total['task_photo_complete'] += $row['task_photo_complete'];
+            $team_grand_total['task_photo_rejected'] += $row['task_photo_rejected'];
+            $team_grand_total['task_approved'] += $row['task_approved'];
+            $team_grand_total['incident_wip'] += $row['incident_wip'];
+            $team_grand_total['incident_closed'] += $row['incident_closed'];
+        }
+
+        return Inertia::render("Dashboard/IncidentTicketDashboard", [
+            'supervisor_matrix' => $supervisor_matrix,
+            'grand_total' => $grand_total,
+            'team_workload_matrix' => $team_workload_matrix,
+            'team_grand_total' => $team_grand_total,
+            'subcoms' => DB::table('subcoms')->where('disabled', 0)->orderBy('name')->get(),
+            'supervisors' => $supervisors,
+            'supervisor_id' => $supervisor_id,
+            'subcom_id' => $subcom_id,
+            'date_from' => $date_from,
+            'date_to' => $date_to,
+        ]);
+    }
+
+    public function rcaDashboard(Request $request)
+    {
+        // Get filter parameters
+        $date_from = $request->get('date_from');
+        $date_to = $request->get('date_to');
+
+        // Set default date range to current week if not provided
+        if (!$date_from && !$date_to) {
+            $date_from = now()->startOfWeek()->format('Y-m-d');
+            $date_to = now()->endOfWeek()->format('Y-m-d');
+        }
+
+        // Get all root causes for maintenance incidents
+        $root_causes = DB::table('root_causes')
+            ->where('status', 'active') // Active status
+            ->where('is_maintenance', 1) // Maintenance incidents only
+            ->orderBy('name')
+            ->get();
+     
+        // Build RCA matrix
+        $rca_matrix = [];
+        foreach ($root_causes as $root_cause) {
+            $row = [
+                'root_cause_id' => $root_cause->id,
+                'root_cause_name' => $root_cause->name,
+            ];
+
+            // Count incidents for this root cause
+            $incident_query = DB::table('incidents')
+                ->where('root_cause_id', $root_cause->id)
+                ->where('type', 'service_complaint'); // Assuming to count service complaints only
+             
+
+            // Apply date filters
+            if ($date_from) {
+                $incident_query->whereDate('incidents.date', '>=', $date_from);
+            }
+            if ($date_to) {
+                $incident_query->whereDate('incidents.date', '<=', $date_to);
+            }
+
+            $row['total_incidents'] = $incident_query->count();
+
+            // Get incidents by status for this root cause
+            $status_counts = DB::table('incidents')
+                ->where('root_cause_id', $root_cause->id)
+                ->where('type', 'service_complaint')
+                ->when($date_from, function ($query) use ($date_from) {
+                    return $query->whereDate('incidents.date', '>=', $date_from);
+                })
+                ->when($date_to, function ($query) use ($date_to) {
+                    return $query->whereDate('incidents.date', '<=', $date_to);
+                })
+                ->select(
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw('SUM(CASE WHEN status = 3 THEN 1 ELSE 0 END) as closed_incidents'),
+                    DB::raw('SUM(CASE WHEN status = 5 THEN 1 ELSE 0 END) as resolved_incidents')
+                )
+                ->first();
+
+         
+            $row['closed_incidents'] = $status_counts->closed_incidents ?? 0;
+            $row['resolved_incidents'] = $status_counts->resolved_incidents ?? 0;
+
+            $rca_matrix[] = $row;
+        }
+
+        // Calculate grand totals
+        $grand_total = [
+            'resolved_incidents' => 0,
+            'closed_incidents' => 0,
+        ];
+
+        foreach ($rca_matrix as $row) {
+            $grand_total['closed_incidents'] += $row['closed_incidents'];
+            $grand_total['resolved_incidents'] += $row['resolved_incidents'];
+        }
+
+        // Get top 5 root causes by incident count for chart data
+        $top_root_causes = collect($rca_matrix)
+            ->sortByDesc('total_incidents')
+            ->take(5)
+            ->values()
+            ->toArray();
+
+        return Inertia::render("Dashboard/RcaDashboard", [
+            'rca_matrix' => $rca_matrix,
+            'grand_total' => $grand_total,
+            'top_root_causes' => $top_root_causes,
             'date_from' => $date_from,
             'date_to' => $date_to,
         ]);
