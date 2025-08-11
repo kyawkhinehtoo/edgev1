@@ -579,7 +579,7 @@
                               Waiting to Plan Change
                             </option>
                             <option value="5" :disabled="user.user_type != 'partner'">Resolved Open</option>
-                            <option value="3" :disabled="user.user_type != 'isp'">Closed</option>
+                            <option value="3" >Closed</option>
                           </select>
                         </div>
                         <p v-if="$page.props.errors.status" class="mt-2 text-sm text-red-500">{{

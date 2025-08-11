@@ -85,7 +85,7 @@ class IncidentTaskController extends Controller
             ->when($user->role?->incident_supervisor, function($query) use ($user){
                 $query->where('i.supervisor_id',$user->id);
              })
-            ->whereIn('i.status',[1,2,3,5])
+            ->whereIn('i.status',[1,2,3,5,11])
             ->when($request->status, function ($query, $status) {
                 if ($status == 1){
                     $query->whereIn('tasks.status', [1,4,5]);
