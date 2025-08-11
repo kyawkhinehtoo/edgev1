@@ -2124,15 +2124,19 @@ class DashboardController extends Controller
             ->orderBy('users.name')
             ->get();
 
-        // Define incident status types based on the image and Incident.vue
+        // Define incident status types based on getStatus JS function and Incident.vue
         $incident_statuses = [
+            1 => 'Request',
+            2 => 'Team Assign',
+            3 => 'Closed',
+            4 => 'Deleted',
+            5 => 'Resolved Open',
             6 => 'Supervisor Assign',
-            2 => 'Team Assigned',
-            1 => 'Pending Team Assign',
-            4 => 'Photo Upload Completed',
-            2 => 'Photo Approved',
-            5 => 'Resolve Opened',
-            3 => 'Ticket Closed'
+            7 => 'Waiting to Suspend',
+            8 => 'Waiting to Reopen',
+            9 => 'Waiting to Terminate',
+            10 => 'Waiting to Plan Change',
+            11 => 'Waiting to Dismantle',
         ];
 
         // Build supervisor matrix
@@ -2155,6 +2159,10 @@ class DashboardController extends Controller
             }
 
             $row['total_ticket'] = $total_query->count();
+
+             // Request Tickets (status = 2)
+            $request_ticket_query = clone $total_query;
+            $row['request_tickets'] = $request_ticket_query->where('incidents.status', 2)->count();
 
             // Supervisor Assign Tickets (status = 6)
             $supervisor_assign_query = clone $total_query;
@@ -2215,6 +2223,7 @@ class DashboardController extends Controller
         // Calculate grand totals
         $grand_total = [
             'total_ticket' => 0,
+            'request_tickets' => 0,
             'supervisor_assign_tickets' => 0,
             'team_assigned_tickets' => 0,
             'pending_team_assign' => 0,
@@ -2225,7 +2234,7 @@ class DashboardController extends Controller
         ];
 
         foreach ($supervisor_matrix as $row) {
-            $grand_total['total_ticket'] += $row['total_ticket'];
+            $grand_total['request_tickets'] += $row['request_tickets'];
             $grand_total['supervisor_assign_tickets'] += $row['supervisor_assign_tickets'];
             $grand_total['team_assigned_tickets'] += $row['team_assigned_tickets'];
             $grand_total['pending_team_assign'] += $row['pending_team_assign'];

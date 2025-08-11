@@ -75,6 +75,9 @@
                       Total Ticket
                     </th>
                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                      Request Tickets
+                    </th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
                       Supervisor Assign Tickets
                     </th>
                     <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
@@ -108,6 +111,9 @@
                       {{ row.total_ticket }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                      {{ row.request_tickets }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
                       {{ row.supervisor_assign_tickets }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
@@ -137,6 +143,9 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-blue-600">
                       {{ grand_total.total_ticket }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                      {{ grand_total.request_tickets }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold">
                       {{ grand_total.supervisor_assign_tickets }}
