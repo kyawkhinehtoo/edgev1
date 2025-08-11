@@ -208,8 +208,12 @@
                   <th scope="col"
                     class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     @click="sortBy('incharge')">Created <i class="fas fa-sort text-gray-400"></i></th>
+                  
                   <th scope="col"
                     class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    
+                  <th scope="col"
+                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team Status</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200 text-sm">
@@ -226,6 +230,7 @@
                   <td class="px-2 py-3 whitespace-nowrap capitalize">{{ row.type.replace("_", " ") }}</td>
                   <td class="px-2 py-3 whitespace-nowrap">{{ row.incharge.match(/\b\w/g).join("") }}</td>
                   <td class="px-2 py-3 whitespace-nowrap">{{ getStatus(row.status) }}</td>
+                  <td class="px-2 py-3 whitespace-nowrap">{{ getTeamStatus(row.task_status) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -1487,6 +1492,18 @@ export default {
       }
       return status;
     }
+    const subconStatus = ref([
+            { id: '1', name: 'WIP' },
+            { id: '3', name: 'Pending' },
+            { id: '4', name: 'Photo Upload Complete' },
+            { id: '5', name: 'Photo Upload Rejected' },
+            { id: '2', name: 'Supervisor Approved' },
+            { id: '0', name: 'Deleted' },
+        ]);
+    function getTeamStatus(data){
+       const statusObj = subconStatus.value.find(s => s.id == String(data));
+      return statusObj ? statusObj.name : "WIP";
+    }
     //  function getStatus(data) {
     //   let status = "WIP";
     //   if (data == 1) {
@@ -1727,7 +1744,7 @@ export default {
 
       priorityColor();
     });
-    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA, clickStatus, checkDisable, updateCustomer, filteredMaintenanceServices, checkDisableType, nextMonthFirstDay, changeType, sla_hour };
+    return { loading, form, openModal, closeModal, newTicket, isOpen, deleteIncident, searchIncident, edit, sortBy, getStatus, changeStatus, sort, search, show, tabClick, tab, selection, selected_id, editMode, typeChange, showPriority, incidentStatus, page_update, alert_edit, submit, clearform, incidentType, incidentBy, incidentDate, formatter, subRCA, clickStatus, checkDisable, updateCustomer, filteredMaintenanceServices, checkDisableType, nextMonthFirstDay, changeType, sla_hour ,getTeamStatus};
   },
 };
 </script>

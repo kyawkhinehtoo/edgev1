@@ -2190,7 +2190,7 @@ class DashboardController extends Controller
             $photo_upload_query = DB::table('incidents')
                 ->join('tasks', 'incidents.id', '=', 'tasks.incident_id')
                 ->where('incidents.supervisor_id', $supervisor->id)
-                ->where('tasks.status', 'completed');
+                ->where('tasks.status', 4);
 
             if ($date_from) {
                 $photo_upload_query->whereDate('incidents.date', '>=', $date_from);
@@ -2207,7 +2207,7 @@ class DashboardController extends Controller
                 ->where('incidents.supervisor_id', $supervisor->id)
                 ->where(function ($q) {
                     return $q->where('tasks.status', 'approved')
-                        ->orWhere('incidents.status', 4); // Assuming status 4 represents photo approved
+                        ->orWhere('incidents.status', 2); // Assuming status 4 represents photo approved
                 });
 
             if ($date_from) {

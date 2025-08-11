@@ -403,6 +403,7 @@ class IncidentController extends Controller
                 'maintenance_services.sla_hours as maintenance_sla_hours',
                 'partners.name as customer_partner_name',
                 'partners.id as customer_partner_id',
+                'tasks.status as task_status'
             )
             ->groupBy('incidents.id')
             ->paginate(10);
