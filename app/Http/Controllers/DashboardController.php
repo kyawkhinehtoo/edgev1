@@ -1960,7 +1960,7 @@ class DashboardController extends Controller
             'photo_upload_complete' => 'Photo Upload Complete',
             'supervisor_approved' => 'Supervisor Approved'
         ];
-
+        
         // Build supervisor matrix
         $supervisor_matrix = [];
         foreach ($supervisors as $supervisor) {
@@ -1975,7 +1975,7 @@ class DashboardController extends Controller
                     ->join('status', 'customers.status_id', '=', 'status.id')
                     ->where('customers.supervisor_id', $supervisor->id)
                     ->where('customers.installation_status', $status_key)
-                    ->where('status.type', 'active')
+                    ->whereNotIn('status.type', ['cancel'])
                     ->where(function ($q) {
                         return $q->where('customers.deleted', '=', 0)
                             ->orWhereNull('customers.deleted');
@@ -1997,6 +1997,7 @@ class DashboardController extends Controller
 
             $supervisor_matrix[] = $row;
         }
+     
 
         // Calculate grand totals
         $grand_total = [];
