@@ -514,7 +514,7 @@ class CustomerController extends Controller
             'city_id' => 'required',
             'township_id' => 'required',
             'installation_date' => 'nullable|date',
-            'isp_ftth_id' => 'required|unique:customers,isp_ftth_id',
+            'isp_ftth_id' => 'required',
             'installation_service_id' => 'required_if:service_type,FTTH',
             'maintenance_service_id' => 'required',
             'service_type' => 'required',
@@ -1308,7 +1308,7 @@ class CustomerController extends Controller
             $cid = array();
             foreach ($customers as $customer) {
                 ///(^TCL[0-9]{5}-[A-Z]{3,})$/
-                $reg = "/(^[A-Z]{3}" . $city->short_code . "[0-9]{7}[A-Z]{2})$/";
+                $reg = "/(^[A-Z0-9]{3}" . $city->short_code . "[0-9]{7}[A-Z]{2})$/";
                 if (preg_match($reg, $customer->ftth_id)) {
                     $pattern = '/\d+/'; // Regular expression to match integers
                     preg_match($pattern, $customer->ftth_id, $matches);

@@ -273,7 +273,7 @@
                             class="text-red-500">*</span>
                           Customer Status </label>
                         <div class="mt-1 flex rounded-md shadow-sm" v-if="status_list.length !== 0">
-                          <multiselect deselect-label="Selected already" :options="statusList" track-by="id"
+                        <multiselect deselect-label="Selected already" :options="statusList" track-by="id"
                             label="name" v-model="form.status" :allow-empty="false"
                             :disabled="!disableStatus ? checkPerm('status_id') : disableStatus"></multiselect>
                         </div>
