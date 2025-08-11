@@ -2162,7 +2162,7 @@ class DashboardController extends Controller
 
              // Request Tickets (status = 2)
             $request_ticket_query = clone $total_query;
-            $row['request_tickets'] = $request_ticket_query->where('incidents.status', 2)->count();
+            $row['request_tickets'] = $request_ticket_query->where('incidents.status', 1)->count();
 
             // Supervisor Assign Tickets (status = 6)
             $supervisor_assign_query = clone $total_query;
