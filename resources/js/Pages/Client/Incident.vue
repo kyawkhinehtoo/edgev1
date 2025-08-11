@@ -210,10 +210,10 @@
                     @click="sortBy('incharge')">Created <i class="fas fa-sort text-gray-400"></i></th>
                   
                   <th scope="col"
-                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rectification Status</th>
                     
                   <th scope="col"
-                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team Status</th>
+                    class="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200 text-sm">
@@ -229,8 +229,9 @@
                   <td class="px-2 py-3 whitespace-nowrap" v-if="row.township_short">{{ row.township_short }}</td>
                   <td class="px-2 py-3 whitespace-nowrap capitalize">{{ row.type.replace("_", " ") }}</td>
                   <td class="px-2 py-3 whitespace-nowrap">{{ row.incharge.match(/\b\w/g).join("") }}</td>
+                    <td class="px-2 py-3 whitespace-nowrap">{{ getTeamStatus(row?.task_status??false) }}</td>
                   <td class="px-2 py-3 whitespace-nowrap">{{ getStatus(row.status) }}</td>
-                  <td class="px-2 py-3 whitespace-nowrap">{{ getTeamStatus(row?.task_status??false) }}</td>
+                
                 </tr>
               </tbody>
             </table>

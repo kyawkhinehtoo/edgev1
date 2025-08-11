@@ -2412,7 +2412,7 @@ class DashboardController extends Controller
                 ->join('customers', 'incidents.customer_id', '=', 'customers.id')
                 ->join('tasks', 'incidents.id', '=', 'tasks.incident_id')
                 ->where('customers.isp_id', $isp->id)
-                ->where('tasks.status', 'completed')
+                ->where('tasks.status', 2)
                 ->where(function ($q) {
                     return $q->where('customers.deleted', '=', 0)
                         ->orWhereNull('customers.deleted');
@@ -2433,8 +2433,7 @@ class DashboardController extends Controller
                 ->leftJoin('tasks', 'incidents.id', '=', 'tasks.incident_id')
                 ->where('customers.isp_id', $isp->id)
                 ->where(function ($q) {
-                    return $q->where('tasks.status', 'approved')
-                        ->orWhere('incidents.status', 4); // Assuming status 4 represents photo approved
+                    return $q->where('tasks.status', 2);// Assuming status 4 represents photo approved
                 })
                 ->where(function ($q) {
                     return $q->where('customers.deleted', '=', 0)
