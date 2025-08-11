@@ -1290,7 +1290,8 @@ export default {
         console.log("user type is partner");
         //stats 10 == waiting to plan change
         //status 5 == resolved open
-        if (form.status == 10 || form.status == 5 || form.status == 9) {
+        //status 7 = waiting to suspend
+        if (form.status == 10 || form.status == 5 || form.status == 9 || form.status == 7) {
 
           return false;
         } else {
