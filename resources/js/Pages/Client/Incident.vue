@@ -230,7 +230,7 @@
                   <td class="px-2 py-3 whitespace-nowrap capitalize">{{ row.type.replace("_", " ") }}</td>
                   <td class="px-2 py-3 whitespace-nowrap">{{ row.incharge.match(/\b\w/g).join("") }}</td>
                   <td class="px-2 py-3 whitespace-nowrap">{{ getStatus(row.status) }}</td>
-                  <td class="px-2 py-3 whitespace-nowrap">{{ getTeamStatus(row.task_status) }}</td>
+                  <td class="px-2 py-3 whitespace-nowrap">{{ getTeamStatus(row?.task_status??false) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -1501,8 +1501,15 @@ export default {
             { id: '0', name: 'Deleted' },
         ]);
     function getTeamStatus(data){
+      if(data){
+         console.log("getTeamStatus : " + data);
        const statusObj = subconStatus.value.find(s => s.id == String(data));
       return statusObj ? statusObj.name : "WIP";
+      }else{
+         console.log("getTeamStatus :  NA " + data);
+      return "NA";
+      }
+     
     }
     //  function getStatus(data) {
     //   let status = "WIP";
