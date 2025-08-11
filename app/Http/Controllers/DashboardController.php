@@ -2206,8 +2206,7 @@ class DashboardController extends Controller
                 ->leftJoin('tasks', 'incidents.id', '=', 'tasks.incident_id')
                 ->where('incidents.supervisor_id', $supervisor->id)
                 ->where(function ($q) {
-                    return $q->where('tasks.status', 'approved')
-                        ->orWhere('incidents.status', 2); // Assuming status 4 represents photo approved
+                    return $q->where('tasks.status', 2); // Assuming status 4 represents photo approved
                 });
 
             if ($date_from) {
@@ -2412,7 +2411,7 @@ class DashboardController extends Controller
                 ->join('customers', 'incidents.customer_id', '=', 'customers.id')
                 ->join('tasks', 'incidents.id', '=', 'tasks.incident_id')
                 ->where('customers.isp_id', $isp->id)
-                ->where('tasks.status', 2)
+                ->where('tasks.status', 4)
                 ->where(function ($q) {
                     return $q->where('customers.deleted', '=', 0)
                         ->orWhereNull('customers.deleted');
