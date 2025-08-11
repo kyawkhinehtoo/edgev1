@@ -73,12 +73,12 @@ class IncidentTaskController extends Controller
                         ->orWhere('tasks.description', 'LIKE', '%' . $search . '%');
                 });
             })
-            ->when($request->task, function ($query, $task) use ($id) {
-                if ($task !== 'all')
-                    $query->where('assigned', $id);
-            }, function($query) use ($id){
-                 $query->where('assigned', $id);
-            })
+            // ->when($request->task, function ($query, $task) use ($id) {
+            //     if ($task !== 'all')
+            //         $query->where('assigned', $id);
+            // }, function($query) use ($id){
+            //      $query->where('assigned', $id);
+            // })
             ->when($user->user_type=='subcon', function ($query) use ($id){
                 $query->where('assigned', $id);
             })

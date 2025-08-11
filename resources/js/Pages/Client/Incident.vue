@@ -673,7 +673,7 @@
                       <!-- end of suspension -->
                       <!-- resume -->
                       <template v-if="form.type == 'resume'">
-                        <div class="py-2 col-span-1 sm:col-span-1">
+                        <!-- <div class="py-2 col-span-1 sm:col-span-1">
                           <div class="mt-1 flex">
                             <label for="resume" class="block text-sm font-medium text-gray-700 mt-2 mr-2"> Suspension
                               Ticket :
@@ -689,7 +689,7 @@
                           </div>
                           <p v-if="$page.props.errors.suspension_incident_id" class="mt-2 text-sm text-red-500">{{
                             $page.props.errors.suspension_incident_id }}</p>
-                        </div>
+                        </div> -->
 
                         <div class="py-2 col-span-1 sm:col-span-1">
                           <div class="mt-1 flex">
@@ -1291,7 +1291,7 @@ export default {
         //stats 10 == waiting to plan change
         //status 5 == resolved open
         //status 7 = waiting to suspend
-        if (form.status == 10 || form.status == 5 || form.status == 9 || form.status == 7) {
+        if (form.status == 10 || form.status == 5 || form.status == 9 || form.status == 7 || form.status == 8) {
 
           return false;
         } else {

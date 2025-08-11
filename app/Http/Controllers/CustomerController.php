@@ -441,6 +441,7 @@ class CustomerController extends Controller
                     $query->where('customers.subcom_id', '=', $user->subcom_id);
                 }
             })
+            ->select('customers.*')
             ->where('status.name', 'LIKE', '%Terminate%')
             ->get();
         $installationServices = InstallationService::where('type', 'new')->get();
@@ -893,6 +894,7 @@ class CustomerController extends Controller
                     $query->where('customers.subcom_id', '=', $user->subcom_id);
                 }
             })
+            ->select('customers.*')
             ->where('status.name', 'LIKE', '%Terminate%')
             ->get();
 
