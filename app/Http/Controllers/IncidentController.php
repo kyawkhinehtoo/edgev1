@@ -339,7 +339,7 @@ class IncidentController extends Controller
                     return $query->whereIn('incidents.status', [1, 5, 6, 7, 8, 9, 10,11]);
                 }
                 if($status == 'all'){
-                      return $query->whereIn('incidents.status', [1,3, 5, 6, 7, 8, 9, 10,11]);
+                      return $query->whereIn('incidents.status', [1,2,3, 5, 6, 7, 8, 9, 10,11]);
                 }
                 $query->where('incidents.status', '=', $status);
             }, function ($query) use ($user) {
