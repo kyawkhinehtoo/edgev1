@@ -274,9 +274,9 @@ export default {
             { name: "Dashboard", route: "dashboard", icon: "fas fa-tv mr-2" , show : true},
 
             { name: "Installation", route: "installation-supervisor-dashboard", icon: "fas fa-users-cog mr-2", show: this.supervisorAndOss() },
-            { name: "Retification", route: "incident-ticket-dashboard", icon: "fas fa-ticket-alt mr-2", show: this.supervisorAndOss() },
-            { name: "Retification RCA", route: "rca-dashboard", icon: "fas fa-search mr-2", show: this.supervisorAndOss() },
-            { name: "Retification Reporting", route: "oss-team-dashboard", icon: "fas fa-chart-bar mr-2", show: this.supervisorAndOss() },
+            { name: "Rectification", route: "incident-ticket-dashboard", icon: "fas fa-ticket-alt mr-2", show: this.supervisorAndOss() },
+            { name: "Rectification RCA", route: "rca-dashboard", icon: "fas fa-search mr-2", show: this.supervisorAndOss() },
+            { name: "Rectification Reporting", route: "oss-team-dashboard", icon: "fas fa-chart-bar mr-2", show: this.supervisorAndOss() },
           ],
         },
          {
