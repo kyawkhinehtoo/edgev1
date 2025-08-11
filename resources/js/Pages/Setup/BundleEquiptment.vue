@@ -1,7 +1,7 @@
 <template>
   <app-layout>
     <template #header>
-      <h2 class="font-semibold text-xl text-white leading-tight">Material Device Setup</h2>
+      <h2 class="font-semibold text-xl text-white leading-tight">Material Device Info</h2>
     </template>
 
     <div class="py-12">
@@ -19,9 +19,10 @@
                 >
               </div>
             </div>
-            <button @click="openModal" 
+
+            <button @click="openModal" v-if="$page.props.login_type =='internal'"
               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Add Device
+              Add Device 
             </button>
           </div>
 
@@ -35,7 +36,7 @@
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Price</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th class="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider"  v-if="$page.props.login_type =='internal'">Actions</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200 text-xs">
@@ -47,7 +48,7 @@
                 <td class="px-6 py-4">{{ row.price }} MMK</td>
                 <td class="px-6 py-4">{{ row.date }}</td>
                 <td class="px-6 py-4">{{ row.is_active?'Active':'Disabled' }}</td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-6 py-4 whitespace-nowrap" v-if="$page.props.login_type =='internal'">
                   <a href="#" @click="edit(row)" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
                   <a href="#" @click="deleteRow(row)" class="text-red-600 hover:text-red-900">Delete</a>
                 </td>

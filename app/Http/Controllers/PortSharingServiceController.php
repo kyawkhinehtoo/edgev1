@@ -13,9 +13,13 @@ class PortSharingServiceController extends Controller
 {
     public function __construct()
     {
-        $user = User::with('role')->find(auth()->id());
-        if (!$user->role->system_setting) {
-            abort(403); // Unauthorized access for non-system_setting users
+          $user = User::with('role')->find(auth()->id());
+       // dd($user->user_type );
+        if(!$user->role?->system_setting ){
+            if( $user->user_type != 'isp' && $user->user_type != 'internal'){
+                abort(403); // Unauthorized access for non-isp users
+            }
+    
         }
     }
 

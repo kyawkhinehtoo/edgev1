@@ -231,13 +231,13 @@ export default {
           isOpen: false, // Tracks if the panel is open
           links: [
             
-            { name: "Material Setup", route: "equiptment.index", icon: "fas fa-warehouse mr-2" ,show : true,show : true},
+            { name: "Material Info", route: "equiptment.index", icon: "fas fa-warehouse mr-2" ,show : true,show : true},
 
            
            
-            { name: "Network Point Setup", route: "port-sharing-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
-            { name: "Maintenance Setup", route: "maintenance-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
-            { name: "Installation Setup", route: "installation-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
+            { name: "Network Point Info", route: "port-sharing-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
+            { name: "Maintenance Info", route: "maintenance-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
+            { name: "Installation Info", route: "installation-service.index", icon: "fas fa-cube mr-2" ,show : true,show : true},
             { name: "Discount Setup", route: "discount-setup.index", icon: "fas fa-percentage mr-2" ,show : true,show :  this.$page.props.login_type != 'isp'},
 
           

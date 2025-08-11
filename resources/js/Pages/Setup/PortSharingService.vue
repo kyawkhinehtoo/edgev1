@@ -1,7 +1,7 @@
 <template>
     <app-layout>
         <template #header>
-            <h2 class="font-semibold text-xl text-white leading-tight">Network Point Services Setup</h2>
+            <h2 class="font-semibold text-xl text-white leading-tight">Network Point Services Info</h2>
         </template>
 
         <div class="py-2">
@@ -16,7 +16,7 @@
                             id="search" v-model="search" v-on:keyup.enter="searchService" />
                     </div>
 
-                    <button @click="openModal"
+                    <button @click="openModal" v-if="$page.props.login_type =='internal'"
                         class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition">Create</button>
                 </div>
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg" v-if="services.data">
@@ -43,7 +43,7 @@
                                     class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Prices</th>
 
-                                <th scope="col" class="relative px-6 py-3"><span class="sr-only">Action</span></th>
+                                <th scope="col" class="relative px-6 py-3" v-if="$page.props.login_type =='internal'"><span class="sr-only">Action</span></th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200 text-sm">
@@ -80,7 +80,7 @@
                                     <span v-else>{{ row . rate }}</span>
                                 </td>
 
-                                <td class="px-3 py-3 text-md font-medium whitespace-nowrap text-right">
+                                <td class="px-3 py-3 text-md font-medium whitespace-nowrap text-right" v-if="$page.props.login_type =='internal'">
                                     <a href="#" @click="edit(row)"
                                         class="text-indigo-600 hover:text-indigo-900">Edit</a> |
                                     <a href="#" @click="deleteRow(row)"

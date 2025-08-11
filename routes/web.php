@@ -87,7 +87,7 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::get('/subcoms/{subcom}', [SubcomController::class, 'show'])->name('subcom.details');
 	Route::resource('/township',TownshipController::class);
 	Route::resource('/city',CityController::class);
-	Route::resource('/equiptment',EquiptmentController::class);
+
 	Route::resource('/menu',MenuController::class);
 	Route::resource('/package',PackageController::class);
 	Route::resource('/project',ProjectController::class);
@@ -115,17 +115,17 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::resource('sn-splitters', SnSplitterController::class);
 
 
-	Route::get('/port-sharing-service', [PortSharingServiceController::class, 'index'])->name('port-sharing-service.index');
+
 	Route::post('/port-sharing-service', [PortSharingServiceController::class, 'store'])->name('port-sharing-service.store');
 	Route::put('/port-sharing-service/{id}', [PortSharingServiceController::class, 'update'])->name('port-sharing-service.update');
 	Route::delete('/port-sharing-service/{id}', [PortSharingServiceController::class, 'destroy'])->name('port-sharing-service.destroy');
 	
-	Route::get('/maintenance-service', [MaintenanceServiceController::class, 'index'])->name('maintenance-service.index');
+	
 	Route::post('/maintenance-service', [MaintenanceServiceController::class, 'store'])->name('maintenance-service.store');
 	Route::put('/maintenance-service/{id}', [MaintenanceServiceController::class, 'update'])->name('maintenance-service.update');
 	Route::delete('/maintenance-service/{id}', [MaintenanceServiceController::class, 'destroy'])->name('maintenance-service.destroy');
 
-	Route::get('/installation-service', [InstallationServiceController::class, 'index'])->name('installation-service.index');
+
 	Route::post('/installation-service', [InstallationServiceController::class, 'store'])->name('installation-service.store');
 	Route::put('/installation-service/{id}', [InstallationServiceController::class, 'update'])->name('installation-service.update');
 	Route::delete('/installation-service/{id}', [InstallationServiceController::class, 'destroy'])->name('installation-service.destroy');
@@ -141,6 +141,11 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 
 
 	Route::group(['middleware'=>['auth','user.type:internal,partner,subcon,isp']],function(){
+
+			Route::resource('/equiptment',EquiptmentController::class);
+			Route::get('/port-sharing-service', [PortSharingServiceController::class, 'index'])->name('port-sharing-service.index');
+		Route::get('/maintenance-service', [MaintenanceServiceController::class, 'index'])->name('maintenance-service.index');
+			Route::get('/installation-service', [InstallationServiceController::class, 'index'])->name('installation-service.index');
 	Route::get('/dashboard',[DashboardController::class,'show'])->name('dashboard');
 	Route::match(['get', 'post'], '/isp-dashboard', [DashboardController::class, 'ispDashboard'])->name('isp.dashboard');
 	Route::match(['get', 'post'], '/isp-installation-dashboard', [DashboardController::class, 'ispInstallationDashboard'])->name('isp.installation.dashboard');
