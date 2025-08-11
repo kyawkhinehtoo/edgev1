@@ -161,7 +161,7 @@
                   <label class="block text-sm font-normal text-center">All</label>
                   <button
                     class="block py-2 px-2 w-full bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:border-green-300 focus:ring focus:ring-green-500 focus:ring-opacity-10 focus:outline-none disabled:opacity-25 transition"
-                    @click="clickStatus('')">{{ ticketRequest + teamAssign + supervisorAssign + close }}</button>
+                    @click="clickStatus('all')">{{ ticketRequest + teamAssign + supervisorAssign + close }}</button>
                 </div>
               </div>
             </div>
