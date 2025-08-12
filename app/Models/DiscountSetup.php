@@ -32,6 +32,14 @@ class DiscountSetup extends Model
         'deleted_at',
     ];
 
+    protected $casts = [
+        'start_date' => 'datetime:Y-m-d',
+        'end_date' => 'datetime:Y-m-d',
+        'is_active' => 'boolean',
+    ];
+
+  
+
     // Relationships
     public function portSharingService()
     {

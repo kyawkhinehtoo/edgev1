@@ -266,7 +266,7 @@
                         <div>
                           <label for="start_date">Start Date</label>
                           <div class="mt-1 flex rounded-md shadow-sm">
-                            <input type="datetime-local" v-model="form.start_date" name="start_date" id="start_date"
+                            <input type="date" v-model="form.start_date" name="start_date" id="start_date"
                               class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                               placeholder="Start Date" required />
                           </div>
@@ -274,7 +274,7 @@
                         <div>
                           <label for="end_date">End Date</label>
                           <div class="mt-1 flex rounded-md shadow-sm">
-                            <input type="datetime-local" v-model="form.end_date" name="end_date" id="end_date"
+                            <input type="date" v-model="form.end_date" name="end_date" id="end_date"
                               class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300"
                               placeholder="End Date" required />
                           </div>
