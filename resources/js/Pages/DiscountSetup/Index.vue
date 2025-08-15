@@ -17,70 +17,81 @@
               id="search" v-model="filter.general" @keyup.enter="searchDiscount" />
           </div>
 
-
-          <div class="col-span-1">
-            <span
+          </div>
+           <div class="grid grid-cols-1 sm:grid-cols-3 items-center justify-between mb-4 gap-2">
+          <div class="col-span-1 w-full grid grid-rows-2 gap-2">
+            <div class="w-full items-center justify-between flex">
+                <span
               class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
               <i class="fas fa-search"></i>
             </span>
             <select v-model="filter.isp_id" @change="searchDiscount"
-              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10">
+              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10 w-full">
               <option value="">All ISPs</option>
               <option v-for="isp in isps" :key="isp.id" :value="isp.id">{{ isp.name }}</option>
             </select>
-          </div>
-
-
-          <div class="col-span-1">
-            <span
+            </div>  
+            <div class="w-full items-center justify-between flex">
+               <span
               class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
               <i class="fas fa-search"></i>
             </span>
             <select v-model="filter.port_sharing_service_id" @change="searchDiscount"
-              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10">
+              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10 w-full">
               <option value="">All Plan</option>
               <option v-for="service in port_sharing_services" :key="service.id" :value="service.id">{{ service.name }}
               </option>
             </select>
+            </div>
           </div>
-          <div class="col-span-1">
-            <span
+
+
+          <div class="col-span-1 w-full grid grid-rows-2 gap-2">
+            <div class="w-full flex">
+                   <span
               class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
               <i class="fa fa-less-than-equal"></i></span>
 
             <input type="date" v-model="filter.start_date" @change="searchDiscount"
-              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10"
+              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10 w-full"
               placeholder="Start Date" />
-          </div>
-          <div class="col-span-1">
-            <span
+            </div>
+             <div class="w-full items-center justify-between flex">
+              <span
               class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
               <i class="fa fa-greater-than-equal"></i></span>
             <input type="date" v-model="filter.end_date" @change="searchDiscount"
-              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10"
+              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10 w-full"
               placeholder="End Date" />
+             </div>
           </div>
-          <div class="col-span-1">
-            <span
+
+          <div class="col-span-1 w-full grid grid-rows-2 gap-2 self-start">
+            <div>
+              <span
               class="z-10 leading-snug font-normal text-center text-gray-300 absolute bg-transparent rounded text-base items-center justify-center w-8 pl-3 py-3">
               <i class="fas fa-search"></i>
             </span>
             <select v-model="filter.is_active" @change="searchDiscount"
-              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10">
+              class="form-input border-0 px-3 py-3 placeholder-gray-300 text-gray-600 relative bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10 w-full">
               <option value="">All Status</option>
               <option value="true">Active</option>
               <option value="false">Inactive</option>
             </select>
-          </div>
-          <div class="col-span-1">
+            </div>
+            
+        
+             <div class="col-span-1">
             <button @click="openModal"
-              class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition">
+              class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring focus:ring-gray-300 disabled:opacity-25 transition ">
               Create
             </button>
+              </div>
           </div>
 
         </div>
-        <div class="bg-white  shadow-xl sm:rounded-lg" v-if="discounts.data">
+       
+        <div class="bg-white overflow-auto shadow-xl sm:rounded-lg" v-if="discounts.data">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -98,8 +109,8 @@
                   End Date</th>
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Rate Type</th>
-                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Discount %</th>
+                <!-- <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Discount %</th> -->
                 <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Active</th>
                 <th class="relative px-6 py-3"><span class="sr-only">Action</span></th>
@@ -115,15 +126,15 @@
                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
                   {{ discount.port_sharing_service?.name }}</td>
                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
-                  {{ discount.isp?.name }}</td>
+                  {{ discount.isp?.short_code }}</td>
                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
                   {{ discount.start_date }}</td>
                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
                   {{ discount.end_date }}</td>
                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
                   {{ discount.rate_type }}</td>
-                <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
-                  {{ discount.discount_percentage }}</td>
+                <!-- <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
+                  {{ discount.discount_percentage }}</td> -->
                 <td class="px-3 py-3 text-left text-md font-medium whitespace-nowrap">
                   {{ discount.is_active ? 'Yes' : 'No' }}</td>
                 <td class="px-3 py-3 text-md font-medium whitespace-nowrap text-right">

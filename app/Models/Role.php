@@ -71,6 +71,7 @@ class Role extends Model
         'incident_oss',
         'service_request',
         'check_sn',
+        'revenue_report',
         'created_at',
         'updated_at'
     ];

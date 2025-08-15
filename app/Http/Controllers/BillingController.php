@@ -38,6 +38,7 @@ use App\Jobs\BillingSMSJob;
 use App\Jobs\ReminderSMSJob;
 use App\Models\BillingConfig;
 use App\Models\BundleEquiptment;
+use App\Models\DiscountSetup;
 use App\Models\InstallationService;
 use App\Models\InvoiceItem;
 use App\Models\Isp;
@@ -170,7 +171,7 @@ class BillingController extends Controller
         
                 foreach ($customerList as $customer) {
                     $customerAddress = $customer->currentAddress()->first();
-                    $portLeasing = $this->getPriceForCustomerByIsp($customer->id);
+                    $portLeasing = $this->getPriceForCustomerByIsp($customer->id, $validated['issue_date']);
                     $mrc = $portLeasing['fee'];
                     try {
                         $installationService = InstallationService::find($customer->installation_service_id);
@@ -410,7 +411,7 @@ class BillingController extends Controller
 
       
     }
-    private function getPriceForCustomerByIsp($customer_id)
+    private function getPriceForCustomerByIsp($customer_id, $billingIssueDate = null)
     {
         $customer = Customer::find($customer_id);
     
@@ -443,11 +444,67 @@ class BillingController extends Controller
                 $fee = $tier['fees'];
             }
         }
-    
+
+        // Check for applicable discount
+        $discountedFee = $this->applyDiscount($fee, $selectedService->id, $customer->isp_id, $billingIssueDate, $position);
+        
         return [
-            'fee' => $fee,
+            'fee' => $discountedFee,
+            'original_fee' => $fee,
             'position' => $position,
+            'discount_applied' => $discountedFee != $fee,
         ];
+    }
+
+    private function applyDiscount($originalFee, $portSharingServiceId, $ispId, $billingIssueDate, $customerPosition = null)
+    {
+        if (!$billingIssueDate || !$originalFee) {
+            return $originalFee;
+        }
+
+        // Convert billing issue date to Carbon instance if it's not already
+        $issueDate = Carbon::parse($billingIssueDate);
+
+        // Find applicable discount setup
+        $discountSetup = DiscountSetup::where('port_sharing_service_id', $portSharingServiceId)
+            ->where('isp_id', $ispId)
+            ->where('is_active', 1)
+            ->where('start_date', '<=', $issueDate)
+            ->where('end_date', '>=', $issueDate)
+            ->first();
+
+        if (!$discountSetup) {
+            return $originalFee; // No discount applicable
+        }
+
+        if ($discountSetup->rate_type === 'percentage') {
+            // Apply percentage discount to the original fee
+            $discountAmount = ($originalFee * $discountSetup->discount_percentage) / 100;
+            return $originalFee - $discountAmount;
+        } elseif ($discountSetup->rate_type === 'fixed') {
+            // For fixed rate, parse the JSON and apply tier logic with discount rates
+            if ($customerPosition !== null && $discountSetup->fix_rate) {
+                $discountTiers = json_decode($discountSetup->fix_rate, true);
+                
+                if ($discountTiers && is_array($discountTiers)) {
+                    $discountFee = null;
+                    foreach ($discountTiers as $tier) {
+                        if ($customerPosition >= $tier['min']) {
+                            $discountFee = $tier['fees'];
+                        }
+                    }
+                    
+                    if ($discountFee !== null) {
+                        return $discountFee;
+                    }
+                }
+            }
+            
+            // Fallback: return original fee if discount tiers couldn't be processed
+            return $originalFee;
+        }
+
+        return $originalFee; // Default return original fee if rate_type is unknown
     }
     public function goTemp(Request $request)
     {

@@ -83,6 +83,7 @@ class RoleController extends Controller
             'smtp_setting' => 'nullable|boolean',
             'service_request' => 'nullable|boolean',
             'check_sn' => 'nullable|boolean',
+            'revenue_report' => 'nullable|boolean',
             'townships' => 'nullable|array',
         ]);
 
@@ -135,6 +136,7 @@ class RoleController extends Controller
             'smtp_setting' => 'nullable|boolean',
             'service_request' => 'nullable|boolean',
             'check_sn' => 'nullable|boolean',
+            'revenue_report' => 'nullable|boolean',
             'townships' => 'nullable|array',
         ]);
 

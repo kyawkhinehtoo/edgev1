@@ -345,7 +345,8 @@ export default {
           isOpen: false,
           links: [
             { name: "Incident Report", route: "incidentReport", icon: "fas fa-users mr-2" ,show : true},
-            { name: "Bill Report", route: "dailyreceipt", icon: "fa fa-money-bill mr-2",show : true },
+            { name: "Bill Report", route: "dailyreceipt", icon: "fa fa-money-bill mr-2",show :  this.$page.props?.role?.bill_report == 1 },
+            { name: "Revenue by Township", route: "revenue-by-township", icon: "fas fa-map-marked-alt mr-2",show :  this.$page.props?.role?.revenue_report == 1 },
             // { name: "Radius User Report", route: "showRadius", icon: "fas fa-server mr-2" },
             // { name: "IP Usages Report", route: "publicIpReport", icon: "fas fa-server mr-2" },
             { name: "DN SN Report", route: "dnSnReport", icon: "fas fa-tower-broadcast mr-2" ,show : true},

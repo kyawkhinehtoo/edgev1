@@ -20,6 +20,7 @@ use App\Http\Controllers\RadiusController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\DailyReceiptController;
+use App\Http\Controllers\RevenueByTownshipController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\BillingConfiguration;
 use App\Http\Controllers\DBBackupController;
@@ -336,6 +337,11 @@ Route::group(['middleware'=>['auth','role','user.type:internal']],function(){
 	Route::post('/dailyreceipt/show',[DailyReceiptController::class,'index']);
 	Route::get('/dailyreceipt/show',[DailyReceiptController::class,'index'])->name('dailyreceipt');
 	Route::post('/exportReceipt',[ExcelController::class,'exportReceipt'])->name('exportReceipt');
+
+	// Revenue by Township Routes
+	Route::get('/revenue-by-township',[RevenueByTownshipController::class,'index'])->name('revenue-by-township');
+	Route::post('/revenue-by-township',[RevenueByTownshipController::class,'generate']);
+	Route::post('/revenue-by-township/export',[RevenueByTownshipController::class,'export']);
 
 	
 

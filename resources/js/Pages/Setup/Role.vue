@@ -316,6 +316,12 @@
                               <label class="inline-flex ml-2">
                                 <input
                                   class="text-red-500 w-6 h-6 mr-2 focus:ring-red-400 focus:ring-opacity-25 border border-gray-300 rounded"
+                                  type="checkbox" v-model="form.revenue_report" />
+                                View Revenue By Township Report
+                              </label>
+                              <label class="inline-flex ml-2">
+                                <input
+                                  class="text-red-500 w-6 h-6 mr-2 focus:ring-red-400 focus:ring-opacity-25 border border-gray-300 rounded"
                                   type="checkbox" v-model="form.radius_report" />
                                 View Radius User Report
                               </label>
@@ -472,6 +478,7 @@ export default {
       incident_oss: null,
       product_catalog:null,
       service_request:null,
+      revenue_report: null,
       townships:[],
     });
     const search = ref("");
@@ -519,6 +526,7 @@ export default {
       form.incident_oss = null;
       form.service_request = null;
       form.check_sn = null;
+      form.revenue_report = null;
       form.townships = [];
     }
     function submit() {
@@ -600,6 +608,7 @@ export default {
       form.smtp_setting = (data.smtp_setting)? true : false;
       form.service_request = (data.service_request)? true : false;
       form.check_sn = (data.check_sn)? true : false;
+      form.revenue_report = (data.revenue_report)? true : false;
       form.customer_status = data.customer_status;
       form.townships = data.townships || [];
       editMode.value = true;
